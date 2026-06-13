@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #F2F5F8; }
+    * { box-sizing: border-box; }
+    input, button, select, textarea { font-family: inherit; }
+    @media (max-width: 920px) {
+      [data-sidebar] { display: none !important; }
+      [data-profile-meta] { display: none !important; }
+      [data-main-pad] { padding: 16px !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Contrats" style="display: flex; width: 100%; min-height: 100vh; background: #F2F5F8; font-family: 'Open Sans', sans-serif; color: #091D2E">
+  <dc-import name="Sidebar" active="contrats" hint-size="248px,100vh"></dc-import>
+
+  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+    <dc-import name="Topbar" active="contrats" searchPlaceholder="Rechercher un contrat, un athlète, un club…" hint-size="100%,64px"></dc-import>
+
+    <main data-main-pad="true" style="flex: 1; padding: 28px 32px 48px 32px; max-width: 1380px; width: 100%; margin: 0 auto">
+
+      <sc-if value="{{ isListe }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #BC000D; margin-bottom: 6px">Commercial</div>
+              <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Contrats</h1>
+              <p style="margin: 6px 0 0 0; font-size: 13.5px; color: #5B6B77">Représentation d'athlètes, prestations événementielles et sponsoring — générés par assistant guidé.</p>
+            </div>
+            <div style="display: flex; gap: 10px">
+              <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 99px; background: rgba(30,159,216,0.14); color: #1E78A8; font-size: 11px; font-weight: 700; letter-spacing: 0.08em">12 ACTIFS</span>
+              <span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 99px; background: rgba(188,0,13,0.10); color: #BC000D; font-size: 11px; font-weight: 700; letter-spacing: 0.08em">2 EXPIRENT</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; margin-bottom: 24px">
+            <sc-for list="{{ modeles }}" as="m" hint-placeholder-count="2">
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-top: 3px solid {{ m.accent }}; border-radius: 8px; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; align-items: center; justify-content: space-between">
+                  <span style="width: 38px; height: 38px; border-radius: 8px; background: {{ m.iconBg }}; color: {{ m.accent }}; display: inline-flex; align-items: center; justify-content: center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ m.icon }}"></path></svg>
+                  </span>
+                  <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #8896A0">Modèle standard {{ m.code }}</span>
+                </div>
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354">{{ m.titre }}</div>
+                <p style="margin: 0; font-size: 12.5px; color: #5B6B77; line-height: 1.55; flex: 1">{{ m.desc }}</p>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 6px 0">
+                  <sc-for list="{{ m.tags }}" as="tag" hint-placeholder-count="3">
+                    <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: #F2F5F8; color: #5B6B77">{{ tag }}</span>
+                  </sc-for>
+                </div>
+                <button onClick="{{ m.onUse }}" style="height: 38px; border: none; border-radius: 6px; background: {{ m.btnBg }}; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer">Utiliser ce modèle →</button>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; overflow: hidden">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(37,67,84,0.10)">
+              <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 17px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Contrats en cours</div>
+              <span style="font-size: 12px; color: #8896A0">Triés par date d'expiration</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 120px 1.2fr 1.1fr 105px 100px 110px 36px; gap: 0; padding: 10px 20px; background: #254354; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #FFFFFF">
+              <span>Référence</span><span>Partie contractante</span><span>Type</span><span style="text-align: right">Valeur</span><span style="text-align: right">Expire le</span><span style="text-align: right">Statut</span><span></span>
+            </div>
+            <sc-for list="{{ contrats }}" as="c" hint-placeholder-count="5">
+              <div onClick="{{ c.onOpen }}" style="display: grid; grid-template-columns: 120px 1.2fr 1.1fr 105px 100px 110px 36px; align-items: center; padding: 14px 20px; border-top: 1px solid rgba(37,67,84,0.07); cursor: pointer; background: #FFFFFF" style-hover="background: #F5F9FD">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #254354">{{ c.ref }}</span>
+                <span style="font-size: 13px; font-weight: 600; padding-right: 8px">{{ c.partie }}</span>
+                <span style="padding-right: 8px"><span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ c.typeBg }}; color: {{ c.typeColor }}">{{ c.type }}</span></span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; text-align: right">{{ c.valeur }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; text-align: right; font-weight: {{ c.expWeight }}; color: {{ c.expColor }}">{{ c.expire }}</span>
+                <span style="text-align: right"><span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ c.badgeBg }}; color: {{ c.badgeColor }}">{{ c.statut }}</span></span>
+                <span style="display: flex; justify-content: flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg></span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAssistant }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 20px">
+            <div style="display: flex; align-items: center; gap: 14px">
+              <button onClick="{{ retourListe }}" style="display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 600; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                Retour
+              </button>
+              <div>
+                <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 22px; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Assistant contrat</h1>
+                <div style="font-size: 12px; color: #8896A0; margin-top: 2px">{{ modeleTitre }} · <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">{{ ctrRef }}</span></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">Enregistrer le brouillon</button>
+              <button style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">Générer PDF</button>
+              <button onClick="{{ askSend }}" style="height: 36px; padding: 0 14px; background: #254354; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #3D5A6C">Envoyer par email</button>
+              <button onClick="{{ askInvoice }}" style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(188,0,13,0.45); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #BC000D; cursor: pointer" style-hover="background: rgba(188,0,13,0.05)">Convertir en facture</button>
+              <button onClick="{{ askProject }}" style="height: 36px; padding: 0 14px; background: #BC000D; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">Convertir en projet</button>
+              <button onClick="{{ askDelete }}" style="width: 36px; height: 36px; background: #FFFFFF; border: 1px solid rgba(188,0,13,0.35); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: #BC000D" style-hover="background: rgba(188,0,13,0.05)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"></path></svg></button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr); gap: 18px; align-items: start">
+
+            <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-top: 3px solid #BC000D; border-radius: 8px; padding: 22px; min-width: 0">
+              <div style="display: flex; gap: 0; margin-bottom: 22px">
+                <sc-for list="{{ steps }}" as="stp" hint-placeholder-count="4">
+                  <div onClick="{{ stp.onClick }}" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; position: relative; padding-top: 2px">
+                    <span style="width: 28px; height: 28px; border-radius: 99px; background: {{ stp.bg }}; color: {{ stp.color }}; border: 2px solid {{ stp.border }}; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; z-index: 2">{{ stp.n }}</span>
+                    <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: {{ stp.labelColor }}; text-align: center">{{ stp.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="height: 4px; background: #EAF0F4; border-radius: 99px; overflow: hidden; margin-bottom: 20px">
+                <div style="height: 100%; width: {{ progressPct }}; background: linear-gradient(90deg, #BC000D, #F4A800); border-radius: 99px; transition: width 0.35s ease"></div>
+              </div>
+
+              <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Étape 1 · Les parties</div>
+                  <div style="padding: 14px 16px; background: #F2F5F8; border-radius: 6px; font-size: 13px; font-style: italic; color: #42474C; line-height: 1.5">« Avec qui l'Agence contracte-t-elle ? »</div>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Modèle de contrat</span>
+                    <select value="{{ modele }}" onChange="{{ setModele }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                      <option value="athlete">Modèle A — Représentation d'athlète</option>
+                      <option value="prestation">Modèle B — Prestation événementielle</option>
+                    </select>
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Partie contractante <span style="color: #BC000D">*</span></span>
+                    <select value="{{ clientId }}" onChange="{{ setClient }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                      <option value="">— Choisir un client —</option>
+                      <sc-for list="{{ clientsOptions }}" as="c" hint-placeholder-count="6">
+                        <option value="{{ c.id }}">{{ c.nom }}</option>
+                      </sc-for>
+                    </select>
+                    <a href="Clients.dc.html" style="font-size: 11.5px; color: #1E9FD8; font-weight: 600; text-decoration: none">Le client n’existe pas ? Créer une fiche client →</a>
+                  </label>
+                  <sc-if value="{{ hasClient }}" hint-placeholder-val="{{ true }}">
+                    <div style="display: flex; align-items: center; gap: 11px; padding: 10px 13px; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px; background: #F8FAFC">
+                      <span style="width: 34px; height: 34px; border-radius: 8px; background: #254354; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 12px; font-weight: 600; flex-shrink: 0">{{ clientInit }}</span>
+                      <span style="min-width: 0; flex: 1">
+                        <span style="display: block; font-size: 12.5px; font-weight: 700; color: #254354">{{ clientNom }}</span>
+                        <span style="display: block; font-size: 11px; color: #8896A0">{{ clientMeta }}</span>
+                      </span>
+                      <span style="display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: rgba(30,159,216,0.14); color: #1E78A8">Lié</span>
+                    </div>
+                  </sc-if>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Qualité</span>
+                    <select value="{{ qualite }}" onChange="{{ setQualite }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                      <option value="Athlète professionnel">Athlète professionnel</option>
+                      <option value="Club sportif">Club sportif</option>
+                      <option value="Sponsor / Partenaire">Sponsor / Partenaire</option>
+                      <option value="Académie / Centre de formation">Académie / Centre de formation</option>
+                    </select>
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Adresse / résidence</span>
+                    <input type="text" value="{{ adresse }}" onChange="{{ setAdresse }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+                  </label>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Étape 2 · Mission &amp; durée</div>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Objet de la mission</span>
+                    <textarea value="{{ objet }}" onChange="{{ setObjet }}" rows="2" style="border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 10px; font-size: 13px; line-height: 1.5; resize: vertical; outline: none" style-focus="border-color: #1E9FD8"></textarea>
+                  </label>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <label style="display: flex; flex-direction: column; gap: 6px">
+                      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Date de début</span>
+                      <input type="date" value="{{ debut }}" onChange="{{ setDebut }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                    </label>
+                    <label style="display: flex; flex-direction: column; gap: 6px">
+                      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Durée (mois)</span>
+                      <input type="number" value="{{ duree }}" onChange="{{ setDuree }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                    </label>
+                  </div>
+                  <div style="padding: 14px 16px; background: #F2F5F8; border-radius: 6px">
+                    <div style="font-size: 13px; font-style: italic; color: #42474C; margin-bottom: 10px">« Le contrat se renouvelle-t-il par tacite reconduction ? »</div>
+                    <div style="display: flex; gap: 8px">
+                      <button onClick="{{ setRenouiOui }}" style="flex: 1; height: 40px; border-radius: 6px; border: 2px solid {{ renouiOuiBorder }}; background: {{ renouiOuiBg }}; color: #254354; font-size: 12.5px; font-weight: 700; cursor: pointer">Oui, tacite reconduction</button>
+                      <button onClick="{{ setRenouiNon }}" style="flex: 1; height: 40px; border-radius: 6px; border: 2px solid {{ renouiNonBorder }}; background: {{ renouiNonBg }}; color: #254354; font-size: 12.5px; font-weight: 700; cursor: pointer">Non, terme fixe</button>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Étape 3 · Conditions financières</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <label style="display: flex; flex-direction: column; gap: 6px">
+                      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Rémunération mensuelle (USD)</span>
+                      <input type="number" value="{{ remuneration }}" onChange="{{ setRemuneration }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                    </label>
+                    <label style="display: flex; flex-direction: column; gap: 6px">
+                      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Commission agence (%)</span>
+                      <input type="number" value="{{ commission }}" onChange="{{ setCommission }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                    </label>
+                  </div>
+                  <div style="padding: 14px 16px; background: #F2F5F8; border-radius: 6px">
+                    <div style="font-size: 13px; font-style: italic; color: #42474C; margin-bottom: 10px">« Le contrat prévoit-il une clause de sortie à indemnité fixe ou un pourcentage de transfert ? »</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px">
+                      <button onClick="{{ setSortieFixe }}" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 6px; border: 2px solid {{ sortieFixeBorder }}; background: {{ sortieFixeBg }}; cursor: pointer; text-align: left">
+                        <span style="width: 16px; height: 16px; border-radius: 99px; border: 2px solid {{ sortieFixeDot }}; background: {{ sortieFixeDotBg }}; box-shadow: inset 0 0 0 2.5px #FFFFFF"></span>
+                        <span style="font-size: 12.5px; font-weight: 700; color: #254354">Indemnité de rupture fixe</span>
+                      </button>
+                      <button onClick="{{ setSortiePct }}" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 6px; border: 2px solid {{ sortiePctBorder }}; background: {{ sortiePctBg }}; cursor: pointer; text-align: left">
+                        <span style="width: 16px; height: 16px; border-radius: 99px; border: 2px solid {{ sortiePctDot }}; background: {{ sortiePctDotBg }}; box-shadow: inset 0 0 0 2.5px #FFFFFF"></span>
+                        <span style="font-size: 12.5px; font-weight: 700; color: #254354">Pourcentage sur transfert</span>
+                      </button>
+                    </div>
+                    <label style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px">
+                      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">{{ sortieLabel }}</span>
+                      <input type="number" value="{{ sortieValeur }}" onChange="{{ setSortieValeur }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; background: #FFFFFF" style-focus="border-color: #1E9FD8" />
+                    </label>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Étape 4 · Clauses &amp; signature</div>
+                  <div style="font-size: 13px; font-style: italic; color: #42474C; padding: 14px 16px; background: #F2F5F8; border-radius: 6px">« Quelles clauses additionnelles souhaitez-vous inclure ? »</div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <sc-for list="{{ clausesList }}" as="cl" hint-placeholder-count="3">
+                      <button onClick="{{ cl.onToggle }}" style="display: flex; align-items: center; gap: 11px; padding: 11px 14px; border-radius: 6px; border: 2px solid {{ cl.border }}; background: {{ cl.bg }}; cursor: pointer; text-align: left">
+                        <span style="width: 18px; height: 18px; border-radius: 4px; border: 2px solid {{ cl.boxBorder }}; background: {{ cl.boxBg }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+                          <sc-if value="{{ cl.checked }}" hint-placeholder-val="{{ false }}">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                          </sc-if>
+                        </span>
+                        <span style="flex: 1">
+                          <span style="display: block; font-size: 12.5px; font-weight: 700; color: #254354">{{ cl.titre }}</span>
+                          <span style="display: block; font-size: 11px; color: #5B6B77; margin-top: 1px">{{ cl.desc }}</span>
+                        </span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Dispositions particulières</span>
+                    <textarea value="{{ notes }}" onChange="{{ setNotes }}" rows="3" style="border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 10px; font-size: 12.5px; line-height: 1.5; resize: vertical; outline: none" style-focus="border-color: #1E9FD8"></textarea>
+                  </label>
+                  <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(23,126,84,0.07); border: 1px solid rgba(23,126,84,0.25); border-radius: 6px; font-size: 12px; color: #177E54; font-weight: 600">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9 12l2 2 4-4"></path></svg>
+                    Document complet — prêt pour génération PDF et signature électronique.
+                  </div>
+                </div>
+              </sc-if>
+
+              <div style="display: flex; justify-content: space-between; margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(37,67,84,0.10)">
+                <button onClick="{{ prevStep }}" style="height: 38px; padding: 0 18px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; color: {{ prevColor }}; font-size: 12.5px; font-weight: 700; cursor: pointer">← Précédent</button>
+                <button onClick="{{ nextStep }}" style="height: 38px; padding: 0 18px; border: none; border-radius: 6px; background: #254354; color: #FFFFFF; font-size: 12.5px; font-weight: 700; cursor: pointer" style-hover="background: #3D5A6C">{{ nextLabel }}</button>
+              </div>
+            </div>
+
+            <div style="position: sticky; top: 84px; min-width: 0">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px">
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #5B6B77">Aperçu du contrat</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8896A0">Mise à jour en direct</span>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.14); border-radius: 4px; box-shadow: 0 16px 40px rgba(9,29,46,0.14); padding: 38px 42px; min-height: 620px">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 2.5px solid #BC000D">
+                  <div style="display: flex; gap: 12px; align-items: center">
+                    <div style="width: 44px; height: 44px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.12); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden">
+                      <img src="assets/logo.png" alt="Ndembo Kin" style="width: 100%; height: 100%; object-fit: contain" />
+                    </div>
+                    <div>
+                      <div style="font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.05em; color: #254354">NDEMBO KIN CONNECT</div>
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #8896A0">Agence officielle de management sportif</div>
+                    </div>
+                  </div>
+                  <div style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #5B6B77; line-height: 1.6">RÉF : {{ ctrRef }}<br />13 JUIN 2026</div>
+                </div>
+
+                <div style="text-align: center; margin: 26px 0 20px 0">
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 19px; text-transform: uppercase; letter-spacing: 0.05em; color: #091D2E; line-height: 1.35">{{ docTitre }}</div>
+                  <div style="width: 60px; height: 3px; background: #F4A800; margin: 12px auto 0 auto"></div>
+                </div>
+
+                <p style="font-size: 12px; line-height: 1.75; color: #42474C; text-align: justify; margin: 0 0 14px 0">Le présent contrat est conclu entre <strong style="color: #254354; border-bottom: 2px solid #254354">NDEMBO KIN CONNECT SARL</strong> (ci-après « l'Agence »), RCCM CD/KIN/RCCM/23-B-0158, dont le siège est situé Av. Citroniers, Q/ Golf, C/ Gombe — Immeuble USAID, 4ᵉ étage (Réf. HEC), Kinshasa, et :</p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 13px 16px; background: #F8FAFC; border-left: 3px solid #BC000D; margin-bottom: 18px">
+                  <div>
+                    <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin-bottom: 4px">Partie contractante</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #254354">{{ partie }}</div>
+                    <div style="font-size: 10.5px; color: #5B6B77; margin-top: 2px">{{ qualite }} — {{ adresse }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin-bottom: 4px">Période d'effet</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #254354">{{ duree }} mois {{ termeLabel }}</div>
+                    <div style="font-size: 10.5px; color: #5B6B77; margin-top: 2px">Début : {{ debutFr }} · Fin : {{ finFr }}</div>
+                  </div>
+                </div>
+
+                <div style="border-left: 3px solid #1E9FD8; padding-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #254354; margin-bottom: 8px">Article 1 — Objet</div>
+                <p style="font-size: 12px; line-height: 1.75; color: #42474C; text-align: justify; margin: 0 0 16px 0">{{ objet }}</p>
+
+                <div style="border-left: 3px solid #1E9FD8; padding-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #254354; margin-bottom: 8px">Article 2 — Rémunération et commission</div>
+                <p style="font-size: 12px; line-height: 1.75; color: #42474C; text-align: justify; margin: 0 0 16px 0">La partie contractante percevra une rémunération mensuelle de base de <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; background: rgba(244,168,0,0.22); padding: 1px 6px; border-radius: 3px">{{ remunerationF }}</span>. L'Agence prélève une commission de <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; background: rgba(244,168,0,0.22); padding: 1px 6px; border-radius: 3px">{{ commission }} %</span> sur l'ensemble des contrats primaires d'endossement conclus pendant la durée du présent accord.</p>
+
+                <div style="border-left: 3px solid #1E9FD8; padding-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #254354; margin-bottom: 8px">Article 3 — Résiliation</div>
+                <p style="font-size: 12px; line-height: 1.75; color: #42474C; text-align: justify; margin: 0 0 16px 0">{{ sortiePhrase1 }} <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; background: rgba(188,0,13,0.10); color: #BC000D; padding: 1px 6px; border-radius: 3px">{{ sortieValeurF }}</span> {{ sortiePhrase2 }}</p>
+
+                <sc-if value="{{ hasClauses }}" hint-placeholder-val="{{ true }}">
+                  <div>
+                    <div style="border-left: 3px solid #1E9FD8; padding-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #254354; margin-bottom: 8px">Article 4 — Clauses additionnelles</div>
+                    <div style="margin: 0 0 16px 0; display: flex; flex-direction: column; gap: 5px">
+                      <sc-for list="{{ clausesActives }}" as="ca" hint-placeholder-count="2">
+                        <div style="display: flex; gap: 8px; font-size: 12px; line-height: 1.6; color: #42474C"><span style="color: #F4A800; font-weight: 700">◆</span><span><strong>{{ ca.titre }}.</strong> {{ ca.texte }}</span></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 34px">
+                  <div style="text-align: center">
+                    <div style="border-bottom: 1.5px dashed rgba(37,67,84,0.35); padding-bottom: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-style: italic; color: #8FA6B5">Signature électronique en attente</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5B6B77; margin-top: 8px">Pour l'Agence</div>
+                  </div>
+                  <div style="text-align: center">
+                    <div style="border-bottom: 1.5px dashed rgba(37,67,84,0.35); padding-bottom: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-style: italic; color: #8FA6B5">En attente d'acceptation</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5B6B77; margin-top: 8px">{{ partie }}</div>
+                  </div>
+                </div>
+
+                <div style="margin-top: 30px; padding-top: 12px; border-top: 1px solid rgba(37,67,84,0.12); display: flex; justify-content: space-between; font-size: 8.5px; color: #8896A0">
+                  <span>NDEMBO KIN CONNECT SARL — Av. Citroniers, Q/ Golf, C/ Gombe — Immeuble USAID, Kinshasa, RDC</span>
+                  <span style="font-family: 'JetBrains Mono', monospace">Page 1 / 3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px">
+      <div onClick="{{ closeConfirm }}" style="position: absolute; inset: 0; background: rgba(9,29,46,0.45)"></div>
+      <div style="position: relative; width: 430px; max-width: 100%; background: #FFFFFF; border-radius: 10px; box-shadow: 0 22px 54px rgba(9,29,46,0.32); overflow: hidden">
+        <div style="display: flex; gap: 14px; padding: 24px 24px 0 24px">
+          <span style="width: 44px; height: 44px; border-radius: 99px; background: {{ confirmIconBg }}; color: {{ confirmIconColor }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ confirmIcon }}"></path></svg>
+          </span>
+          <div>
+            <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354">{{ confirmTitle }}</div>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #5B6B77; line-height: 1.55">{{ confirmBody }}</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 22px 24px">
+          <button onClick="{{ closeConfirm }}" style="height: 38px; padding: 0 16px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #5B6B77; cursor: pointer" style-hover="background: #F8FAFC">Annuler</button>
+          <button onClick="{{ confirmAction }}" style="height: 38px; padding: 0 18px; background: {{ confirmBtnBg }}; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer">{{ confirmBtnLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 300; background: #16242F; color: #FFFFFF; border-radius: 8px; padding: 13px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 14px 36px rgba(9,29,46,0.32)">
+      <span style="width: 26px; height: 26px; border-radius: 99px; background: #177E54; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </span>
+      <span style="font-size: 13px; font-weight: 600">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'liste',
+    step: 1,
+    clients: [],
+    clientId: 7,
+    confirm: null,
+    toast: '',
+    modele: 'athlete',
+    partie: 'Jean-Luc Mobutu',
+    qualite: 'Athlète professionnel',
+    adresse: 'Centre Académique de Kinshasa, RDC',
+    objet: 'L\u2019Agence assure la représentation exclusive de l\u2019Athlète : négociation des contrats professionnels, gestion de carrière, suivi médical et préparation aux détections internationales.',
+    debut: '2026-08-01',
+    duree: 24,
+    renouvelable: false,
+    remuneration: 1500,
+    commission: 15,
+    sortieType: 'fixe',
+    sortieValeur: 75000,
+    clauses: { confidentialite: true, exclusivite: true, image: false },
+    notes: '',
+  };
+
+  componentDidMount() {
+    import('./crm-data.js').then((m) => { this._mod = m; this.setState({ clients: m.CLIENTS }); });
+  }
+
+  _needClient() {
+    this.setState({ step: 1, toast: 'Sélectionnez d’abord la partie contractante (client).' });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2600);
+  }
+
+  renderVals() {
+    const S = this.state;
+    const QUALITE_MAP = { 'Club': 'Club sportif', 'Sponsor': 'Sponsor / Partenaire', 'Académie': 'Académie / Centre de formation', 'Athlète': 'Athlète professionnel', 'Institution': 'Institution / Fédération' };
+    const selClient = S.clients.find((c) => String(c.id) === String(S.clientId)) || null;
+    const clientInit = (S.partie || '').split(' ').filter(Boolean).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+    const ctrRef = (this._mod && this._mod.nextNumero) ? this._mod.nextNumero('CTR-', 2026, this._mod.CONTRATS.map((c) => c.ref)) : 'CTR-2026-020';
+    const fmtUsd = (n) => '$' + (Number(n) || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const MOIS = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUL', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
+    const dateFr = (iso) => {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-');
+      return d + ' ' + MOIS[parseInt(m, 10) - 1] + ' ' + y;
+    };
+    const finIso = (() => {
+      if (!S.debut) return null;
+      const d = new Date(S.debut + 'T00:00:00');
+      d.setMonth(d.getMonth() + (Number(S.duree) || 0));
+      return d.toISOString().slice(0, 10);
+    })();
+
+    const CONTRATS = [
+      { ref: 'CTR-2026-018', partie: 'Jean-Luc Mobutu', type: 'Représentation', valeur: '$75 000', expire: '01 aoû 2028', statut: 'Signé' },
+      { ref: 'CTR-2026-016', partie: 'Orange RDC', type: 'Sponsoring', valeur: '$2,5 M', expire: '31 déc 2027', statut: 'Signé' },
+      { ref: 'CTR-2026-015', partie: 'Yaya Diallo — Kinshasa FC', type: 'Représentation', valeur: '$120 000', expire: '12 jun 2028', statut: 'Signé' },
+      { ref: 'CTR-2026-013', partie: 'A. Boposa — Consultant scouting', type: 'Prestation', valeur: '$4 500/mois', expire: '15 aoû 2026', statut: 'Expire bientôt', urgent: true },
+      { ref: 'CTR-2026-019', partie: 'Académie Les Aiglons', type: 'Prestation', valeur: '$8 600', expire: '—', statut: 'Brouillon' },
+    ];
+    const TYPE_STYLE = {
+      'Représentation': { bg: 'rgba(37,67,84,0.10)', color: '#254354' },
+      'Sponsoring': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00' },
+      'Prestation': { bg: 'rgba(30,159,216,0.14)', color: '#1E78A8' },
+    };
+    const BADGE = {
+      'Signé': { bg: 'rgba(23,126,84,0.12)', color: '#177E54' },
+      'Expire bientôt': { bg: 'rgba(188,0,13,0.10)', color: '#BC000D' },
+      'Brouillon': { bg: 'rgba(37,67,84,0.10)', color: '#42474C' },
+    };
+
+    const stepLabels = ['Parties', 'Mission', 'Finances', 'Clauses'];
+    const steps = stepLabels.map((label, i) => {
+      const n = i + 1;
+      const isActive = S.step === n;
+      const isDone = S.step > n;
+      return {
+        n: isDone ? '✓' : String(n),
+        label,
+        bg: isActive ? '#BC000D' : isDone ? '#254354' : '#FFFFFF',
+        color: isActive || isDone ? '#FFFFFF' : '#8896A0',
+        border: isActive ? '#BC000D' : isDone ? '#254354' : 'rgba(37,67,84,0.25)',
+        labelColor: isActive ? '#BC000D' : isDone ? '#254354' : '#8896A0',
+        onClick: () => this.setState({ step: n }),
+      };
+    });
+
+    const CLAUSE_DEFS = [
+      { key: 'confidentialite', titre: 'Confidentialité', desc: 'Non-divulgation des termes financiers et stratégiques.', texte: 'Les parties s\u2019engagent à ne divulguer aucune information financière ou stratégique relative au présent accord.' },
+      { key: 'exclusivite', titre: 'Exclusivité', desc: 'L\u2019Agence est le représentant exclusif pendant la durée du contrat.', texte: 'La partie contractante s\u2019interdit de mandater tout autre agent ou structure concurrente pendant la durée du contrat.' },
+      { key: 'image', titre: 'Droit à l\u2019image', desc: 'Exploitation encadrée de l\u2019image à des fins promotionnelles.', texte: 'L\u2019Agence est autorisée à exploiter l\u2019image de la partie contractante dans le cadre strict de la promotion de ses activités.' },
+    ];
+    const clausesList = CLAUSE_DEFS.map((c) => {
+      const checked = S.clauses[c.key];
+      return {
+        ...c,
+        checked,
+        border: checked ? 'rgba(30,159,216,0.6)' : 'rgba(37,67,84,0.14)',
+        bg: checked ? 'rgba(30,159,216,0.05)' : '#FFFFFF',
+        boxBorder: checked ? '#1E9FD8' : 'rgba(37,67,84,0.35)',
+        boxBg: checked ? '#1E9FD8' : '#FFFFFF',
+        onToggle: () => this.setState({ clauses: { ...S.clauses, [c.key]: !checked } }),
+      };
+    });
+    const clausesActives = CLAUSE_DEFS.filter((c) => S.clauses[c.key]);
+
+    const estFixe = S.sortieType === 'fixe';
+    const radio = (sel) => ({
+      border: sel ? 'rgba(188,0,13,0.55)' : 'rgba(37,67,84,0.16)',
+      bg: sel ? 'rgba(188,0,13,0.05)' : '#FFFFFF',
+      dot: sel ? '#BC000D' : 'rgba(37,67,84,0.35)',
+      dotBg: sel ? '#BC000D' : '#FFFFFF',
+    });
+    const rF = radio(estFixe);
+    const rP = radio(!estFixe);
+
+    const CONFIRM = {
+      project: { title: 'Convertir en projet ?', body: 'Un projet sera créé à partir de ce contrat avec ' + S.partie + ' (mission, durée et responsabilités reprises). Le contrat reste la source.', btn: 'Convertir', btnBg: '#BC000D', icon: 'M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D', toast: 'Contrat converti — projet créé avec ' + S.partie + '.' },
+      invoice: { title: 'Convertir en facture ?', body: 'Une facture brouillon reprenant les conditions financières du contrat avec ' + S.partie + ' sera générée.', btn: 'Convertir', btnBg: '#BC000D', icon: 'M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D', toast: 'Contrat converti en facture (brouillon).' },
+      send: { title: 'Envoyer pour signature ?', body: 'Le contrat sera envoyé à ' + S.partie + ' par email pour signature électronique.', btn: 'Envoyer', btnBg: '#254354', icon: 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354', toast: 'Contrat envoyé à ' + S.partie + ' pour signature.' },
+      delete: { title: 'Supprimer ce brouillon ?', body: 'Le contrat ' + ctrRef + ' (' + S.partie + ') sera définitivement supprimé. Action irréversible.', btn: 'Supprimer', btnBg: '#BC000D', icon: 'M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D', toast: 'Brouillon de contrat supprimé.' },
+    };
+    const cur = S.confirm ? CONFIRM[S.confirm] : null;
+    const fireToast = (msg) => {
+      this.setState({ confirm: null, toast: msg });
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.setState({ toast: '' }), 2600);
+    };
+
+    return {
+      isListe: S.view === 'liste',
+      isAssistant: S.view === 'assistant',
+      retourListe: () => this.setState({ view: 'liste' }),
+
+      clientsOptions: S.clients,
+      clientId: String(S.clientId || ''),
+      setClient: (e) => {
+        const id = e.target.value;
+        const c = S.clients.find((x) => String(x.id) === String(id));
+        if (c) this.setState({ clientId: id, partie: c.nom, qualite: QUALITE_MAP[c.type] || S.qualite, adresse: c.adresse });
+        else this.setState({ clientId: '' });
+      },
+      hasClient: !!selClient,
+      clientInit,
+      clientNom: S.partie,
+      clientMeta: selClient ? (selClient.type + ' · ' + selClient.ville + ' · ' + selClient.email) : S.qualite,
+      progressPct: (S.step / 4 * 100) + '%',
+
+      askProject: () => { if (!S.clientId) return this._needClient(); this.setState({ confirm: 'project' }); },
+      askInvoice: () => { if (!S.clientId) return this._needClient(); this.setState({ confirm: 'invoice' }); },
+      askSend: () => { if (!S.clientId) return this._needClient(); this.setState({ confirm: 'send' }); },
+      askDelete: () => this.setState({ confirm: 'delete' }),
+      ctrRef,
+      confirmOpen: !!cur,
+      closeConfirm: () => this.setState({ confirm: null }),
+      confirmTitle: cur && cur.title,
+      confirmBody: cur && cur.body,
+      confirmIcon: cur && cur.icon,
+      confirmIconBg: cur && cur.iconBg,
+      confirmIconColor: cur && cur.iconColor,
+      confirmBtnLabel: cur && cur.btn,
+      confirmBtnBg: cur && cur.btnBg,
+      confirmAction: () => { const wasDel = S.confirm === 'delete'; fireToast(cur ? cur.toast : ''); if (wasDel) this.setState({ view: 'liste', clientId: '' }); },
+      toast: S.toast,
+
+      modeles: [
+        { code: 'A', titre: 'Représentation d\u2019athlète', desc: 'Mandat exclusif de gestion de carrière : négociation, commission d\u2019agence, clause de sortie et bonus de performance. Conforme aux règlements FIFA / FECOFA.', tags: ['Carrière', 'Commission', 'Transferts'], accent: '#BC000D', iconBg: 'rgba(188,0,13,0.10)', btnBg: '#BC000D', icon: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', onUse: () => this.setState({ view: 'assistant', step: 1, modele: 'athlete', clientId: 7, partie: 'Jean-Luc Mobutu', qualite: 'Athlète professionnel', adresse: 'Centre Académique de Kinshasa, RDC' }) },
+        { code: 'B', titre: 'Prestation événementielle', desc: 'Organisation de tournois, camps d\u2019entraînement et stages : périmètre de mission, calendrier, conditions financières et responsabilités logistiques.', tags: ['Tournois', 'Camps', 'Logistique'], accent: '#254354', iconBg: 'rgba(37,67,84,0.10)', btnBg: '#254354', icon: 'M8 21h8M12 17v4M17 4H7v5a5 5 0 0 0 10 0zM17 4h4v2a3 3 0 0 1-3 3M7 4H3v2a3 3 0 0 0 3 3', onUse: () => this.setState({ view: 'assistant', step: 1, modele: 'prestation', clientId: 4, partie: 'Académie Les Aiglons', qualite: 'Académie / Centre de formation', adresse: 'Av. de l’École 7, Limete — Kinshasa, RDC', objet: 'L\u2019Agence organise et encadre un camp d\u2019entraînement U17 à Lubumbashi : programme sportif, logistique, encadrement technique et restitution d\u2019évaluation individuelle.' }) },
+      ],
+      contrats: CONTRATS.map((c) => ({
+        ...c,
+        typeBg: TYPE_STYLE[c.type].bg,
+        typeColor: TYPE_STYLE[c.type].color,
+        badgeBg: BADGE[c.statut].bg,
+        badgeColor: BADGE[c.statut].color,
+        expColor: c.urgent ? '#BC000D' : '#5B6B77',
+        expWeight: c.urgent ? '700' : '500',
+        onOpen: () => this.setState({ view: 'assistant', step: 4 }),
+      })),
+
+      steps,
+      isStep1: S.step === 1,
+      isStep2: S.step === 2,
+      isStep3: S.step === 3,
+      isStep4: S.step === 4,
+      prevStep: () => this.setState({ step: Math.max(1, S.step - 1) }),
+      nextStep: () => this.setState({ step: Math.min(4, S.step + 1) }),
+      prevColor: S.step === 1 ? '#B9C4CC' : '#254354',
+      nextLabel: S.step === 4 ? 'Finaliser ✓' : 'Étape suivante →',
+
+      modele: S.modele,
+      setModele: (e) => this.setState({ modele: e.target.value }),
+      modeleTitre: S.modele === 'athlete' ? 'Modèle A — Représentation d\u2019athlète' : 'Modèle B — Prestation événementielle',
+      docTitre: S.modele === 'athlete' ? 'Contrat de représentation d\u2019athlète professionnel' : 'Contrat de prestation de services événementiels',
+      partie: S.partie,
+      setPartie: (e) => this.setState({ partie: e.target.value }),
+      qualite: S.qualite,
+      setQualite: (e) => this.setState({ qualite: e.target.value }),
+      adresse: S.adresse,
+      setAdresse: (e) => this.setState({ adresse: e.target.value }),
+      objet: S.objet,
+      setObjet: (e) => this.setState({ objet: e.target.value }),
+      debut: S.debut,
+      setDebut: (e) => this.setState({ debut: e.target.value }),
+      duree: S.duree,
+      setDuree: (e) => this.setState({ duree: e.target.value }),
+      debutFr: dateFr(S.debut),
+      finFr: dateFr(finIso),
+      termeLabel: S.renouvelable ? '(renouvelable par tacite reconduction)' : '(terme fixe)',
+
+      setRenouiOui: () => this.setState({ renouvelable: true }),
+      setRenouiNon: () => this.setState({ renouvelable: false }),
+      renouiOuiBorder: S.renouvelable ? 'rgba(188,0,13,0.55)' : 'rgba(37,67,84,0.16)',
+      renouiOuiBg: S.renouvelable ? 'rgba(188,0,13,0.06)' : '#FFFFFF',
+      renouiNonBorder: !S.renouvelable ? 'rgba(188,0,13,0.55)' : 'rgba(37,67,84,0.16)',
+      renouiNonBg: !S.renouvelable ? 'rgba(188,0,13,0.06)' : '#FFFFFF',
+
+      remuneration: S.remuneration,
+      setRemuneration: (e) => this.setState({ remuneration: e.target.value }),
+      remunerationF: fmtUsd(S.remuneration),
+      commission: S.commission,
+      setCommission: (e) => this.setState({ commission: e.target.value }),
+
+      setSortieFixe: () => this.setState({ sortieType: 'fixe', sortieValeur: 75000 }),
+      setSortiePct: () => this.setState({ sortieType: 'pct', sortieValeur: 12 }),
+      sortieFixeBorder: rF.border, sortieFixeBg: rF.bg, sortieFixeDot: rF.dot, sortieFixeDotBg: rF.dotBg,
+      sortiePctBorder: rP.border, sortiePctBg: rP.bg, sortiePctDot: rP.dot, sortiePctDotBg: rP.dotBg,
+      sortieLabel: estFixe ? 'Indemnité négociée (USD)' : 'Pourcentage du transfert (%)',
+      sortieValeur: S.sortieValeur,
+      setSortieValeur: (e) => this.setState({ sortieValeur: e.target.value }),
+      sortieValeurF: estFixe ? fmtUsd(S.sortieValeur) : (Number(S.sortieValeur) || 0) + ' %',
+      sortiePhrase1: 'En cas de transfert vers un championnat européen ou du Golfe, ' + (estFixe ? 'une indemnité de rupture fixe de' : 'un pourcentage de'),
+      sortiePhrase2: estFixe ? 'sera versée à l\u2019Agence au titre de compensation de développement.' : 'du montant du transfert sera versé à l\u2019Agence au titre de compensation de développement.',
+
+      clausesList,
+      clausesActives,
+      hasClauses: clausesActives.length > 0,
+      notes: S.notes,
+      setNotes: (e) => this.setState({ notes: e.target.value }),
+    };
+  }
+}
+</script>
+</body>
+</html>

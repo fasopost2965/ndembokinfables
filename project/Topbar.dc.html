@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    .nk-hamburger { display: none; }
+    @media (max-width: 920px) { .nk-hamburger { display: inline-flex !important; } }
+    @keyframes nkNavIn { from { transform: translateX(-12px); } to { transform: translateX(0); } }
+  </style>
+</helmet>
+<header style="height: 64px; background: #FFFFFF; border-bottom: 1px solid rgba(37,67,84,0.12); display: flex; align-items: center; gap: 16px; padding: 0 28px; position: sticky; top: 0; z-index: 60">
+  <button onClick="{{ toggleMobileNav }}" class="nk-hamburger" style="width: 38px; height: 38px; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; cursor: pointer; color: #254354; flex-shrink: 0">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
+  </button>
+  <div style="position: relative; flex: 1; max-width: 420px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#72787C" stroke-width="2" stroke-linecap="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 1"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+    <input type="text" value="{{ searchQ }}" onChange="{{ setSearchQ }}" onFocus="{{ openSearch }}" placeholder="{{ searchPlaceholder }}" style="width: 100%; box-sizing: border-box; height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #F8FAFC; padding: 0 12px 0 36px; font-family: 'Open Sans', sans-serif; font-size: 13px; color: #091D2E; outline: none" style-focus="border-color: #1E9FD8; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(30,159,216,0.15)" />
+    <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeSearch }}" style="position: fixed; inset: 0; z-index: 90"></div>
+      <div style="position: absolute; left: 0; right: 0; top: 46px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.14); border-radius: 8px; box-shadow: 0 12px 32px rgba(9,29,46,0.16); padding: 8px; z-index: 100; max-height: 400px; overflow-y: auto">
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <sc-for list="{{ searchGroups }}" as="g" hint-placeholder-count="2">
+              <div style="margin-bottom: 4px">
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #8896A0; padding: 6px 8px">{{ g.title }}</div>
+                <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="3">
+                  <a href="{{ r.href }}" style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; text-decoration: none; color: #091D2E" style-hover="background: #EDF4FF">
+                    <span style="width: 28px; height: 28px; border-radius: 6px; background: {{ r.iconBg }}; color: {{ r.iconColor }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600">{{ r.badge }}</span>
+                    <span style="min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ r.label }}</span><span style="display: block; font-size: 11px; color: #8896A0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ r.sub }}</span></span>
+                  </a>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 22px; text-align: center; font-size: 12.5px; color: #8896A0">Aucun résultat pour « {{ searchQ }} »</div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="flex: 1"></div>
+
+  <div style="position: relative">
+    <button onClick="{{ toggleCreate }}" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; background: #BC000D; color: #FFFFFF; border: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s ease" style-hover="background: #E61B1C">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+      <span>Créer</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+    <sc-if value="{{ createOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; right: 0; top: 46px; width: 230px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.14); border-radius: 8px; box-shadow: 0 12px 32px rgba(9,29,46,0.16); padding: 6px; display: flex; flex-direction: column; z-index: 100">
+        <sc-for list="{{ createLinks }}" as="lnk" hint-placeholder-count="5">
+          <a href="{{ lnk.href }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px; text-decoration: none; color: #091D2E; font-family: 'Open Sans', sans-serif; font-size: 13px; font-weight: 600" style-hover="background: #EDF4FF">
+            <span style="width: 26px; height: 26px; border-radius: 6px; background: {{ lnk.iconBg }}; color: {{ lnk.iconColor }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ lnk.icon }}"></path></svg>
+            </span>
+            <span>{{ lnk.label }}</span>
+          </a>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="position: relative">
+    <button onClick="{{ toggleNotif }}" style="position: relative; width: 38px; height: 38px; border: 1px solid rgba(37,67,84,0.14); background: #FFFFFF; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #254354" style-hover="background: #F8FAFC">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+      <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}">
+        <span style="position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: #BC000D; border: 1.5px solid #FFFFFF; color: #FFFFFF; font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">{{ unreadCount }}</span>
+      </sc-if>
+    </button>
+    <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeNotif }}" style="position: fixed; inset: 0; z-index: 90"></div>
+      <div style="position: absolute; right: 0; top: 46px; width: 326px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.14); border-radius: 8px; box-shadow: 0 12px 32px rgba(9,29,46,0.16); z-index: 100; overflow: hidden">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid rgba(37,67,84,0.10)">
+          <span style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">Notifications</span>
+          <button onClick="{{ markAllRead }}" style="border: none; background: transparent; color: #1E9FD8; font-size: 11.5px; font-weight: 700; cursor: pointer">Tout marquer comme lu</button>
+        </div>
+        <div style="max-height: 340px; overflow-y: auto">
+          <sc-for list="{{ notifList }}" as="n" hint-placeholder-count="4">
+            <a href="{{ n.href }}" style="display: flex; gap: 11px; padding: 12px 16px; border-bottom: 1px solid rgba(37,67,84,0.06); text-decoration: none; color: inherit; background: {{ n.bg }}" style-hover="background: #F5F9FD">
+              <span style="width: 8px; height: 8px; border-radius: 99px; background: {{ n.accent }}; margin-top: 5px; flex-shrink: 0"></span>
+              <span style="min-width: 0"><span style="display: block; font-size: 12.5px; color: #42474C; line-height: 1.45">{{ n.texte }}</span><span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #8896A0; margin-top: 2px">{{ n.date }}</span></span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="width: 1px; height: 26px; background: rgba(37,67,84,0.14)"></div>
+
+  <div style="position: relative">
+    <button onClick="{{ toggleProfile }}" style="display: flex; align-items: center; gap: 10px; cursor: pointer; background: none; border: none; padding: 4px 6px; border-radius: 8px" style-hover="background: #F2F5F8">
+      <div style="width: 36px; height: 36px; border-radius: 99px; background: #254354; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.04em; flex-shrink: 0">AN</div>
+      <div data-profile-meta="true" style="line-height: 1.25; text-align: left">
+        <div style="font-family: 'Open Sans', sans-serif; font-size: 12.5px; font-weight: 700; color: #091D2E">A. Ndembo</div>
+        <div style="font-family: 'Open Sans', sans-serif; font-size: 11px; color: #72787C">Directeur Général</div>
+      </div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+    <sc-if value="{{ profileOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeProfile }}" style="position: fixed; inset: 0; z-index: 90"></div>
+      <div style="position: absolute; right: 0; top: 52px; width: 220px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.14); border-radius: 8px; box-shadow: 0 12px 32px rgba(9,29,46,0.16); padding: 6px; z-index: 100">
+        <div style="padding: 10px 12px 10px 12px; border-bottom: 1px solid rgba(37,67,84,0.08); margin-bottom: 4px">
+          <div style="font-size: 13px; font-weight: 700; color: #091D2E">A. Ndembo</div>
+          <div style="font-size: 11px; color: #8896A0; margin-top: 1px">contact@ndembokin.com</div>
+        </div>
+        <a href="Parametres.dc.html" style="display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 6px; text-decoration: none; color: #091D2E; font-size: 13px; font-weight: 600" style-hover="background: #EDF4FF">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B6B77" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Paramètres
+        </a>
+        <div style="height: 1px; background: rgba(37,67,84,0.08); margin: 4px 0"></div>
+        <a href="Connexion.dc.html" style="display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 6px; text-decoration: none; color: #BC000D; font-size: 13px; font-weight: 700" style-hover="background: rgba(188,0,13,0.06)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#BC000D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
+          Se déconnecter
+        </a>
+      </div>
+    </sc-if>
+  </div>
+</header>
+
+<sc-if value="{{ mobileNavOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position: fixed; inset: 0; z-index: 300; display: flex">
+    <div onClick="{{ closeMobileNav }}" style="position: absolute; inset: 0; background: rgba(9,29,46,0.5)"></div>
+    <aside style="position: relative; width: 266px; max-width: 82%; height: 100%; background: #203243; display: flex; flex-direction: column; overflow-y: auto; animation: nkNavIn 0.22s ease">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.08)">
+        <div style="display: flex; align-items: center; gap: 11px">
+          <span style="width: 38px; height: 38px; background: #FFFFFF; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; overflow: hidden"><img src="assets/logo.png" alt="" style="width: 100%; height: 100%; object-fit: contain" /></span>
+          <span><span style="display: block; font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.06em; color: #FFFFFF">NDEMBO KIN</span><span style="display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.14em; color: #7E97A8; text-transform: uppercase">Connect SARL</span></span>
+        </div>
+        <button onClick="{{ closeMobileNav }}" style="width: 32px; height: 32px; border: none; background: rgba(255,255,255,0.08); border-radius: 6px; color: #FFFFFF; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+      </div>
+      <nav style="flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 16px">
+        <sc-for list="{{ navSections }}" as="sec" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #5F7A8C; padding: 0 12px 6px 12px">{{ sec.title }}</div>
+            <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+              <a href="{{ it.href }}" style="display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 6px; text-decoration: none; background: {{ it.bg }}; color: {{ it.color }}; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: {{ it.weight }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="{{ it.icon }}"></path></svg>
+                <span>{{ it.label }}</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-for>
+      </nav>
+    </aside>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1200, &quot;height&quot;: 64}, &quot;searchPlaceholder&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Rechercher clients, documents, projets\u2026&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    createOpen: false, mobileNavOpen: false,
+    searchQ: '', searchFocus: false, notifOpen: false,
+    clients: [], docs: [],
+    notifs: [
+      { id: 1, texte: 'Facture FAC-2026-019 en retard — Mazembe Corp', date: 'il y a 2 h', href: 'Factures.dc.html', read: false, accent: '#BC000D' },
+      { id: 2, texte: 'Devis DEV-2026-039 accepté — Académie Les Aiglons', date: 'il y a 5 h', href: 'Devis.dc.html', read: false, accent: '#177E54' },
+      { id: 3, texte: 'Carte VIP de B. Kalala expire bientôt', date: 'hier', href: 'Membres VIP.dc.html', read: false, accent: '#F4A800' },
+      { id: 4, texte: 'Contrat CTR-2026-013 expire le 15 août', date: 'hier', href: 'Contrats.dc.html', read: true, accent: '#1E9FD8' },
+    ],
+  };
+
+  componentDidMount() {
+    import('./crm-data.js').then((m) => {
+      const docs = [
+        ...m.DEVIS.map((d) => ({ ref: d.ref, objet: d.objet, href: 'Devis.dc.html' })),
+        ...m.FACTURES.map((f) => ({ ref: f.ref, objet: f.objet, href: 'Factures.dc.html' })),
+        ...m.CONTRATS.map((c) => ({ ref: c.ref, objet: c.type, href: 'Contrats.dc.html' })),
+      ];
+      this.setState({ clients: m.CLIENTS, docs });
+    });
+  }
+
+  renderVals() {
+    const active = this.props.active ?? '';
+    const ICONS = {
+      dashboard: 'M3.5 3.5h7v7h-7zM13.5 3.5h7v7h-7zM13.5 13.5h7v7h-7zM3.5 13.5h7v7h-7z',
+      devis: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+      factures: 'M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5',
+      contrats: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+      projets: 'M4 4h4.5v16H4zM9.75 4h4.5v10h-4.5zM15.5 4H20v7h-4.5z',
+      clients: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+      evenements: 'M8 21h8M12 17v4M17 4H7v5a5 5 0 0 0 10 0zM17 4h4v2a3 3 0 0 1-3 3M7 4H3v2a3 3 0 0 0 3 3',
+      vip: 'M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z',
+      parametres: 'M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+    };
+    const sections = [
+      { title: 'Pilotage', items: [ { key: 'dashboard', label: 'Tableau de bord', href: 'Dashboard.dc.html' } ] },
+      { title: 'Commercial', items: [
+        { key: 'devis', label: 'Devis', href: 'Devis.dc.html' },
+        { key: 'factures', label: 'Factures', href: 'Factures.dc.html' },
+        { key: 'contrats', label: 'Contrats', href: 'Contrats.dc.html' },
+        { key: 'projets', label: 'Projets', href: 'Projets.dc.html' },
+      ] },
+      { title: 'Opérations', items: [
+        { key: 'evenements', label: 'Événements', href: 'Evenements.dc.html' },
+      ] },
+      { title: 'Relations', items: [
+        { key: 'clients', label: 'Clients', href: 'Clients.dc.html' },
+        { key: 'vip', label: 'Membres VIP', href: 'Membres VIP.dc.html' },
+      ] },
+      { title: 'Système', items: [ { key: 'parametres', label: 'Paramètres', href: 'Parametres.dc.html' } ] },
+    ];
+    const navSections = sections.map((s) => ({
+      title: s.title,
+      items: s.items.map((it) => {
+        const on = it.key === active;
+        return { ...it, icon: ICONS[it.key], bg: on ? '#BC000D' : 'transparent', color: on ? '#FFFFFF' : '#B9CBD8', weight: on ? '700' : '400' };
+      }),
+    }));
+    const initiales = (nom) => nom.split(' ').filter(Boolean).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+    const sq = (this.state.searchQ || '').trim().toLowerCase();
+    const searchOpen = this.state.searchFocus && sq.length > 0;
+    const pageItems = sections.flatMap((s) => s.items).filter((it) => it.label.toLowerCase().includes(sq)).slice(0, 4)
+      .map((it) => ({ label: it.label, sub: 'Écran', href: it.href, badge: it.label.charAt(0), iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354' }));
+    const cliItems = (this.state.clients || []).filter((c) => c.nom.toLowerCase().includes(sq)).slice(0, 4)
+      .map((c) => ({ label: c.nom, sub: c.type + ' · ' + c.ville, href: 'Clients.dc.html', badge: initiales(c.nom), iconBg: 'rgba(30,159,216,0.14)', iconColor: '#1E78A8' }));
+    const docItems = (this.state.docs || []).filter((d) => (d.ref + ' ' + d.objet).toLowerCase().includes(sq)).slice(0, 4)
+      .map((d) => ({ label: d.ref, sub: d.objet, href: d.href, badge: d.ref.charAt(0), iconBg: 'rgba(244,168,0,0.16)', iconColor: '#9A6B00' }));
+    const groups = sq ? [ { title: 'Écrans', items: pageItems }, { title: 'Clients', items: cliItems }, { title: 'Documents', items: docItems } ].filter((g) => g.items.length > 0) : [];
+    const unread = this.state.notifs.filter((n) => !n.read).length;
+
+    const profileOpen = this.state.profileOpen;
+    return {
+      navSections,
+      mobileNavOpen: this.state.mobileNavOpen,
+      toggleMobileNav: () => this.setState((s) => ({ mobileNavOpen: !s.mobileNavOpen })),
+      closeMobileNav: () => this.setState({ mobileNavOpen: false }),
+      searchQ: this.state.searchQ,
+      setSearchQ: (e) => this.setState({ searchQ: e.target.value, searchFocus: true }),
+      openSearch: () => this.setState({ searchFocus: true }),
+      closeSearch: () => this.setState({ searchFocus: false }),
+      searchOpen,
+      searchGroups: groups,
+      hasResults: groups.length > 0,
+      noResults: groups.length === 0,
+      notifOpen: this.state.notifOpen,
+      toggleNotif: () => this.setState((s) => ({ notifOpen: !s.notifOpen })),
+      closeNotif: () => this.setState({ notifOpen: false }),
+      notifList: this.state.notifs.map((n) => ({ ...n, bg: n.read ? '#FFFFFF' : 'rgba(30,159,216,0.05)' })),
+      hasUnread: unread > 0,
+      unreadCount: String(unread),
+      markAllRead: () => this.setState((s) => ({ notifs: s.notifs.map((n) => ({ ...n, read: true })) })),
+      searchPlaceholder: this.props.searchPlaceholder ?? 'Rechercher clients, documents, projets…',
+      profileOpen,
+      toggleProfile: () => this.setState((s) => ({ profileOpen: !s.profileOpen, notifOpen: false, createOpen: false })),
+      closeProfile: () => this.setState({ profileOpen: false }),
+      createOpen: this.state.createOpen,
+      toggleCreate: () => this.setState((s) => ({ createOpen: !s.createOpen, profileOpen: false })),
+      createLinks: [
+        { label: 'Nouveau devis', href: 'Devis.dc.html', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8', iconBg: 'rgba(30,159,216,0.14)', iconColor: '#1E9FD8' },
+        { label: 'Nouvelle facture', href: 'Factures.dc.html', icon: 'M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D' },
+        { label: 'Nouveau contrat', href: 'Contrats.dc.html', icon: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354' },
+        { label: 'Nouveau projet', href: 'Projets.dc.html', icon: 'M4 4h4.5v16H4zM9.75 4h4.5v10h-4.5zM15.5 4H20v7h-4.5z', iconBg: 'rgba(30,159,216,0.14)', iconColor: '#1E9FD8' },
+        { label: 'Nouvel événement', href: 'Evenements.dc.html', icon: 'M8 21h8M12 17v4M17 4H7v5a5 5 0 0 0 10 0zM17 4h4v2a3 3 0 0 1-3 3M7 4H3v2a3 3 0 0 0 3 3', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D' },
+        { label: 'Nouveau client', href: 'Clients.dc.html', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', iconBg: 'rgba(23,126,84,0.12)', iconColor: '#177E54' },
+        { label: 'Ajouter un membre VIP', href: 'Membres VIP.dc.html', icon: 'M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z', iconBg: 'rgba(244,168,0,0.16)', iconColor: '#B07800' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

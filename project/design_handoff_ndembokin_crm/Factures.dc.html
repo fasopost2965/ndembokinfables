@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #F2F5F8; }
+    * { box-sizing: border-box; }
+    input, button, select, textarea { font-family: inherit; }
+    @media (max-width: 920px) {
+      [data-sidebar] { display: none !important; }
+      [data-profile-meta] { display: none !important; }
+      [data-main-pad] { padding: 16px !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Factures" style="display: flex; width: 100%; min-height: 100vh; background: #F2F5F8; font-family: 'Open Sans', sans-serif; color: #091D2E">
+  <dc-import name="Sidebar" active="factures" hint-size="248px,100vh"></dc-import>
+
+  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+    <dc-import name="Topbar" active="factures" searchPlaceholder="Rechercher une facture, un client…" hint-size="100%,64px"></dc-import>
+
+    <main data-main-pad="true" style="flex: 1; padding: 28px 32px 48px 32px; max-width: 1380px; width: 100%; margin: 0 auto">
+
+      <sc-if value="{{ isListe }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #BC000D; margin-bottom: 6px">Commercial</div>
+              <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Factures</h1>
+              <p style="margin: 6px 0 0 0; font-size: 13.5px; color: #5B6B77">Facturation, encaissements et relances — USD &amp; CDF.</p>
+            </div>
+            <button onClick="{{ nouvelleFacture }}" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; background: #BC000D; border: none; border-radius: 6px; font-size: 13.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              Nouvelle facture
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 18px">
+            <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-left: 3px solid {{ st.accent }}; border-radius: 8px; padding: 16px 18px">
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5B6B77">{{ st.label }}</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; letter-spacing: -0.03em; margin-top: 8px; color: {{ st.valueColor }}">{{ st.value }}</div>
+                <div style="font-size: 11.5px; color: #8896A0; margin-top: 4px">{{ st.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; overflow: hidden">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 20px; border-bottom: 1px solid rgba(37,67,84,0.10); flex-wrap: wrap">
+              <div style="display: flex; gap: 4px; background: #F2F5F8; border-radius: 6px; padding: 4px">
+                <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+                  <button onClick="{{ t.onClick }}" style="height: 30px; padding: 0 14px; border: none; border-radius: 5px; background: {{ t.bg }}; color: {{ t.color }}; font-size: 12.5px; font-weight: {{ t.weight }}; cursor: pointer">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <div style="position: relative; width: 260px; max-width: 100%">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#72787C" stroke-width="2" stroke-linecap="round" style="position: absolute; left: 11px; top: 50%; transform: translateY(-50%)"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+                <input type="text" value="{{ q }}" onChange="{{ setQ }}" placeholder="Filtrer par client ou référence…" style="width: 100%; height: 34px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; background: #FFFFFF; padding: 0 10px 0 32px; font-size: 12.5px; color: #091D2E; outline: none" style-focus="border-color: #1E9FD8; box-shadow: 0 0 0 3px rgba(30,159,216,0.15)" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 125px 1.1fr 1.3fr 95px 105px 115px 110px 36px; gap: 0; padding: 10px 20px; background: #254354; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #FFFFFF">
+              <span>Numéro</span><span>Client</span><span>Objet</span><span>Émise le</span><span>Échéance</span><span style="text-align: right">Montant</span><span style="text-align: right">Paiement</span><span></span>
+            </div>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+              <div onClick="{{ r.onOpen }}" style="display: grid; grid-template-columns: 125px 1.1fr 1.3fr 95px 105px 115px 110px 36px; align-items: center; padding: 14px 20px; border-top: 1px solid rgba(37,67,84,0.07); cursor: pointer; background: #FFFFFF" style-hover="background: #F5F9FD">
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #254354">{{ r.numero }}</span>
+                <span style="font-size: 13px; font-weight: 600; padding-right: 8px">{{ r.client }}</span>
+                <span style="font-size: 12.5px; color: #5B6B77; padding-right: 8px">{{ r.objet }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #5B6B77">{{ r.date }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: {{ r.echWeight }}; color: {{ r.echColor }}">{{ r.echeance }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; text-align: right">{{ r.montant }}</span>
+                <span style="text-align: right"><span style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ r.badgeBg }}; color: {{ r.badgeColor }}"><span style="width: 5px; height: 5px; border-radius: 99px; background: {{ r.badgeColor }}"></span>{{ r.statut }}</span></span>
+                <span style="display: flex; justify-content: flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg></span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ listeVide }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 48px 20px; text-align: center; border-top: 1px solid rgba(37,67,84,0.07)">
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354">Aucune facture pour ce filtre</div>
+                <p style="margin: 6px 0 14px 0; font-size: 13px; color: #8896A0">Modifiez la recherche ou créez une nouvelle facture.</p>
+                <button onClick="{{ nouvelleFacture }}" style="height: 36px; padding: 0 16px; background: #BC000D; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer">+ Nouvelle facture</button>
+              </div>
+            </sc-if>
+            <div style="padding: 12px 20px; border-top: 1px solid rgba(37,67,84,0.10); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #8896A0">
+              <span>{{ rowCount }} factures affichées</span>
+              <span style="font-family: 'JetBrains Mono', monospace">Page 1 / 1</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isEditeur }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 20px">
+            <div style="display: flex; align-items: center; gap: 14px">
+              <button onClick="{{ retourListe }}" style="display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 600; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                Retour
+              </button>
+              <div>
+                <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 22px; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Éditeur de facture</h1>
+                <div style="font-size: 12px; color: #8896A0; margin-top: 2px"><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">{{ numero }}</span> · Statut : <span style="font-weight: 700; color: {{ statutColor }}">{{ statut }}</span></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">Enregistrer</button>
+              <button style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">Aperçu PDF</button>
+              <button onClick="{{ askSend }}" style="height: 36px; padding: 0 14px; background: #254354; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #3D5A6C">Envoyer par email</button>
+              <button onClick="{{ marquerPayee }}" style="display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px; background: {{ payeeBg }}; border: 1px solid {{ payeeBorder }}; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: {{ payeeColor }}; cursor: pointer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                {{ payeeLabel }}
+              </button>
+              <button onClick="{{ askConvert }}" style="display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px; background: #BC000D; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                Convertir en projet
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: minmax(380px, 1fr) minmax(420px, 1.05fr); gap: 18px; align-items: start">
+
+            <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px">
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354; margin-bottom: 14px">1 · Client &amp; document</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                  <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Client facturé</span>
+                    <select value="{{ client }}" onChange="{{ setClient }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                      <sc-for list="{{ clients }}" as="c" hint-placeholder-count="5">
+                        <option value="{{ c }}">{{ c }}</option>
+                      </sc-for>
+                    </select>
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Numéro</span>
+                    <input type="text" value="{{ numero }}" onChange="{{ setNumero }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 700; color: #254354; outline: none" style-focus="border-color: #1E9FD8" />
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Devise</span>
+                    <select value="{{ devise }}" onChange="{{ setDevise }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                      <option value="USD">USD — Dollar américain</option>
+                      <option value="CDF">CDF — Franc congolais</option>
+                    </select>
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Date d'émission</span>
+                    <input type="date" value="{{ date }}" onChange="{{ setDate }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Échéance de paiement</span>
+                    <input type="date" value="{{ echeance }}" onChange="{{ setEcheance }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Mode de paiement</span>
+                    <select value="{{ modePaiement }}" onChange="{{ setModePaiement }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                      <option value="Virement bancaire — Rawbank">Virement bancaire — Rawbank</option>
+                      <option value="Mobile Money — M-Pesa">Mobile Money — M-Pesa</option>
+                      <option value="Mobile Money — Orange Money">Mobile Money — Orange Money</option>
+                      <option value="Espèces — reçu signé">Espèces — reçu signé</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px">
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354; margin-bottom: 14px">2 · Lignes de facturation</div>
+                <div style="display: grid; grid-template-columns: 1fr 58px 92px 92px 28px; gap: 8px; padding-bottom: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">
+                  <span>Description</span><span style="text-align: center">Qté</span><span style="text-align: right">P.U. (USD)</span><span style="text-align: right">Total</span><span></span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{ lignes }}" as="l" hint-placeholder-count="2">
+                    <div style="display: grid; grid-template-columns: 1fr 58px 92px 92px 28px; gap: 8px; align-items: center">
+                      <input type="text" value="{{ l.desc }}" onChange="{{ l.onDesc }}" style="height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 10px; font-size: 12.5px; outline: none" style-focus="border-color: #1E9FD8" />
+                      <input type="number" value="{{ l.qte }}" onChange="{{ l.onQte }}" style="height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-align: center; outline: none" style-focus="border-color: #1E9FD8" />
+                      <input type="number" value="{{ l.pu }}" onChange="{{ l.onPu }}" style="height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-align: right; outline: none" style-focus="border-color: #1E9FD8" />
+                      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; text-align: right; color: #254354">{{ l.montant }}</span>
+                      <button onClick="{{ l.onRemove }}" title="Supprimer la ligne" style="width: 26px; height: 26px; border: none; background: transparent; color: #8896A0; cursor: pointer; border-radius: 5px; display: flex; align-items: center; justify-content: center" style-hover="background: rgba(188,0,13,0.08); color: #BC000D">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ addLigne }}" style="margin-top: 12px; width: 100%; height: 36px; border: 1.5px dashed rgba(30,159,216,0.5); background: rgba(30,159,216,0.04); border-radius: 6px; color: #1E78A8; font-size: 12.5px; font-weight: 700; cursor: pointer" style-hover="background: rgba(30,159,216,0.10)">+ Ajouter une ligne</button>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(37,67,84,0.10)">
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Remise (%)</span>
+                    <input type="number" value="{{ remise }}" onChange="{{ setRemise }}" style="height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">TVA (%)</span>
+                    <input type="number" value="{{ tva }}" onChange="{{ setTva }}" style="height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Notes (visibles sur la facture)</span>
+                    <textarea value="{{ notes }}" onChange="{{ setNotes }}" rows="3" style="border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 10px; font-size: 12.5px; line-height: 1.5; resize: vertical; outline: none" style-focus="border-color: #1E9FD8"></textarea>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div style="position: sticky; top: 84px; min-width: 0">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px">
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #5B6B77">Aperçu du document</span>
+                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #177E54"><span style="width: 7px; height: 7px; border-radius: 99px; background: #177E54"></span>Synchronisé</span>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.14); border-radius: 4px; box-shadow: 0 16px 40px rgba(9,29,46,0.14); overflow: hidden; position: relative">
+                <div style="height: 5px; background: linear-gradient(90deg, #254354 0%, #254354 55%, #BC000D 55%, #BC000D 80%, #F4A800 80%, #F4A800 100%)"></div>
+                <sc-if value="{{ estPayee }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; top: 110px; right: 36px; transform: rotate(-12deg); border: 3px solid #177E54; color: #177E54; border-radius: 6px; padding: 6px 16px; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.18em; opacity: 0.85; background: rgba(255,255,255,0.7)">PAYÉE</div>
+                </sc-if>
+                <div style="padding: 34px 38px 28px 38px">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px">
+                    <div style="display: flex; gap: 12px; align-items: center">
+                      <div style="width: 46px; height: 46px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.12); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden">
+                        <img src="assets/logo.png" alt="Ndembo Kin" style="width: 100%; height: 100%; object-fit: contain" />
+                      </div>
+                      <div>
+                        <div style="font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.05em; color: #254354">NDEMBO KIN CONNECT</div>
+                        <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #8896A0">SARL · Management Sportif · Kinshasa</div>
+                      </div>
+                    </div>
+                    <div style="text-align: right">
+                      <div style="font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: #BC000D; line-height: 1">FACTURE</div>
+                      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #254354; margin-top: 6px">{{ numero }}</div>
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; margin-top: 26px; padding: 14px 16px; background: #F8FAFC; border: 1px solid rgba(37,67,84,0.08); border-radius: 6px">
+                    <div>
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin-bottom: 5px">Facturé à</div>
+                      <div style="font-size: 12.5px; font-weight: 700">{{ client }}</div>
+                      <div style="font-size: 10.5px; color: #5B6B77; margin-top: 3px; line-height: 1.45">{{ clientAdresse }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin-bottom: 5px">Émise le</div>
+                      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700">{{ dateFr }}</div>
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin: 9px 0 5px 0">À régler avant le</div>
+                      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700; color: #BC000D">{{ echeanceFr }}</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin-bottom: 5px">Devise</div>
+                      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700">{{ devise }}</div>
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #8896A0; margin: 9px 0 5px 0">Mode de paiement</div>
+                      <div style="font-size: 10.5px; font-weight: 700; line-height: 1.4">{{ modePaiement }}</div>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 22px">
+                    <div style="display: grid; grid-template-columns: 1fr 50px 95px 100px; gap: 8px; padding: 9px 12px; background: #254354; border-radius: 4px 4px 0 0; font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #FFFFFF">
+                      <span>Désignation</span><span style="text-align: center">Qté</span><span style="text-align: right">P.U.</span><span style="text-align: right">Montant</span>
+                    </div>
+                    <sc-for list="{{ previewLignes }}" as="pl" hint-placeholder-count="2">
+                      <div style="display: grid; grid-template-columns: 1fr 50px 95px 100px; gap: 8px; padding: 10px 12px; background: {{ pl.bg }}; border-bottom: 1px solid rgba(37,67,84,0.06); font-size: 11.5px; align-items: center">
+                        <span style="font-weight: 600; line-height: 1.4">{{ pl.desc }}</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; text-align: center">{{ pl.qte }}</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; text-align: right">{{ pl.puF }}</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; text-align: right">{{ pl.montant }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; gap: 18px; margin-top: 14px; align-items: flex-start">
+                    <div style="flex: 1; padding: 12px 14px; background: rgba(30,159,216,0.06); border: 1px solid rgba(30,159,216,0.25); border-radius: 6px">
+                      <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #1E78A8; margin-bottom: 4px">Coordonnées de règlement</div>
+                      <div style="font-size: 10.5px; color: #42474C; line-height: 1.6">Rawbank — NDEMBO KIN CONNECT SARL<br />Compte USD : 0501-1234567-89 · Swift : RAWBCDKI<br />Référence à rappeler : <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700">{{ numero }}</span></div>
+                    </div>
+                    <div style="width: 250px; display: flex; flex-direction: column; gap: 6px">
+                      <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #5B6B77"><span>Sous-total</span><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #091D2E">{{ sousTotalF }}</span></div>
+                      <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #5B6B77"><span>Remise ({{ remise }} %)</span><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #BC000D">−{{ remiseF }}</span></div>
+                      <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #5B6B77"><span>TVA ({{ tva }} %)</span><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #091D2E">{{ tvaF }}</span></div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding: 10px 12px; background: #BC000D; border-radius: 6px; color: #FFFFFF">
+                        <span style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase">Net à payer</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px">{{ totalF }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 20px; padding: 12px 14px; background: rgba(244,168,0,0.07); border: 1px solid rgba(244,168,0,0.30); border-radius: 6px">
+                    <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #9A6B00; margin-bottom: 4px">Conditions de paiement</div>
+                    <div style="font-size: 11px; color: #42474C; line-height: 1.55; white-space: pre-line">{{ notes }}</div>
+                  </div>
+
+                  <div style="margin-top: 24px; padding-top: 14px; border-top: 1px solid rgba(37,67,84,0.12); display: flex; justify-content: space-between; gap: 14px; font-size: 8.5px; color: #8896A0; line-height: 1.6">
+                    <div>
+                      NDEMBO KIN CONNECT SARL — RCCM : CD/KIN/RCCM/23-B-0158 · ID NAT : 01-83-N12345K · NIF : A1234567B<br />
+                      Av. Citroniers, Q/ Golf, C/ Gombe — Immeuble USAID, 4ᵉ étage (Réf. HEC) — Kinshasa, RDC<br />
+                      contact@ndembokin.com · +243 810 188 880 (WhatsApp)
+                    </div>
+                    <div style="text-align: right; white-space: nowrap; font-family: 'JetBrains Mono', monospace">Page 1 / 1</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px">
+      <div onClick="{{ closeConfirm }}" style="position: absolute; inset: 0; background: rgba(9,29,46,0.45)"></div>
+      <div style="position: relative; width: 430px; max-width: 100%; background: #FFFFFF; border-radius: 10px; box-shadow: 0 22px 54px rgba(9,29,46,0.32); overflow: hidden">
+        <div style="display: flex; gap: 14px; padding: 24px 24px 0 24px">
+          <span style="width: 44px; height: 44px; border-radius: 99px; background: {{ confirmIconBg }}; color: {{ confirmIconColor }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ confirmIcon }}"></path></svg>
+          </span>
+          <div>
+            <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354">{{ confirmTitle }}</div>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #5B6B77; line-height: 1.55">{{ confirmBody }}</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 22px 24px">
+          <button onClick="{{ closeConfirm }}" style="height: 38px; padding: 0 16px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #5B6B77; cursor: pointer" style-hover="background: #F8FAFC">Annuler</button>
+          <button onClick="{{ confirmAction }}" style="height: 38px; padding: 0 18px; background: {{ confirmBtnBg }}; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer">{{ confirmBtnLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 300; background: #16242F; color: #FFFFFF; border-radius: 8px; padding: 13px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 14px 36px rgba(9,29,46,0.32)">
+      <span style="width: 26px; height: 26px; border-radius: 99px; background: #177E54; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </span>
+      <span style="font-size: 13px; font-weight: 600">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'liste',
+    filtre: 'Toutes',
+    q: '',
+    confirm: null,
+    toast: '',
+    client: 'Mazembe Corp',
+    numero: 'FAC-2026-094',
+    date: '2026-06-02',
+    echeance: '2026-06-17',
+    devise: 'USD',
+    modePaiement: 'Virement bancaire — Rawbank',
+    statut: 'En retard',
+    remise: 0,
+    tva: 16,
+    notes: 'Paiement à 15 jours date de facture. Pénalité de retard : 1,5 % par mois entamé. Escompte 2 % pour règlement sous 5 jours.',
+    lignes: [
+      { desc: 'Activation sponsoring Tier 1 — LED et périmètre', qte: 1, pu: 10000 },
+      { desc: 'Campagne réseaux sociaux — semaine de match (5 posts)', qte: 5, pu: 400 },
+    ],
+  };
+
+  renderVals() {
+    const S = this.state;
+    const RATE = 2850;
+    const fmt = (n) => {
+      const v = S.devise === 'CDF' ? n * RATE : n;
+      const s = v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return S.devise === 'CDF' ? s + ' FC' : '$' + s;
+    };
+    const fmtUsd = (n) => '$' + n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const dateFr = (iso) => {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-');
+      const mois = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUL', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
+      return d + ' ' + mois[parseInt(m, 10) - 1] + ' ' + y;
+    };
+
+    const ADRESSES = {
+      'Mazembe Corp': '45 Boulevard du 30 Juin, Gombe — Kinshasa, RDC · Attn : Direction Financière',
+      'Orange RDC': 'Immeuble Orange, Blvd du 30 Juin — Kinshasa, RDC · Attn : Sponsoring & Événements',
+      'Lupopo FC Academy': 'Av. Kasavubu 218 — Lubumbashi, RDC · Attn : Coordination Académie',
+      'Académie Les Aiglons': 'Av. de l\u2019École 7, Limete — Kinshasa, RDC · Attn : Direction Sportive',
+      'Union Kinshasa': 'Av. des Huileries 102, Gombe — Kinshasa, RDC · Attn : Secrétariat Général',
+      'FECOFA': 'Av. de la Démocratie — Kinshasa, RDC · Attn : Commission des Compétitions',
+    };
+
+    const FACTURES = [
+      { numero: 'FAC-2026-094', client: 'Mazembe Corp', objet: 'Sponsoring Tier 1 — DRC Youth Cup', date: '2026-06-02', echeance: '2026-06-17', montant: 12000, statut: 'En retard' },
+      { numero: 'FAC-2026-093', client: 'Orange RDC', objet: 'Activation marque — quarts de finale', date: '2026-06-01', echeance: '2026-07-01', montant: 21400, statut: 'En attente' },
+      { numero: 'FAC-2026-091', client: 'Académie Les Aiglons', objet: 'Camp U17 Lubumbashi — acompte 40 %', date: '2026-05-28', echeance: '2026-06-28', montant: 3440, statut: 'En attente' },
+      { numero: 'FAC-2026-089', client: 'Lupopo FC Academy', objet: 'Programme détection talents', date: '2026-05-24', echeance: '2026-06-08', montant: 4250, statut: 'Payée' },
+      { numero: 'FAC-2026-087', client: 'FECOFA', objet: 'Encadrement arbitrage — phase de groupes', date: '2026-05-15', echeance: '2026-05-30', montant: 6800, statut: 'Payée' },
+      { numero: 'FAC-2026-086', client: 'Union Kinshasa', objet: 'Location stade — gala annuel', date: '2026-05-12', echeance: '2026-06-12', montant: 5500, statut: 'Brouillon' },
+    ];
+
+    const BADGES = {
+      'Brouillon': { bg: 'rgba(37,67,84,0.10)', color: '#42474C' },
+      'En attente': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00' },
+      'Payée': { bg: 'rgba(23,126,84,0.12)', color: '#177E54' },
+      'En retard': { bg: 'rgba(188,0,13,0.10)', color: '#BC000D' },
+    };
+
+    const ql = S.q.trim().toLowerCase();
+    const filtered = FACTURES.filter((f) =>
+      (S.filtre === 'Toutes' || f.statut === S.filtre) &&
+      (!ql || (f.client + ' ' + f.numero + ' ' + f.objet).toLowerCase().includes(ql))
+    );
+
+    const rows = filtered.map((f) => ({
+      ...f,
+      date: dateFr(f.date).toLowerCase(),
+      echeance: dateFr(f.echeance).toLowerCase(),
+      echColor: f.statut === 'En retard' ? '#BC000D' : '#5B6B77',
+      echWeight: f.statut === 'En retard' ? '700' : '500',
+      montant: fmtUsd(f.montant),
+      badgeBg: BADGES[f.statut].bg,
+      badgeColor: BADGES[f.statut].color,
+      onOpen: () => this.setState({ view: 'editeur', numero: f.numero, client: f.client, date: f.date, echeance: f.echeance, statut: f.statut }),
+    }));
+
+    const tabs = ['Toutes', 'Brouillon', 'En attente', 'Payée', 'En retard'].map((t) => ({
+      label: t,
+      bg: S.filtre === t ? '#FFFFFF' : 'transparent',
+      color: S.filtre === t ? '#254354' : '#5B6B77',
+      weight: S.filtre === t ? '700' : '600',
+      onClick: () => this.setState({ filtre: t }),
+    }));
+
+    const sousTotal = S.lignes.reduce((a, l) => a + (Number(l.qte) || 0) * (Number(l.pu) || 0), 0);
+    const remiseM = sousTotal * ((Number(S.remise) || 0) / 100);
+    const tvaM = (sousTotal - remiseM) * ((Number(S.tva) || 0) / 100);
+    const total = sousTotal - remiseM + tvaM;
+
+    const setLigne = (i, patch) => {
+      const lignes = S.lignes.map((l, j) => (j === i ? { ...l, ...patch } : l));
+      this.setState({ lignes });
+    };
+
+    const estPayee = S.statut === 'Payée';
+
+    const CONFIRM = {
+      convert: { title: 'Convertir en projet ?', body: 'Un projet opérationnel sera créé à partir de ' + S.numero + ' (client, montant et objet repris). La facture reste liée comme source.', btn: 'Convertir', btnBg: '#BC000D', icon: 'M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D', toast: 'Facture convertie — projet créé à partir de ' + S.numero + '.' },
+      send: { title: 'Envoyer la facture par email ?', body: 'Le document ' + S.numero + ' sera envoyé à ' + S.client + ' au format PDF avec les coordonnées de règlement.', btn: 'Envoyer', btnBg: '#254354', icon: 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354', toast: 'Facture envoyée à ' + S.client + '.' },
+    };
+    const cur = S.confirm ? CONFIRM[S.confirm] : null;
+    const fireToast = (msg, patch) => {
+      this.setState({ confirm: null, toast: msg, ...(patch || {}) });
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.setState({ toast: '' }), 2600);
+    };
+
+    return {
+      isListe: S.view === 'liste',
+      isEditeur: S.view === 'editeur',
+      listeVide: rows.length === 0,
+      retourListe: () => this.setState({ view: 'liste' }),
+
+      askConvert: () => this.setState({ confirm: 'convert' }),
+      askSend: () => this.setState({ confirm: 'send' }),
+      confirmOpen: !!cur,
+      closeConfirm: () => this.setState({ confirm: null }),
+      confirmTitle: cur && cur.title,
+      confirmBody: cur && cur.body,
+      confirmIcon: cur && cur.icon,
+      confirmIconBg: cur && cur.iconBg,
+      confirmIconColor: cur && cur.iconColor,
+      confirmBtnLabel: cur && cur.btn,
+      confirmBtnBg: cur && cur.btnBg,
+      confirmAction: () => fireToast(cur ? cur.toast : ''),
+      toast: S.toast,
+      nouvelleFacture: () => this.setState({ view: 'editeur', numero: 'FAC-2026-095', statut: 'Brouillon', date: '2026-06-13', echeance: '2026-06-28' }),
+      stats: [
+        { label: 'Encaissé en juin', value: '$18 200', note: 'Objectif mensuel : 85 % atteint', accent: '#177E54', valueColor: '#177E54' },
+        { label: 'En attente', value: '$24 840', note: '3 factures émises non réglées', accent: '#F4A800', valueColor: '#091D2E' },
+        { label: 'En retard', value: '$12 000', note: '1 facture — relance recommandée', accent: '#BC000D', valueColor: '#BC000D' },
+        { label: 'Délai moyen de paiement', value: '4,2 j', note: 'Meilleure performance du trimestre', accent: '#1E9FD8', valueColor: '#091D2E' },
+      ],
+      tabs,
+      rows,
+      rowCount: rows.length,
+      q: S.q,
+      setQ: (e) => this.setState({ q: e.target.value }),
+
+      clients: Object.keys(ADRESSES),
+      client: S.client,
+      clientAdresse: ADRESSES[S.client] || '—',
+      setClient: (e) => this.setState({ client: e.target.value }),
+      numero: S.numero,
+      setNumero: (e) => this.setState({ numero: e.target.value }),
+      date: S.date,
+      setDate: (e) => this.setState({ date: e.target.value }),
+      echeance: S.echeance,
+      setEcheance: (e) => this.setState({ echeance: e.target.value }),
+      devise: S.devise,
+      setDevise: (e) => this.setState({ devise: e.target.value }),
+      modePaiement: S.modePaiement,
+      setModePaiement: (e) => this.setState({ modePaiement: e.target.value }),
+      remise: S.remise,
+      setRemise: (e) => this.setState({ remise: e.target.value }),
+      tva: S.tva,
+      setTva: (e) => this.setState({ tva: e.target.value }),
+      notes: S.notes,
+      setNotes: (e) => this.setState({ notes: e.target.value }),
+      dateFr: dateFr(S.date),
+      echeanceFr: dateFr(S.echeance),
+
+      statut: S.statut,
+      statutColor: (BADGES[S.statut] || BADGES['Brouillon']).color,
+      estPayee,
+      marquerPayee: () => fireToast(estPayee ? 'Facture rouverte — statut « En attente ».' : 'Facture ' + S.numero + ' marquée comme payée.', { statut: estPayee ? 'En attente' : 'Payée' }),
+      payeeLabel: estPayee ? 'Payée ✓' : 'Marquer payée',
+      payeeBg: estPayee ? '#177E54' : '#FFFFFF',
+      payeeColor: estPayee ? '#FFFFFF' : '#177E54',
+      payeeBorder: estPayee ? '#177E54' : 'rgba(23,126,84,0.45)',
+
+      lignes: S.lignes.map((l, i) => ({
+        ...l,
+        montant: fmtUsd((Number(l.qte) || 0) * (Number(l.pu) || 0)),
+        onDesc: (e) => setLigne(i, { desc: e.target.value }),
+        onQte: (e) => setLigne(i, { qte: e.target.value }),
+        onPu: (e) => setLigne(i, { pu: e.target.value }),
+        onRemove: () => this.setState({ lignes: S.lignes.filter((_, j) => j !== i) }),
+      })),
+      addLigne: () => this.setState({ lignes: [...S.lignes, { desc: '', qte: 1, pu: 0 }] }),
+
+      previewLignes: S.lignes.map((l, i) => ({
+        desc: l.desc || '—',
+        qte: l.qte,
+        puF: fmt(Number(l.pu) || 0),
+        montant: fmt((Number(l.qte) || 0) * (Number(l.pu) || 0)),
+        bg: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC',
+      })),
+      sousTotalF: fmt(sousTotal),
+      remiseF: fmt(remiseM),
+      tvaF: fmt(tvaM),
+      totalF: fmt(total),
+    };
+  }
+}
+</script>
+</body>
+</html>

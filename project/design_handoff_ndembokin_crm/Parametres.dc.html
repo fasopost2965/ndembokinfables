@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #F2F5F8; }
+    * { box-sizing: border-box; }
+    input, button, select, textarea { font-family: inherit; }
+    @media (max-width: 920px) {
+      [data-sidebar] { display: none !important; }
+      [data-profile-meta] { display: none !important; }
+      [data-main-pad] { padding: 16px !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Paramètres" style="display: flex; width: 100%; min-height: 100vh; background: #F2F5F8; font-family: 'Open Sans', sans-serif; color: #091D2E">
+  <dc-import name="Sidebar" active="parametres" hint-size="248px,100vh"></dc-import>
+
+  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+    <dc-import name="Topbar" active="parametres" searchPlaceholder="Rechercher un paramètre…" hint-size="100%,64px"></dc-import>
+
+    <main data-main-pad="true" style="flex: 1; padding: 28px 32px 110px 32px; max-width: 1180px; width: 100%; margin: 0 auto">
+
+      <div style="margin-bottom: 26px">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #BC000D; margin-bottom: 6px">Système</div>
+        <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Paramètres</h1>
+        <p style="margin: 6px 0 0 0; font-size: 13.5px; color: #5B6B77">Identité, informations légales, devises et modèles de documents — appliqués à tous les devis, factures et contrats.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 22px 32px; align-items: start">
+
+        <div style="padding-top: 4px">
+          <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">Logo &amp; identité</div>
+          <p style="margin: 8px 0 0 0; font-size: 12.5px; color: #5B6B77; line-height: 1.55">Apparaît sur les documents imprimables, les cartes NFC et les portails clients. Déposez le logo officiel (PNG transparent).</p>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px; display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start">
+          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="logo-principal" shape="rounded" radius="10" fit="contain" placeholder="Déposer le logo officiel" style="width: 150px; height: 150px; border: 1.5px dashed rgba(37,67,84,0.30); background: #F8FAFC" hint-size="150px,150px"></x-import>
+          <div style="flex: 1; min-width: 260px">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77; margin-bottom: 10px">Couleurs de la marque</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px">
+              <sc-for list="{{ couleurs }}" as="c" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 9px; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px; padding: 8px 10px">
+                  <span style="width: 24px; height: 24px; border-radius: 5px; background: {{ c.hex }}; flex-shrink: 0; border: 1px solid rgba(9,29,46,0.10)"></span>
+                  <span>
+                    <span style="display: block; font-size: 11px; font-weight: 700">{{ c.nom }}</span>
+                    <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8896A0">{{ c.hex }}</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top: 14px; font-size: 11.5px; color: #8896A0; line-height: 1.5">Typographies : <strong style="color: #254354">Oswald</strong> (titres), <strong style="color: #254354">Open Sans</strong> (texte), <strong style="color: #254354">JetBrains Mono</strong> (montants &amp; références).</div>
+          </div>
+        </div>
+
+        <div style="padding-top: 4px">
+          <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">Informations légales</div>
+          <p style="margin: 8px 0 0 0; font-size: 12.5px; color: #5B6B77; line-height: 1.55">Identification officielle utilisée pour la génération des contrats et la conformité fiscale (RDC).</p>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+          <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Dénomination sociale</span>
+            <input type="text" defaultValue="NDEMBO KIN CONNECT SARL" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">RCCM</span>
+            <input type="text" defaultValue="CD/KIN/RCCM/23-B-0158" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">ID National</span>
+            <input type="text" defaultValue="01-83-N12345K" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">NIF</span>
+            <input type="text" defaultValue="A1234567B" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Téléphone &amp; WhatsApp</span>
+            <input type="text" defaultValue="+243 810 188 880" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Adresse du siège</span>
+            <input type="text" defaultValue="Av. Citroniers, Q/ Golf, C/ Gombe — Immeuble USAID, 4ᵉ étage (Réf. HEC, ex ISC) — Kinshasa, RDC" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Email de facturation</span>
+            <input type="text" defaultValue="contact@ndembokin.com" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+        </div>
+
+        <div style="padding-top: 4px">
+          <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">Devises &amp; taxes</div>
+          <p style="margin: 8px 0 0 0; font-size: 12.5px; color: #5B6B77; line-height: 1.55">Devise de référence et taux de conversion utilisés pour les devis, factures et valorisations.</p>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <button onClick="{{ setUsd }}" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 8px; border: 2px solid {{ usdBorder }}; background: {{ usdBg }}; cursor: pointer; text-align: left">
+              <span style="width: 40px; height: 28px; border-radius: 5px; background: #254354; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700">USD</span>
+              <span style="flex: 1">
+                <span style="display: block; font-size: 13px; font-weight: 700; color: #254354">Dollar américain</span>
+                <span style="display: block; font-size: 11px; color: #8896A0; margin-top: 1px">Devise principale d'exploitation</span>
+              </span>
+              <sc-if value="{{ usdActif }}" hint-placeholder-val="{{ true }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E9FD8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9 12l2 2 4-4"></path></svg>
+              </sc-if>
+            </button>
+            <button onClick="{{ setCdf }}" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 8px; border: 2px solid {{ cdfBorder }}; background: {{ cdfBg }}; cursor: pointer; text-align: left">
+              <span style="width: 40px; height: 28px; border-radius: 5px; background: #1E9FD8; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700">CDF</span>
+              <span style="flex: 1">
+                <span style="display: block; font-size: 13px; font-weight: 700; color: #254354">Franc congolais</span>
+                <span style="display: block; font-size: 11px; color: #8896A0; margin-top: 1px">1 USD = {{ taux }} CDF</span>
+              </span>
+              <sc-if value="{{ cdfActif }}" hint-placeholder-val="{{ false }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E9FD8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9 12l2 2 4-4"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Taux de change (1 USD → CDF)</span>
+              <input type="number" value="{{ taux }}" onChange="{{ setTaux }}" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">TVA par défaut (%)</span>
+              <input type="number" defaultValue="16" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(37,67,84,0.10); font-size: 12px; color: #8896A0">
+            <span style="font-style: italic">Dernière mise à jour des taux : aujourd'hui, 09 h 42</span>
+            <button style="border: none; background: transparent; color: #1E9FD8; font-size: 12px; font-weight: 700; cursor: pointer" style-hover="text-decoration: underline">⟳ Actualiser les taux</button>
+          </div>
+        </div>
+
+        <div style="padding-top: 4px">
+          <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">Modèles de documents</div>
+          <p style="margin: 8px 0 0 0; font-size: 12.5px; color: #5B6B77; line-height: 1.55">Numérotation automatique, conditions par défaut et modèles de contrat actifs.</p>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Préfixe devis</span>
+              <input type="text" defaultValue="DEV-2026-" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Préfixe factures</span>
+              <input type="text" defaultValue="FAC-2026-" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Préfixe contrats</span>
+              <input type="text" defaultValue="CTR-2026-" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+          </div>
+          <label style="display: flex; flex-direction: column; gap: 6px; margin-top: 14px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Conditions par défaut (devis &amp; factures)</span>
+            <textarea rows="3" defaultValue="Acompte de 40 % à la signature. Solde payable à 30 jours par virement bancaire (Rawbank). Pénalité de retard : 1,5 % par mois entamé." style="border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55; resize: vertical; outline: none" style-focus="border-color: #1E9FD8"></textarea>
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px">
+            <sc-for list="{{ modelesContrat }}" as="mc" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px">
+                <span style="width: 30px; height: 30px; border-radius: 6px; background: {{ mc.iconBg }}; color: {{ mc.iconColor }}; display: inline-flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px">{{ mc.code }}</span>
+                <span style="flex: 1">
+                  <span style="display: block; font-size: 13px; font-weight: 700">{{ mc.titre }}</span>
+                  <span style="display: block; font-size: 11.5px; color: #8896A0; margin-top: 1px">{{ mc.desc }}</span>
+                </span>
+                <button onClick="{{ mc.onToggle }}" style="width: 42px; height: 24px; border-radius: 99px; border: none; background: {{ mc.switchBg }}; cursor: pointer; position: relative; transition: background 0.15s ease; padding: 0">
+                  <span style="position: absolute; top: 3px; left: {{ mc.knobLeft }}; width: 18px; height: 18px; border-radius: 99px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(9,29,46,0.3); transition: left 0.15s ease"></span>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="padding-top: 4px">
+          <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">E-mail &amp; envois</div>
+          <p style="margin: 8px 0 0 0; font-size: 12.5px; color: #5B6B77; line-height: 1.55">Expéditeur, objet et signature appliqués à tout devis, facture ou contrat envoyé par email.</p>
+        </div>
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Nom d'expéditeur</span>
+            <input type="text" defaultValue="Ndembo Kin Connect SARL" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Email d'expéditeur</span>
+            <input type="text" defaultValue="contact@ndembokin.com" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Copie (CC) automatique</span>
+            <input type="text" defaultValue="direction@ndembokin.com" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Objet par défaut</span>
+            <input type="text" defaultValue="Votre document [REF] — Ndembo Kin Connect" style="height: 38px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px; grid-column: 1 / -1">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Signature d'email</span>
+            <textarea rows="3" defaultValue="Cordialement,&#10;L'équipe Ndembo Kin Connect SARL&#10;contact@ndembokin.com · +243 810 188 880 (WhatsApp)" style="border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55; resize: vertical; outline: none" style-focus="border-color: #1E9FD8"></textarea>
+          </label>
+          <div style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px">
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: #254354">Joindre le PDF imprimable</div>
+              <div style="font-size: 11.5px; color: #8896A0; margin-top: 1px">Le document est joint automatiquement à chaque envoi.</div>
+            </div>
+            <button onClick="{{ togglePdf }}" style="width: 42px; height: 24px; border-radius: 99px; border: none; background: {{ pdfSwitchBg }}; cursor: pointer; position: relative; padding: 0; flex-shrink: 0">
+              <span style="position: absolute; top: 3px; left: {{ pdfKnobLeft }}; width: 18px; height: 18px; border-radius: 99px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(9,29,46,0.3); transition: left 0.15s ease"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div style="position: fixed; bottom: 0; left: 248px; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid rgba(37,67,84,0.14); padding: 14px 32px; display: flex; justify-content: flex-end; gap: 10px; z-index: 70">
+      <button style="height: 38px; padding: 0 16px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 13px; font-weight: 700; color: #5B6B77; cursor: pointer" style-hover="background: #F8FAFC">Annuler</button>
+      <button onClick="{{ enregistrer }}" style="height: 38px; padding: 0 22px; background: #BC000D; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">{{ saveLabel }}</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    deviseActive: 'USD',
+    taux: 2850,
+    modeles: { a: true, b: true },
+    pdfJoint: true,
+    saved: false,
+  };
+
+  renderVals() {
+    const S = this.state;
+    return {
+      couleurs: [
+        { nom: 'Slate Blue', hex: '#254354' },
+        { nom: 'Rouge action', hex: '#BC000D' },
+        { nom: 'Or victoire', hex: '#F4A800' },
+        { nom: 'Cyan panafricain', hex: '#1E9FD8' },
+      ],
+      usdActif: S.deviseActive === 'USD',
+      cdfActif: S.deviseActive === 'CDF',
+      setUsd: () => this.setState({ deviseActive: 'USD' }),
+      setCdf: () => this.setState({ deviseActive: 'CDF' }),
+      usdBorder: S.deviseActive === 'USD' ? '#1E9FD8' : 'rgba(37,67,84,0.14)',
+      usdBg: S.deviseActive === 'USD' ? 'rgba(30,159,216,0.05)' : '#FFFFFF',
+      cdfBorder: S.deviseActive === 'CDF' ? '#1E9FD8' : 'rgba(37,67,84,0.14)',
+      cdfBg: S.deviseActive === 'CDF' ? 'rgba(30,159,216,0.05)' : '#FFFFFF',
+      taux: S.taux,
+      setTaux: (e) => this.setState({ taux: e.target.value }),
+      togglePdf: () => this.setState((st) => ({ pdfJoint: !st.pdfJoint })),
+      pdfSwitchBg: S.pdfJoint ? '#177E54' : 'rgba(37,67,84,0.25)',
+      pdfKnobLeft: S.pdfJoint ? '21px' : '3px',
+      modelesContrat: [
+        { code: 'A', titre: 'Représentation d\u2019athlète', desc: 'Mandat exclusif, commission, clause de sortie', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D', actif: S.modeles.a,
+          switchBg: S.modeles.a ? '#177E54' : 'rgba(37,67,84,0.25)', knobLeft: S.modeles.a ? '21px' : '3px',
+          onToggle: () => this.setState({ modeles: { ...S.modeles, a: !S.modeles.a } }) },
+        { code: 'B', titre: 'Prestation événementielle', desc: 'Tournois, camps d\u2019entraînement et stages', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354', actif: S.modeles.b,
+          switchBg: S.modeles.b ? '#177E54' : 'rgba(37,67,84,0.25)', knobLeft: S.modeles.b ? '21px' : '3px',
+          onToggle: () => this.setState({ modeles: { ...S.modeles, b: !S.modeles.b } }) },
+      ],
+      saveLabel: S.saved ? 'Enregistré ✓' : 'Enregistrer les modifications',
+      enregistrer: () => {
+        this.setState({ saved: true });
+        setTimeout(() => this.setState({ saved: false }), 2000);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

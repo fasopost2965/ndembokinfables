@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #F2F5F8; }
+    * { box-sizing: border-box; }
+    input, button, select, textarea { font-family: inherit; }
+    @media (max-width: 920px) {
+      [data-sidebar] { display: none !important; }
+      [data-profile-meta] { display: none !important; }
+      [data-main-pad] { padding: 16px !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Projets" style="display: flex; width: 100%; min-height: 100vh; background: #F2F5F8; font-family: 'Open Sans', sans-serif; color: #091D2E">
+  <dc-import name="Sidebar" active="projets" hint-size="248px,100vh"></dc-import>
+
+  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+    <dc-import name="Topbar" active="projets" searchPlaceholder="Rechercher un projet, une tâche…" hint-size="100%,64px"></dc-import>
+
+    <main data-main-pad="true" style="flex: 1; padding: 28px 32px 48px 32px; max-width: 1380px; width: 100%; margin: 0 auto">
+
+      <sc-if value="{{ isListe }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #BC000D; margin-bottom: 6px">Opérations</div>
+              <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Projets</h1>
+              <p style="margin: 6px 0 0 0; font-size: 13.5px; color: #5B6B77">Tournois, camps et activations — issus de contrats et factures convertis.</p>
+            </div>
+            <button style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; background: #BC000D; border: none; border-radius: 6px; font-size: 13.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              Nouveau projet
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap">
+            <sc-for list="{{ filtres }}" as="f" hint-placeholder-count="5">
+              <button onClick="{{ f.onClick }}" style="height: 32px; padding: 0 15px; border-radius: 99px; border: 1px solid {{ f.border }}; background: {{ f.bg }}; color: {{ f.color }}; font-size: 12px; font-weight: 700; cursor: pointer">{{ f.label }}</button>
+            </sc-for>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px">
+            <sc-for list="{{ projets }}" as="p" hint-placeholder-count="6">
+              <div onClick="{{ p.onOpen }}" style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-top: 3px solid {{ p.prioAccent }}; border-radius: 8px; padding: 18px 20px; cursor: pointer; display: flex; flex-direction: column; gap: 12px; transition: box-shadow 0.15s ease" style-hover="box-shadow: 0 8px 24px rgba(9,29,46,0.10)">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px">
+                  <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ p.statutBg }}; color: {{ p.statutColor }}">{{ p.statut }}</span>
+                  <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ p.prioBg }}; color: {{ p.prioColor }}">{{ p.priorite }}</span>
+                </div>
+                <div>
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 17px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354; line-height: 1.3">{{ p.titre }}</div>
+                  <div style="font-size: 12px; color: #5B6B77; margin-top: 4px">{{ p.client }} · <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px">{{ p.source }}</span></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; color: #5B6B77; margin-bottom: 5px">
+                    <span style="font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase">Avancement</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">{{ p.progress }} %</span>
+                  </div>
+                  <div style="height: 6px; background: #EDF2F6; border-radius: 99px; overflow: hidden">
+                    <div style="height: 100%; width: {{ p.progress }}%; background: {{ p.barColor }}; border-radius: 99px"></div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(37,67,84,0.08)">
+                  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: #5B6B77">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg>
+                    {{ p.dates }}
+                  </span>
+                  <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #5B6B77">{{ p.taches }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px">
+            <button onClick="{{ retourListe }}" style="display: flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 600; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+              Tous les projets
+            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <button style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">Modifier le projet</button>
+              <button style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #5B6B77; cursor: pointer" style-hover="background: #F8FAFC">Archiver</button>
+              <button style="height: 36px; padding: 0 14px; background: #254354; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #3D5A6C">Rapport PDF</button>
+            </div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-top: 3px solid #BC000D; border-radius: 8px; padding: 22px 24px; margin-bottom: 16px">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+              <div style="min-width: 260px">
+                <div style="display: flex; gap: 8px; margin-bottom: 10px">
+                  <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: rgba(30,159,216,0.14); color: #1E78A8">En cours</span>
+                  <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: rgba(188,0,13,0.10); color: #BC000D">Priorité haute</span>
+                </div>
+                <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 25px; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Tournoi Inter-Écoles Kinshasa 2026</h1>
+                <div style="font-size: 13px; color: #5B6B77; margin-top: 6px">FECOFA · Converti depuis le devis <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">DEV-2026-035</span> · Budget <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">$21 400</span></div>
+              </div>
+              <div style="display: flex; gap: 26px; flex-wrap: wrap">
+                <div>
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8896A0; margin-bottom: 4px">Début</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700">01 MAI 2026</div>
+                </div>
+                <div>
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8896A0; margin-bottom: 4px">Échéance</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #BC000D">04 JUIL 2026</div>
+                </div>
+                <div>
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8896A0; margin-bottom: 4px">Avancement</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #177E54">{{ progressPct }} %</div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 16px; height: 8px; background: #EDF2F6; border-radius: 99px; overflow: hidden">
+              <div style="height: 100%; width: {{ progressPct }}%; background: linear-gradient(90deg, #1E9FD8, #177E54); border-radius: 99px; transition: width 0.3s ease"></div>
+            </div>
+
+            <div style="display: flex; margin-top: 20px">
+              <sc-for list="{{ etapes }}" as="et" hint-placeholder-count="5">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 7px; padding-right: 8px">
+                  <div style="display: flex; align-items: center; gap: 6px">
+                    <span style="width: 22px; height: 22px; border-radius: 99px; background: {{ et.bg }}; border: 2px solid {{ et.border }}; color: {{ et.color }}; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; flex-shrink: 0">{{ et.n }}</span>
+                    <span style="flex: 1; height: 3px; background: {{ et.lineBg }}; border-radius: 2px"></span>
+                  </div>
+                  <div>
+                    <div style="font-size: 11px; font-weight: 700; color: {{ et.labelColor }}">{{ et.label }}</div>
+                    <div style="font-size: 10px; color: #8896A0; margin-top: 1px">{{ et.note }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 16px; align-items: start">
+            <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; overflow: hidden; min-width: 0">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(37,67,84,0.10)">
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 17px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Tâches <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #8896A0">{{ tachesCount }}</span></div>
+                <span style="font-size: 11.5px; color: #8896A0">Cliquer pour cocher / décocher</span>
+              </div>
+              <div style="display: flex; flex-direction: column">
+                <sc-for list="{{ taches }}" as="t" hint-placeholder-count="6">
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-bottom: 1px solid rgba(37,67,84,0.06); background: {{ t.bg }}">
+                    <button onClick="{{ t.onToggle }}" style="width: 20px; height: 20px; border-radius: 5px; border: 2px solid {{ t.boxBorder }}; background: {{ t.boxBg }}; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0">
+                      <sc-if value="{{ t.fait }}" hint-placeholder-val="{{ false }}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                      </sc-if>
+                    </button>
+                    <span style="flex: 1; font-size: 13px; font-weight: 600; color: {{ t.textColor }}; text-decoration: {{ t.deco }}">{{ t.titre }}</span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8896A0; white-space: nowrap">{{ t.date }}</span>
+                    <span style="display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ t.prioBg }}; color: {{ t.prioColor }}; white-space: nowrap">{{ t.priorite }}</span>
+                    <span style="width: 26px; height: 26px; border-radius: 99px; background: #254354; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 10px; font-weight: 600; flex-shrink: 0">{{ t.qui }}</span>
+                    <button onClick="{{ t.onRemove }}" title="Supprimer" style="width: 24px; height: 24px; border: none; background: transparent; color: #B9C4CC; cursor: pointer; border-radius: 5px; display: flex; align-items: center; justify-content: center" style-hover="background: rgba(188,0,13,0.08); color: #BC000D">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: 8px; padding: 14px 20px; background: #F8FAFC">
+                <input type="text" value="{{ nouvelleTache }}" onChange="{{ setNouvelleTache }}" placeholder="Ajouter une tâche…" style="flex: 1; height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 12px; font-size: 12.5px; outline: none; background: #FFFFFF" style-focus="border-color: #1E9FD8" />
+                <select value="{{ nouvellePrio }}" onChange="{{ setNouvellePrio }}" style="height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; background: #FFFFFF; padding: 0 8px; font-size: 12px; outline: none">
+                  <option value="Faible">Faible</option>
+                  <option value="Moyenne">Moyenne</option>
+                  <option value="Haute">Haute</option>
+                  <option value="Urgente">Urgente</option>
+                </select>
+                <button onClick="{{ addTache }}" style="height: 36px; padding: 0 16px; background: #BC000D; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">+ Ajouter</button>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 18px 20px">
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354; margin-bottom: 12px">Notes du projet</div>
+                <textarea value="{{ notes }}" onChange="{{ setNotes }}" rows="5" style="width: 100%; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 10px; font-size: 12.5px; line-height: 1.55; resize: vertical; outline: none" style-focus="border-color: #1E9FD8"></textarea>
+                <div style="font-size: 11px; color: #8896A0; margin-top: 6px">Dernière modification : aujourd'hui, 09 h 42</div>
+              </div>
+
+              <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 18px 20px">
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354; margin-bottom: 14px">Journal d'activité</div>
+                <div style="display: flex; flex-direction: column">
+                  <sc-for list="{{ journal }}" as="j" hint-placeholder-count="4">
+                    <div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid rgba(37,67,84,0.07)">
+                      <span style="width: 8px; height: 8px; border-radius: 99px; background: {{ j.dot }}; margin-top: 5px; flex-shrink: 0"></span>
+                      <div style="flex: 1">
+                        <div style="font-size: 12.5px; font-weight: 600; line-height: 1.4">{{ j.texte }}</div>
+                        <div style="font-size: 11px; color: #8896A0; margin-top: 2px">{{ j.qui }} · {{ j.quand }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'liste',
+    filtre: 'Tous',
+    nouvelleTache: '',
+    nouvellePrio: 'Moyenne',
+    notes: 'Le Gouvernorat confirme la mise à disposition du Stade des Martyrs le 04/07. Prévoir un plan B (Stade Tata Raphaël) en cas de cérémonie officielle. Sponsor LED : maquettes validées par Orange RDC.',
+    taches: [
+      { titre: 'Réserver le Stade des Martyrs', fait: true, priorite: 'Haute', date: '12 MAI', qui: 'AN' },
+      { titre: 'Confirmer arbitres et encadrement médical', fait: true, priorite: 'Moyenne', date: '02 JUN', qui: 'SK' },
+      { titre: 'Assurance joueurs — renouvellement', fait: false, priorite: 'Urgente', date: '20 JUN', qui: 'AN' },
+      { titre: 'Logistique transport des 16 équipes', fait: false, priorite: 'Haute', date: '24 JUN', qui: 'MB' },
+      { titre: 'Briefing bénévoles et plan de sécurité', fait: false, priorite: 'Moyenne', date: '30 JUN', qui: 'SK' },
+      { titre: 'Kit communication et LED sponsors', fait: false, priorite: 'Faible', date: '02 JUL', qui: 'MB' },
+    ],
+  };
+
+  renderVals() {
+    const S = this.state;
+    const PRIO = {
+      'Faible': { bg: 'rgba(30,159,216,0.14)', color: '#1E78A8', accent: '#1E9FD8' },
+      'Moyenne': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00', accent: '#F4A800' },
+      'Haute': { bg: 'rgba(188,0,13,0.10)', color: '#BC000D', accent: '#BC000D' },
+      'Urgente': { bg: '#BC000D', color: '#FFFFFF', accent: '#BC000D' },
+    };
+    const STATUT = {
+      'En cours': { bg: 'rgba(30,159,216,0.14)', color: '#1E78A8' },
+      'Planifié': { bg: 'rgba(37,67,84,0.10)', color: '#42474C' },
+      'En pause': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00' },
+      'Terminé': { bg: 'rgba(23,126,84,0.12)', color: '#177E54' },
+    };
+
+    const PROJETS = [
+      { titre: 'Tournoi Inter-Écoles Kinshasa 2026', client: 'FECOFA', source: 'DEV-2026-035', statut: 'En cours', priorite: 'Haute', progress: 68, dates: '01 mai → 04 juil', taches: '12 / 18' },
+      { titre: 'Activation sponsor — Orange RDC', client: 'Orange RDC', source: 'CTR-2026-016', statut: 'En cours', priorite: 'Urgente', progress: 82, dates: '15 mai → 28 juin', taches: '9 / 11' },
+      { titre: 'Camp d\u2019entraînement U17 — Lubumbashi', client: 'Académie Les Aiglons', source: 'DEV-2026-038', statut: 'En cours', priorite: 'Moyenne', progress: 35, dates: '10 juin → 22 août', taches: '5 / 14' },
+      { titre: 'Tournée de détection — Matadi', client: 'Lupopo FC Academy', source: 'FAC-2026-089', statut: 'En pause', priorite: 'Moyenne', progress: 50, dates: '01 juin → 30 juil', taches: '6 / 12' },
+      { titre: 'Gala VIP Ndembo Kin', client: 'Interne', source: '—', statut: 'Planifié', priorite: 'Faible', progress: 10, dates: '01 sep → 15 oct', taches: '1 / 9' },
+      { titre: 'Consulting carrière — 3 espoirs', client: 'Lupopo FC Academy', source: 'DEV-2026-033', statut: 'Terminé', priorite: 'Faible', progress: 100, dates: '02 fév → 30 avr', taches: '10 / 10' },
+    ];
+
+    const filtres = ['Tous', 'En cours', 'Planifié', 'En pause', 'Terminé'].map((f) => ({
+      label: f,
+      bg: S.filtre === f ? '#254354' : '#FFFFFF',
+      color: S.filtre === f ? '#FFFFFF' : '#5B6B77',
+      border: S.filtre === f ? '#254354' : 'rgba(37,67,84,0.18)',
+      onClick: () => this.setState({ filtre: f }),
+    }));
+
+    const projets = PROJETS.filter((p) => S.filtre === 'Tous' || p.statut === S.filtre).map((p) => ({
+      ...p,
+      statutBg: STATUT[p.statut].bg,
+      statutColor: STATUT[p.statut].color,
+      prioBg: PRIO[p.priorite].bg,
+      prioColor: PRIO[p.priorite].color,
+      prioAccent: PRIO[p.priorite].accent,
+      barColor: p.progress === 100 ? '#177E54' : p.priorite === 'Urgente' ? '#BC000D' : '#1E9FD8',
+      onOpen: () => this.setState({ view: 'detail' }),
+    }));
+
+    const faits = S.taches.filter((t) => t.fait).length;
+    const progressPct = Math.round((faits / Math.max(1, S.taches.length)) * 100);
+
+    const etapesDef = [
+      { label: 'Cadrage', note: 'Terminé — 08 mai', status: 'done' },
+      { label: 'Planification', note: 'Terminé — 29 mai', status: 'done' },
+      { label: 'Préparation', note: 'En cours', status: 'current' },
+      { label: 'Exécution', note: 'Matchs 02–04 juil', status: 'todo' },
+      { label: 'Clôture', note: 'Bilan & rapport', status: 'todo' },
+    ];
+    const etapes = etapesDef.map((e, i) => ({
+      n: e.status === 'done' ? '✓' : String(i + 1),
+      label: e.label,
+      note: e.note,
+      bg: e.status === 'done' ? '#177E54' : e.status === 'current' ? '#BC000D' : '#FFFFFF',
+      border: e.status === 'done' ? '#177E54' : e.status === 'current' ? '#BC000D' : 'rgba(37,67,84,0.25)',
+      color: e.status === 'todo' ? '#8896A0' : '#FFFFFF',
+      lineBg: e.status === 'done' ? '#177E54' : e.status === 'current' ? 'rgba(188,0,13,0.30)' : 'rgba(37,67,84,0.12)',
+      labelColor: e.status === 'current' ? '#BC000D' : e.status === 'done' ? '#254354' : '#8896A0',
+    }));
+
+    const taches = S.taches.map((t, i) => ({
+      ...t,
+      bg: t.fait ? '#FAFCFD' : '#FFFFFF',
+      boxBorder: t.fait ? '#177E54' : 'rgba(37,67,84,0.35)',
+      boxBg: t.fait ? '#177E54' : '#FFFFFF',
+      textColor: t.fait ? '#8896A0' : '#091D2E',
+      deco: t.fait ? 'line-through' : 'none',
+      prioBg: PRIO[t.priorite].bg,
+      prioColor: PRIO[t.priorite].color,
+      onToggle: () => this.setState({ taches: S.taches.map((x, j) => (j === i ? { ...x, fait: !x.fait } : x)) }),
+      onRemove: () => this.setState({ taches: S.taches.filter((_, j) => j !== i) }),
+    }));
+
+    return {
+      isListe: S.view === 'liste',
+      isDetail: S.view === 'detail',
+      retourListe: () => this.setState({ view: 'liste' }),
+      filtres,
+      projets,
+
+      progressPct,
+      etapes,
+      taches,
+      tachesCount: faits + ' / ' + S.taches.length,
+      nouvelleTache: S.nouvelleTache,
+      setNouvelleTache: (e) => this.setState({ nouvelleTache: e.target.value }),
+      nouvellePrio: S.nouvellePrio,
+      setNouvellePrio: (e) => this.setState({ nouvellePrio: e.target.value }),
+      addTache: () => {
+        if (!S.nouvelleTache.trim()) return;
+        this.setState({
+          taches: [...S.taches, { titre: S.nouvelleTache.trim(), fait: false, priorite: S.nouvellePrio, date: '—', qui: 'AN' }],
+          nouvelleTache: '',
+        });
+      },
+      notes: S.notes,
+      setNotes: (e) => this.setState({ notes: e.target.value }),
+      journal: [
+        { texte: 'Tâche « Confirmer arbitres » marquée terminée', qui: 'S. Kabongo', quand: 'Aujourd\u2019hui, 08 h 15', dot: '#177E54' },
+        { texte: 'Priorité de « Assurance joueurs » passée à Urgente', qui: 'A. Ndembo', quand: 'Hier, 17 h 02', dot: '#BC000D' },
+        { texte: 'Note mise à jour : plan B Stade Tata Raphaël', qui: 'A. Ndembo', quand: 'Hier, 09 h 30', dot: '#1E9FD8' },
+        { texte: 'Projet créé par conversion du devis DEV-2026-035', qui: 'Système', quand: '01 mai, 10 h 12', dot: '#F4A800' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

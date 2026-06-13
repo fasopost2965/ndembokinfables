@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #F2F5F8; }
+    * { box-sizing: border-box; }
+    input, button, select, textarea { font-family: inherit; }
+    @keyframes nkSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes nkToastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 920px) {
+      [data-sidebar] { display: none !important; }
+      [data-profile-meta] { display: none !important; }
+      [data-main-pad] { padding: 16px !important; }
+      [data-vip-drawer] { width: 100% !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Membres VIP" style="display: flex; width: 100%; min-height: 100vh; background: #F2F5F8; font-family: 'Open Sans', sans-serif; color: #091D2E">
+  <dc-import name="Sidebar" active="vip" hint-size="248px,100vh"></dc-import>
+
+  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+    <dc-import name="Topbar" active="vip" searchPlaceholder="Rechercher un membre VIP…" hint-size="100%,64px"></dc-import>
+
+    <main data-main-pad="true" style="flex: 1; padding: 28px 32px 48px 32px; max-width: 1380px; width: 100%; margin: 0 auto">
+
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #B07800; margin-bottom: 6px">Relations · Programme premium</div>
+          <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Membres VIP &amp; cartes NFC</h1>
+          <p style="margin: 6px 0 0 0; font-size: 13.5px; color: #5B6B77">Adhésions, réductions automatiques et accès privilégiés aux tournois, camps et stages.</p>
+        </div>
+        <button onClick="{{ nouveauMembre }}" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; background: #BC000D; border: none; border-radius: 6px; font-size: 13.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          Ajouter un membre
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 18px">
+        <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-left: 3px solid {{ st.accent }}; border-radius: 8px; padding: 16px 18px">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5B6B77">{{ st.label }}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; letter-spacing: -0.03em; margin-top: 8px">{{ st.value }}</div>
+            <div style="font-size: 11.5px; color: #8896A0; margin-top: 4px">{{ st.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: minmax(340px, 1fr) minmax(380px, 1.1fr); gap: 16px; align-items: start; margin-bottom: 16px">
+
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; overflow: hidden; min-width: 0">
+          <div style="padding: 14px 18px; border-bottom: 1px solid rgba(37,67,84,0.10); display: flex; flex-direction: column; gap: 10px">
+            <div style="position: relative">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#72787C" stroke-width="2" stroke-linecap="round" style="position: absolute; left: 11px; top: 50%; transform: translateY(-50%)"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+              <input type="text" value="{{ q }}" onChange="{{ setQ }}" placeholder="Rechercher un membre…" style="width: 100%; height: 36px; border: 1px solid rgba(37,67,84,0.16); border-radius: 6px; padding: 0 10px 0 32px; font-size: 12.5px; outline: none" style-focus="border-color: #1E9FD8; box-shadow: 0 0 0 3px rgba(30,159,216,0.15)" />
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap">
+              <sc-for list="{{ tierFiltres }}" as="tf" hint-placeholder-count="4">
+                <button onClick="{{ tf.onClick }}" style="height: 28px; padding: 0 13px; border-radius: 99px; border: 1px solid {{ tf.border }}; background: {{ tf.bg }}; color: {{ tf.color }}; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer">{{ tf.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; max-height: 520px; overflow-y: auto">
+            <sc-for list="{{ membres }}" as="m" hint-placeholder-count="6">
+              <div onClick="{{ m.onSelect }}" style="display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid rgba(37,67,84,0.06); cursor: pointer; background: {{ m.bg }}; border-left: 3px solid {{ m.selBorder }}" style-hover="background: #F5F9FD">
+                <span style="width: 38px; height: 38px; border-radius: 99px; background: {{ m.avatarBg }}; color: {{ m.avatarColor }}; display: inline-flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; flex-shrink: 0">{{ m.initiales }}</span>
+                <span style="flex: 1; min-width: 0">
+                  <span style="display: block; font-size: 13px; font-weight: 700">{{ m.nom }}</span>
+                  <span style="display: block; font-size: 11.5px; color: #8896A0; margin-top: 1px">{{ m.role }}</span>
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ m.tierBg }}; color: {{ m.tierColor }}"><span style="width: 5px; height: 5px; border-radius: 99px; background: {{ m.tierColor }}"></span>{{ m.tier }}</span>
+                <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: {{ m.statutBg }}; color: {{ m.statutColor }}; white-space: nowrap">{{ m.statut }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px; min-width: 0; position: sticky; top: 84px">
+          <div style="background: {{ carteBg }}; border-radius: 14px; padding: 24px 26px; color: #FFFFFF; position: relative; overflow: hidden; box-shadow: 0 18px 44px rgba(9,29,46,0.28); aspect-ratio: 1.66; max-width: 480px">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, {{ tierAccent }}, transparent 70%)"></div>
+            <div style="position: absolute; right: -60px; bottom: -80px; width: 240px; height: 240px; border-radius: 99px; border: 1.5px solid rgba(255,255,255,0.07)"></div>
+            <div style="position: absolute; right: -30px; bottom: -50px; width: 160px; height: 160px; border-radius: 99px; border: 1.5px solid rgba(255,255,255,0.07)"></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start">
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span style="width: 30px; height: 30px; border-radius: 7px; background: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0"><img src="assets/logo.png" alt="" style="width: 100%; height: 100%; object-fit: contain" /></span>
+                <div>
+                  <div style="font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em">NDEMBO KIN <span style="color: {{ tierAccent }}">VIP</span></div>
+                  <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 3px">Accès {{ selTier }} · Carte NFC</div>
+                </div>
+              </div>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 14.5a4 4 0 0 1 7 0M6 11.5a8 8 0 0 1 12 0M3.5 8.5a12 12 0 0 1 17 0"></path></svg>
+            </div>
+            <div style="width: 42px; height: 32px; border-radius: 6px; background: linear-gradient(135deg, #F4D27A, {{ chipColor }}); margin-top: 22px; position: relative; overflow: hidden">
+              <span style="position: absolute; inset: 7px 9px; border: 1px solid rgba(9,29,46,0.25); border-radius: 3px"></span>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; letter-spacing: 0.16em; margin-top: 16px">{{ selCarte }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 18px">
+              <div>
+                <div style="font-size: 8.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.5)">Titulaire</div>
+                <div style="font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 3px">{{ selNom }}</div>
+              </div>
+              <div style="text-align: right">
+                <div style="font-size: 8.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.5)">Valide jusqu'au</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; margin-top: 3px; color: {{ expColor }}">{{ selExpire }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 18px 20px">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px">
+              <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">{{ selNom }}</div>
+              <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: {{ selStatutBg }}; color: {{ selStatutColor }}">{{ selStatut }}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-bottom: 16px">
+              <sc-for list="{{ details }}" as="d" hint-placeholder-count="6">
+                <div>
+                  <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8896A0; margin-bottom: 3px">{{ d.label }}</div>
+                  <div style="font-size: 13px; font-weight: 600; font-family: {{ d.font }}">{{ d.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(37,67,84,0.10)">
+              <button style="height: 34px; padding: 0 14px; background: #BC000D; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">Renouveler l'adhésion</button>
+              <button onClick="{{ assignerCarte }}" style="height: 34px; padding: 0 14px; background: #254354; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #3D5A6C">Assigner une carte</button>
+              <button style="height: 34px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12px; font-weight: 700; color: #254354; cursor: pointer" style-hover="background: #F8FAFC">Envoyer par email</button>
+              <button style="height: 34px; padding: 0 14px; background: #FFFFFF; border: 1px solid rgba(244,168,0,0.55); border-radius: 6px; font-size: 12px; font-weight: 700; color: #9A6B00; cursor: pointer" style-hover="background: rgba(244,168,0,0.08)">Appliquer une réduction</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 22px 24px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 18px">
+          <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.03em; color: #254354">Avantages par niveau</div>
+          <span style="font-size: 12px; color: #8896A0">Liés aux tournois, camps d'entraînement et stages Ndembo Kin</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+          <sc-for list="{{ niveaux }}" as="n" hint-placeholder-count="3">
+            <div style="border: 1px solid rgba(37,67,84,0.12); border-top: 3px solid {{ n.accent }}; border-radius: 8px; padding: 18px 20px">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px">
+                <span style="display: inline-flex; align-items: center; gap: 7px; font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="{{ n.accent }}" stroke="{{ n.accent }}" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"></path></svg>
+                  {{ n.nom }}
+                </span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: {{ n.accentText }}">{{ n.remise }}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <sc-for list="{{ n.avantages }}" as="av" hint-placeholder-count="4">
+                  <div style="display: flex; gap: 9px; font-size: 12.5px; color: #42474C; line-height: 1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ n.accentText }}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px"><path d="M20 6L9 17l-5-5"></path></svg>
+                    <span>{{ av }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(37,67,84,0.08); font-size: 11.5px; color: #8896A0">Cotisation annuelle : <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">{{ n.prix }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 200; display: flex; justify-content: flex-end">
+      <div onClick="{{ closeDrawer }}" style="position: absolute; inset: 0; background: rgba(9,29,46,0.42)"></div>
+      <div data-vip-drawer="true" style="position: relative; width: 470px; max-width: 100%; height: 100%; background: #FFFFFF; box-shadow: -12px 0 40px rgba(9,29,46,0.2); display: flex; flex-direction: column; animation: nkSlideIn 0.22s ease">
+        <div style="padding: 20px 24px; border-bottom: 1px solid rgba(37,67,84,0.10); display: flex; align-items: center; justify-content: space-between">
+          <div>
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #B07800">{{ drawerKicker }}</div>
+            <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 20px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354; margin-top: 2px">{{ drawerTitle }}</div>
+          </div>
+          <button onClick="{{ closeDrawer }}" style="width: 34px; height: 34px; border: 1px solid rgba(37,67,84,0.16); background: #FFFFFF; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5B6B77" style-hover="background: #F8FAFC">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; gap: 10px; padding: 12px 14px; background: rgba(30,159,216,0.07); border: 1px solid rgba(30,159,216,0.25); border-radius: 6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E78A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><path d="M12 16v-4M12 8h.01M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"></path></svg>
+            <span style="font-size: 12px; color: #1E78A8; line-height: 1.5">Un membre VIP est rattaché à une <strong>fiche client</strong> existante. La carte NFC, les réductions et les accès sont liés à ce client — une seule source, pas de double saisie.</span>
+          </div>
+
+          <sc-if value="{{ isAssign }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 14px 16px; background: #F8FAFC; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px">
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #8896A0; margin-bottom: 4px">Titulaire</div>
+              <div style="font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 600; color: #254354; text-transform: uppercase; letter-spacing: 0.03em">{{ assignName }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <label style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Client à affilier <span style="color: #BC000D">*</span></span>
+                <select value="{{ fClientId }}" onChange="{{ setFClient }}" style="height: 40px; border: 1px solid {{ clientBorder }}; border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                  <option value="">— Choisir un client existant —</option>
+                  <sc-for list="{{ clientsOptions }}" as="c" hint-placeholder-count="6">
+                    <option value="{{ c.id }}">{{ c.nom }}</option>
+                  </sc-for>
+                </select>
+                <sc-if value="{{ clientError }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: 11px; color: #BC000D; font-weight: 600">Sélectionnez le client à affilier au programme VIP.</span>
+                </sc-if>
+                <a href="Clients.dc.html" style="font-size: 11.5px; color: #1E9FD8; font-weight: 600; text-decoration: none">Le client n’existe pas ? Créer d’abord une fiche client →</a>
+              </label>
+
+              <sc-if value="{{ hasClient }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; align-items: center; gap: 11px; padding: 11px 13px; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px; background: #F8FAFC">
+                  <span style="width: 36px; height: 36px; border-radius: 8px; background: #254354; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; flex-shrink: 0">{{ clientInit }}</span>
+                  <span style="min-width: 0">
+                    <span style="display: block; font-size: 13px; font-weight: 700; color: #254354">{{ clientNom }}</span>
+                    <span style="display: block; font-size: 11.5px; color: #8896A0">{{ clientMeta }}</span>
+                  </span>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Niveau d’adhésion</span>
+            <select value="{{ fTier }}" onChange="{{ setFTier }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+              <option value="Or">Or — réduction 15 %</option>
+              <option value="Argent">Argent — réduction 10 %</option>
+              <option value="Bronze">Bronze — réduction 5 %</option>
+            </select>
+          </label>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 6px; border-left: 3px solid {{ tierAccentDrawer }}; background: #F8FAFC">
+            <span style="font-size: 12px; color: #5B6B77">Réduction <strong style="color: #254354">{{ tierRemise }}</strong> · Cotisation annuelle</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #254354">{{ tierPrix }}</span>
+          </div>
+
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Numéro de carte NFC</span>
+            <div style="display: flex; gap: 8px">
+              <input type="text" value="{{ fCarte }}" onChange="{{ setFCarte }}" style="flex: 1; min-width: 0; height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.06em; outline: none" style-focus="border-color: #1E9FD8" />
+              <button onClick="{{ regenCarte }}" style="height: 40px; padding: 0 13px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12px; font-weight: 700; color: #254354; cursor: pointer; white-space: nowrap" style-hover="background: #F8FAFC">⟳ Générer</button>
+            </div>
+          </label>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Date d’émission</span>
+              <input type="date" value="{{ fEmission }}" onChange="{{ setFEmission }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Valide jusqu’au</span>
+              <div style="height: 40px; border: 1px solid rgba(37,67,84,0.12); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #254354; display: flex; align-items: center; background: #F8FAFC">{{ validiteCalc }}</div>
+            </label>
+          </div>
+
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Statut</span>
+            <select value="{{ fStatut }}" onChange="{{ setFStatut }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+              <option value="Actif">Actif</option>
+              <option value="Expire bientôt">Expire bientôt</option>
+              <option value="Expiré">Expiré</option>
+            </select>
+          </label>
+        </div>
+
+        <div style="padding: 16px 24px; border-top: 1px solid rgba(37,67,84,0.10); display: flex; gap: 10px; justify-content: flex-end; background: #F8FAFC">
+          <button onClick="{{ closeDrawer }}" style="height: 40px; padding: 0 18px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 13px; font-weight: 700; color: #5B6B77; cursor: pointer" style-hover="background: #F2F5F8">Annuler</button>
+          <button onClick="{{ enregistrerMembre }}" style="height: 40px; padding: 0 22px; background: #BC000D; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">{{ saveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 300; background: #16242F; color: #FFFFFF; border-radius: 8px; padding: 13px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 14px 36px rgba(9,29,46,0.32); animation: nkToastIn 0.25s ease">
+      <span style="width: 26px; height: 26px; border-radius: 99px; background: #177E54; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </span>
+      <span style="font-size: 13px; font-weight: 600">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    sel: 0, q: '', tierFiltre: 'Tous',
+    clients: [],
+    drawerOpen: false, mode: 'create',
+    f: { clientId: '', tier: 'Or', carte: '', emission: '2026-06-13', statut: 'Actif' },
+    showErrors: false, extra: [], toast: '',
+  };
+
+  componentDidMount() {
+    import('./crm-data.js').then((m) => {
+      this._gen = m.genCarteNFC;
+      this.setState((s) => ({ clients: m.CLIENTS, f: { ...s.f, carte: s.f.carte || m.genCarteNFC() } }));
+    });
+  }
+
+  renderVals() {
+    const S = this.state;
+    const TIERS = {
+      'Or': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00', accent: '#F4A800', chip: '#C98E1B' },
+      'Argent': { bg: 'rgba(37,67,84,0.10)', color: '#5B6B77', accent: '#B9C4CC', chip: '#9AA7B0' },
+      'Bronze': { bg: 'rgba(168,107,47,0.14)', color: '#A86B2F', accent: '#C08A4D', chip: '#A86B2F' },
+    };
+    const STATUTS = {
+      'Actif': { bg: 'rgba(23,126,84,0.12)', color: '#177E54' },
+      'Expire bientôt': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00' },
+      'Expiré': { bg: 'rgba(188,0,13,0.10)', color: '#BC000D' },
+    };
+
+    const MEMBRES = [
+      { nom: 'Didier Ngoy', role: 'Mécène — Kinshasa Leopards', tier: 'Or', statut: 'Actif', carte: '4588 2201 9833 0042', depuis: 'OCT 2023', expire: '10/2026', remise: '15 %', visites: 42, email: 'd.ngoy@leopards.cd', tel: '+243 998 112 233' },
+      { nom: 'Mireille Tshala', role: 'Direction — Rawbank', tier: 'Or', statut: 'Actif', carte: '4588 2201 9833 0107', depuis: 'JAN 2024', expire: '01/2027', remise: '15 %', visites: 35, email: 'm.tshala@rawbank.cd', tel: '+243 991 445 566' },
+      { nom: 'Sarah Mbeki', role: 'Sponsor tournois', tier: 'Argent', statut: 'Actif', carte: '4588 2201 9833 0078', depuis: 'MAR 2024', expire: '03/2027', remise: '10 %', visites: 18, email: 's.mbeki@gmail.com', tel: '+243 997 778 899' },
+      { nom: 'Benoit Kalala', role: 'Scout — étoiles montantes', tier: 'Bronze', statut: 'Expire bientôt', carte: '4588 2201 9833 0114', depuis: 'JUL 2025', expire: '07/2026', remise: '5 %', visites: 7, email: 'b.kalala@yahoo.fr', tel: '+243 815 223 344' },
+      { nom: 'Patrice Lumu', role: 'Entrepreneur — Matadi', tier: 'Argent', statut: 'Expiré', carte: '4588 2201 9833 0056', depuis: 'FÉV 2023', expire: '02/2026', remise: '10 %', visites: 24, email: 'p.lumu@outlook.com', tel: '+243 812 990 011' },
+      { nom: 'Gloria Kanza', role: 'Présidente — Académie Espoir', tier: 'Bronze', statut: 'Actif', carte: '4588 2201 9833 0121', depuis: 'SEP 2025', expire: '09/2026', remise: '5 %', visites: 5, email: 'g.kanza@espoir.cd', tel: '+243 819 556 677' },
+    ];
+
+    const ALL = [...MEMBRES, ...S.extra];
+    const ql = S.q.trim().toLowerCase();
+    const visibles = ALL.map((m, i) => ({ m, i })).filter(({ m }) =>
+      (S.tierFiltre === 'Tous' || m.tier === S.tierFiltre) &&
+      (!ql || (m.nom + ' ' + m.role).toLowerCase().includes(ql))
+    );
+
+    const sel = ALL[S.sel] || ALL[0];
+    const selTier = TIERS[sel.tier];
+
+    const TIER_INFO = { 'Or': { remise: '−15 %', prix: '$1 200 / an' }, 'Argent': { remise: '−10 %', prix: '$600 / an' }, 'Bronze': { remise: '−5 %', prix: '$250 / an' } };
+    const selClient = S.clients.find((c) => String(c.id) === String(S.f.clientId)) || null;
+    const drawerClientError = S.showErrors && S.mode === 'create' && !selClient;
+    const validite = (() => {
+      if (!S.f.emission) return '—';
+      const d = new Date(S.f.emission + 'T00:00:00'); d.setFullYear(d.getFullYear() + 1);
+      return String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+    })();
+
+    const initiales = (nom) => nom.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+
+    return {
+      stats: [
+        { label: 'Membres actifs', value: '132', note: '+9 ce trimestre', accent: '#254354' },
+        { label: 'Niveau Or', value: '42', note: 'Cartes NFC en circulation', accent: '#F4A800' },
+        { label: 'Expirations — 30 jours', value: '12', note: 'Campagne de renouvellement', accent: '#BC000D' },
+        { label: 'Réductions utilisées (juin)', value: '$12 450', note: '842 passages NFC', accent: '#1E9FD8' },
+      ],
+      q: S.q,
+      setQ: (e) => this.setState({ q: e.target.value }),
+      tierFiltres: ['Tous', 'Or', 'Argent', 'Bronze'].map((t) => ({
+        label: t,
+        bg: S.tierFiltre === t ? '#254354' : '#FFFFFF',
+        color: S.tierFiltre === t ? '#FFFFFF' : '#5B6B77',
+        border: S.tierFiltre === t ? '#254354' : 'rgba(37,67,84,0.18)',
+        onClick: () => this.setState({ tierFiltre: t }),
+      })),
+
+      clientsOptions: S.clients,
+      drawerOpen: S.drawerOpen,
+      isCreate: S.mode === 'create',
+      isAssign: S.mode === 'assign',
+      drawerKicker: S.mode === 'assign' ? 'Carte NFC' : 'Programme VIP',
+      drawerTitle: S.mode === 'assign' ? 'Assigner une carte NFC' : 'Nouveau membre VIP',
+      saveLabel: S.mode === 'assign' ? 'Assigner la carte' : 'Créer le membre VIP',
+      assignName: this._assignName || sel.nom,
+      nouveauMembre: () => this.openCreate(),
+      assignerCarte: () => this.openAssign(sel.nom),
+      closeDrawer: () => this.setState({ drawerOpen: false, showErrors: false }),
+
+      fClientId: String(S.f.clientId || ''),
+      setFClient: (e) => this.setState({ f: { ...S.f, clientId: e.target.value } }),
+      clientError: drawerClientError,
+      clientBorder: drawerClientError ? '#BC000D' : 'rgba(37,67,84,0.18)',
+      hasClient: !!selClient,
+      clientInit: selClient ? initiales(selClient.nom) : '',
+      clientNom: selClient ? selClient.nom : '',
+      clientMeta: selClient ? (selClient.type + ' · ' + selClient.email) : '',
+
+      fTier: S.f.tier,
+      setFTier: (e) => this.setState({ f: { ...S.f, tier: e.target.value } }),
+      tierRemise: TIER_INFO[S.f.tier].remise,
+      tierPrix: TIER_INFO[S.f.tier].prix,
+      tierAccentDrawer: TIERS[S.f.tier].accent,
+
+      fCarte: S.f.carte,
+      setFCarte: (e) => this.setState({ f: { ...S.f, carte: e.target.value } }),
+      regenCarte: () => this.setState({ f: { ...S.f, carte: (this._gen ? this._gen() : S.f.carte) } }),
+
+      fEmission: S.f.emission,
+      setFEmission: (e) => this.setState({ f: { ...S.f, emission: e.target.value } }),
+      validiteCalc: validite,
+
+      fStatut: S.f.statut,
+      setFStatut: (e) => this.setState({ f: { ...S.f, statut: e.target.value } }),
+
+      enregistrerMembre: () => this.saveMembre(),
+      toast: S.toast,
+      membres: visibles.map(({ m, i }) => ({
+        ...m,
+        initiales: initiales(m.nom),
+        avatarBg: i === S.sel ? '#254354' : 'rgba(37,67,84,0.10)',
+        avatarColor: i === S.sel ? '#FFFFFF' : '#254354',
+        tierBg: TIERS[m.tier].bg,
+        tierColor: TIERS[m.tier].color,
+        statutBg: STATUTS[m.statut].bg,
+        statutColor: STATUTS[m.statut].color,
+        bg: i === S.sel ? 'rgba(30,159,216,0.06)' : '#FFFFFF',
+        selBorder: i === S.sel ? '#1E9FD8' : 'transparent',
+        onSelect: () => this.setState({ sel: i }),
+      })),
+
+      carteBg: 'linear-gradient(135deg, #16242F 0%, #203243 55%, #2D4A5C 100%)',
+      tierAccent: selTier.accent,
+      chipColor: selTier.chip,
+      selTier: sel.tier,
+      selNom: sel.nom,
+      selCarte: sel.carte,
+      selExpire: sel.expire,
+      expColor: sel.statut === 'Expiré' ? '#FF8A93' : sel.statut === 'Expire bientôt' ? '#F4A800' : '#FFFFFF',
+      selStatut: sel.statut,
+      selStatutBg: STATUTS[sel.statut].bg,
+      selStatutColor: STATUTS[sel.statut].color,
+      details: [
+        { label: 'Email', value: sel.email, font: "'Open Sans', sans-serif" },
+        { label: 'Téléphone', value: sel.tel, font: "'JetBrains Mono', monospace" },
+        { label: 'Membre depuis', value: sel.depuis, font: "'JetBrains Mono', monospace" },
+        { label: 'Expiration', value: sel.expire, font: "'JetBrains Mono', monospace" },
+        { label: 'Réduction appliquée', value: sel.remise + ' sur billetterie & stages', font: "'Open Sans', sans-serif" },
+        { label: 'Passages NFC (12 mois)', value: String(sel.visites), font: "'JetBrains Mono', monospace" },
+      ],
+
+      niveaux: [
+        { nom: 'Or', remise: '−15 %', prix: '$1 200 / an', accent: '#F4A800', accentText: '#B07800', avantages: [
+          'Loge boardroom — finales et galas',
+          'Accès prioritaire aux rapports de détection',
+          'Invitations aux camps d\u2019entraînement élite',
+          'Conciergerie billetterie pour 4 accompagnants',
+        ]},
+        { nom: 'Argent', remise: '−10 %', prix: '$600 / an', accent: '#B9C4CC', accentText: '#5B6B77', avantages: [
+          'Salon stade — jours de match',
+          'Places réservées en tribune officielle',
+          'Accès aux stages avec tarif préférentiel',
+          'Newsletter scouting trimestrielle',
+        ]},
+        { nom: 'Bronze', remise: '−5 %', prix: '$250 / an', accent: '#C08A4D', accentText: '#A86B2F', avantages: [
+          'Fenêtre de billetterie anticipée',
+          'Accès événements ouverts et tournois régionaux',
+          'Badge numérique et carte NFC personnalisée',
+          'Offres partenaires Ndembo Kin',
+        ]},
+      ],
+    };
+  }
+
+  openCreate() {
+    this.setState({ drawerOpen: true, mode: 'create', showErrors: false,
+      f: { clientId: '', tier: 'Or', carte: (this._gen ? this._gen() : ''), emission: '2026-06-13', statut: 'Actif' } });
+  }
+
+  openAssign(name) {
+    this._assignName = name;
+    this.setState({ drawerOpen: true, mode: 'assign', showErrors: false,
+      f: { clientId: '', tier: 'Or', carte: (this._gen ? this._gen() : ''), emission: '2026-06-13', statut: 'Actif' } });
+  }
+
+  saveMembre() {
+    const S = this.state;
+    const MOIS = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN', 'JUL', 'AOÛ', 'SEP', 'OCT', 'NOV', 'DÉC'];
+    const pad = (n) => String(n).padStart(2, '0');
+    if (S.mode === 'create') {
+      const c = S.clients.find((x) => String(x.id) === String(S.f.clientId));
+      if (!c) { this.setState({ showErrors: true }); return; }
+      const em = new Date((S.f.emission || '2026-06-13') + 'T00:00:00');
+      const ex = new Date(em); ex.setFullYear(ex.getFullYear() + 1);
+      const remiseMap = { 'Or': '15 %', 'Argent': '10 %', 'Bronze': '5 %' };
+      const newM = {
+        nom: c.nom, role: c.type + ' — ' + c.ville, tier: S.f.tier, statut: S.f.statut,
+        carte: S.f.carte, depuis: MOIS[em.getMonth()] + ' ' + em.getFullYear(),
+        expire: pad(ex.getMonth() + 1) + '/' + ex.getFullYear(),
+        remise: remiseMap[S.f.tier], visites: 0, email: c.email, tel: c.tel, clientId: c.id,
+      };
+      this.setState({ extra: [...S.extra, newM], drawerOpen: false, sel: 6 + S.extra.length,
+        toast: 'Membre VIP « ' + c.nom + ' » créé — carte NFC ' + S.f.tier + ' assignée.' });
+    } else {
+      this.setState({ drawerOpen: false, toast: 'Nouvelle carte NFC assignée à ' + (this._assignName || 'ce membre') + '.' });
+    }
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2800);
+  }
+}
+</script>
+</body>
+</html>

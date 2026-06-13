@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NDÉMBO KIN - CRM Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#3d5a6c",
+                    "surface-dim": "#c9dcf3",
+                    "secondary-container": "#e61b1c",
+                    "on-surface": "#091d2e",
+                    "inverse-surface": "#203243",
+                    "surface": "#f7f9ff",
+                    "surface-tint": "#456274",
+                    "primary": "#254354",
+                    "on-tertiary-fixed-variant": "#614000",
+                    "on-primary-fixed": "#001e2d",
+                    "background": "#f7f9ff",
+                    "tertiary-container": "#754f00",
+                    "surface-container-high": "#d9eaff",
+                    "inverse-primary": "#accbe0",
+                    "tertiary": "#573900",
+                    "panafrican-cyan": "#1E9FD8",
+                    "on-primary-fixed-variant": "#2d4a5c",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#410001",
+                    "primary-fixed": "#c8e7fc",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#d1e4fb",
+                    "stadium-gray": "#F8FAFC",
+                    "tertiary-fixed-dim": "#ffba43",
+                    "surface-container-low": "#edf4ff",
+                    "primary-fixed-dim": "#accbe0",
+                    "outline": "#72787c",
+                    "on-surface-variant": "#42474c",
+                    "tertiary-fixed": "#ffddaf",
+                    "on-secondary-container": "#fffbff",
+                    "secondary-fixed": "#ffdad5",
+                    "on-background": "#091d2e",
+                    "on-secondary-fixed-variant": "#930007",
+                    "surface-white": "#FFFFFF",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#281800",
+                    "secondary": "#bc000d",
+                    "inverse-on-surface": "#e8f2ff",
+                    "surface-variant": "#d1e4fb",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#c2c7cc",
+                    "surface-container": "#e3efff",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb4aa",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#b2d0e6",
+                    "on-tertiary-container": "#ffc15f",
+                    "surface-bright": "#f7f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "margin-desktop": "32px",
+                    "unit": "8px",
+                    "container-max": "1280px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Oswald"],
+                    "stats-md": ["JetBrains Mono"],
+                    "headline-xl": ["Oswald"],
+                    "display-lg": ["Oswald"],
+                    "label-caps": ["Open Sans"],
+                    "body-lg": ["Open Sans"],
+                    "stats-lg": ["JetBrains Mono"],
+                    "body-sm": ["Open Sans"],
+                    "title-md": ["Open Sans"],
+                    "headline-lg-mobile": ["Oswald"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "stats-md": ["18px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "headline-xl": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "display-lg": ["72px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "stats-lg": ["40px", {"lineHeight": "1", "letterSpacing": "-0.05em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "title-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(114, 120, 124, 0.1);
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1E9FD8 !important;
+            box-shadow: 0 0 0 2px rgba(30, 159, 216, 0.1);
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg overflow-x-hidden">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-full py-6 bg-primary dark:bg-inverse-surface border-r border-outline-variant/10 shadow-md w-64 flex-shrink-0 transition-all duration-300">
+<div class="px-6 mb-8">
+<h1 class="text-headline-lg font-headline-lg font-bold text-on-primary dark:text-surface-bright leading-none">NDÉMBO KIN</h1>
+<p class="text-label-caps font-label-caps text-on-primary-fixed-variant mt-1 opacity-80">Sports Management</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-lg">Dashboard</span>
+</a>
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span class="font-body-lg">Tournaments</span>
+</a>
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="font-body-lg">Scouting</span>
+</a>
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-body-lg">Contracts</span>
+</a>
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-body-lg">Financials</span>
+</a>
+<!-- Active Tab: Settings -->
+<a class="bg-secondary text-on-secondary rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-body-lg">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-2 space-y-1">
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-body-lg">Support</span>
+</a>
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-primary-container transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-body-lg">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full bg-stadium-gray overflow-y-auto scrollbar-hide">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-margin-desktop h-16 w-full bg-surface-white border-b border-outline-variant/20 sticky top-0 z-50">
+<div class="flex items-center gap-6 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface border-none rounded-lg text-body-sm focus:ring-1 focus:ring-panafrican-cyan" placeholder="Search settings..." type="text"/>
+</div>
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-on-surface text-body-sm font-semibold transition-all" href="#">Match Day</a>
+<a class="text-on-surface-variant hover:text-on-surface text-body-sm font-semibold transition-all" href="#">Talent Pool</a>
+<a class="text-on-surface-variant hover:text-on-surface text-body-sm font-semibold transition-all" href="#">Revenue</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 bg-secondary text-white text-body-sm font-bold rounded-lg hover:opacity-90 transition-opacity">
+                        Create Invoice
+                    </button>
+<button class="p-2 text-primary hover:bg-surface rounded-full transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary overflow-hidden border border-outline-variant/20">
+<img alt="Executive Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdImlqlG_5LuBcNHmkGP0yZ26Y1GeCN1mof6i77REpg97cstCEa4VZu0OdFY5YskxaT0hrAiUYpVTn6_IQ04_9hQPIAS9RWEpmGHi7YlQHbol_oPYQmaAkmZgZAaVETt8TXNjFhIHegtzd73rplimi8VUpvc2ZPS3tpIQQeH9J5t4fsBLE83rn6o6UN9OYe8LtN9jBAKOdse_ueR8V7lDl9bn0vl6Rxfu8Za12-TKxDFRt7F3fRF5n"/>
+</div>
+</div>
+</header>
+<!-- Settings Content Container -->
+<div class="max-w-[1200px] mx-auto w-full p-8">
+<header class="mb-10">
+<h2 class="text-headline-xl font-headline-xl text-primary">CRM Settings</h2>
+<p class="text-body-lg text-on-surface-variant">Global configuration for NDÉMBO KIN sports management platform.</p>
+</header>
+<div class="space-y-8 pb-16">
+<!-- Section: Logo & Branding -->
+<section class="bento-grid">
+<div class="col-span-12 lg:col-span-4 flex flex-col justify-center">
+<h3 class="text-title-md font-headline-lg text-primary uppercase">Logo &amp; Branding</h3>
+<p class="text-body-sm text-on-surface-variant mt-2 leading-relaxed">Customize your visual identity. These assets appear on match reports, tournament brochures, and client portals.</p>
+</div>
+<div class="col-span-12 lg:col-span-8 bg-surface-white p-6 border border-outline-variant/10 rounded-xl shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 bg-secondary h-full"></div>
+<div class="flex flex-col md:flex-row gap-8 items-start">
+<div class="w-32 h-32 bg-stadium-gray border-2 border-dashed border-outline-variant/30 rounded-xl flex items-center justify-center overflow-hidden">
+<img alt="NDÉMBO KIN Logo" class="max-w-[80%] max-h-[80%] object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbaDEBLixUDXN8EVqm9M8g7VhGy_xOWJpD2PLgKlu8WEIots_ZW1ims8Vr4faS6cAL9MPrFfALkRbz59kPNYf44mcmCQ34RX5VJD4CR2NRoEOow7D_k3iKn5Nnnr29sqtZ8vVzkrM0ix2UYid6GJjKWk6WZaHJz57oWWwPY5QXKqj4ky5kHQrbALM8bYDV5u1DLWS0t8UMdosS5MQQ7SVMR9XROBnT54Fr0xqfEZrRB8WO-bRV2E-M"/>
+</div>
+<div class="flex-1 space-y-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-label-caps font-label-caps text-on-surface-variant">Primary Brand Color</label>
+<div class="flex items-center gap-2 p-2 border border-outline-variant/20 rounded-lg">
+<div class="w-6 h-6 rounded bg-secondary"></div>
+<span class="font-stats-md text-sm">#BC000D</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-label-caps font-label-caps text-on-surface-variant">Secondary Color</label>
+<div class="flex items-center gap-2 p-2 border border-outline-variant/20 rounded-lg">
+<div class="w-6 h-6 rounded bg-panafrican-cyan"></div>
+<span class="font-stats-md text-sm">#1E9FD8</span>
+</div>
+</div>
+</div>
+<button class="w-full py-3 bg-primary text-on-primary font-bold text-label-caps rounded-lg hover:opacity-95 transition-opacity">Upload New Assets</button>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-outline-variant/10 w-full"></div>
+<!-- Section: Legal Info -->
+<section class="bento-grid">
+<div class="col-span-12 lg:col-span-4 flex flex-col justify-center">
+<h3 class="text-title-md font-headline-lg text-primary uppercase">Legal Info</h3>
+<p class="text-body-sm text-on-surface-variant mt-2">Official registration details for contract generation and tax compliance.</p>
+</div>
+<div class="col-span-12 lg:col-span-8 space-y-6">
+<div class="bg-surface-white p-6 border border-outline-variant/10 rounded-xl shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="text-label-caps font-label-caps text-on-surface-variant">Registered Entity Name</label>
+<input class="w-full bg-stadium-gray border-outline-variant/20 rounded-lg text-body-sm font-semibold p-3" type="text" value="NDÉMBO KIN Sports Management S.A.R.L"/>
+</div>
+<div class="space-y-1">
+<label class="text-label-caps font-label-caps text-on-surface-variant">RCCM / ID Nat</label>
+<input class="w-full bg-stadium-gray border-outline-variant/20 rounded-lg text-body-sm font-stats-md p-3" type="text" value="CD/KIN/RCCM/23-B-0158"/>
+</div>
+<div class="col-span-full space-y-1">
+<label class="text-label-caps font-label-caps text-on-surface-variant">Registered Business Address</label>
+<textarea class="w-full bg-stadium-gray border-outline-variant/20 rounded-lg text-body-sm p-3" rows="2">Avenue du Stade, Kinshasa, Democratic Republic of the Congo</textarea>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-outline-variant/10 w-full"></div>
+<!-- Section: Currency & Financials -->
+<section class="bento-grid">
+<div class="col-span-12 lg:col-span-4 flex flex-col justify-center">
+<h3 class="text-title-md font-headline-lg text-primary uppercase">Currency Settings</h3>
+<p class="text-body-sm text-on-surface-variant mt-2">Set base currency and exchange rates for player valuations and ticket sales.</p>
+</div>
+<div class="col-span-12 lg:col-span-8">
+<div class="bg-surface-white border border-outline-variant/10 rounded-xl overflow-hidden shadow-sm">
+<div class="bg-primary px-6 py-3">
+<span class="text-white text-label-caps">Active Currency Profiles</span>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="p-4 border-2 border-panafrican-cyan rounded-xl bg-panafrican-cyan/5 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-panafrican-cyan flex items-center justify-center text-white font-bold">USD</div>
+<div>
+<div class="font-bold text-on-surface">US Dollar</div>
+<div class="text-xs text-on-surface-variant">Primary Operating Currency</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-panafrican-cyan" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="p-4 border border-outline-variant/20 rounded-xl hover:border-primary transition-all flex justify-between items-center group cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-stadium-gray flex items-center justify-center text-primary font-bold">CDF</div>
+<div>
+<div class="font-bold text-on-surface">Franc Congolais</div>
+<div class="text-xs text-on-surface-variant">1 USD = 2,750 CDF</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</div>
+</div>
+<div class="px-6 py-4 bg-stadium-gray border-t border-outline-variant/20 flex items-center justify-between">
+<span class="text-body-sm italic text-on-surface-variant">Last updated: Today, 09:42 AM</span>
+<button class="text-panafrican-cyan font-bold text-label-caps flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-sm" data-icon="sync">sync</span> Update Rates
+                                    </button>
+</div>
+</div>
+</div>
+</section>
+<div class="h-px bg-outline-variant/10 w-full"></div>
+<!-- Section: Document Templates -->
+<section class="bento-grid">
+<div class="col-span-12 lg:col-span-4 flex flex-col justify-center">
+<h3 class="text-title-md font-headline-lg text-primary uppercase">Document Templates</h3>
+<p class="text-body-sm text-on-surface-variant mt-2">Manage automated PDF generation for contracts, scout reports, and receipts.</p>
+</div>
+<div class="col-span-12 lg:col-span-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Template Card -->
+<div class="bg-surface-white p-5 border border-outline-variant/10 rounded-xl hover:shadow-md transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="article">article</span>
+</div>
+<span class="text-label-caps bg-green-100 text-green-700 px-2 py-1 rounded">Active</span>
+</div>
+<h4 class="font-bold text-on-surface mb-1">Standard Pro-Contract</h4>
+<p class="text-xs text-on-surface-variant mb-4">v4.2 - Includes latest FIFA regulations update.</p>
+<div class="flex gap-2">
+<button class="flex-1 py-2 text-xs font-bold border border-outline-variant/30 rounded-lg hover:bg-stadium-gray">Edit Template</button>
+<button class="p-2 border border-outline-variant/30 rounded-lg hover:bg-stadium-gray">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Template Card -->
+<div class="bg-surface-white p-5 border border-outline-variant/10 rounded-xl hover:shadow-md transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+</div>
+<span class="text-label-caps bg-green-100 text-green-700 px-2 py-1 rounded">Active</span>
+</div>
+<h4 class="font-bold text-on-surface mb-1">Scouting Performance Report</h4>
+<p class="text-xs text-on-surface-variant mb-4">v1.8 - Features heatmaps and stat-radars.</p>
+<div class="flex gap-2">
+<button class="flex-1 py-2 text-xs font-bold border border-outline-variant/30 rounded-lg hover:bg-stadium-gray">Edit Template</button>
+<button class="p-2 border border-outline-variant/30 rounded-lg hover:bg-stadium-gray">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<!-- Add New Placeholder -->
+<div class="bg-surface border-2 border-dashed border-outline-variant/30 p-5 rounded-xl flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white hover:border-panafrican-cyan transition-all">
+<span class="material-symbols-outlined text-outline group-hover:text-panafrican-cyan mb-2" data-icon="add_circle">add_circle</span>
+<span class="text-label-caps font-bold text-outline group-hover:text-panafrican-cyan">Add New Template</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Action Bar -->
+<div class="mt-8 pt-8 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+<p class="text-body-sm text-on-surface-variant font-medium">Changes will be logged in the administrative audit trail.</p>
+<div class="flex gap-3 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none px-8 py-3 bg-stadium-gray text-primary font-bold text-label-caps rounded-lg hover:bg-outline-variant/10 transition-colors">Discard</button>
+<button class="flex-1 sm:flex-none px-12 py-3 bg-secondary text-white font-bold text-label-caps rounded-lg shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-95 transition-all">Save Changes</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Toast Notification (Hidden by Default) -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-inverse-surface text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-xl transition-all duration-500 opacity-0 translate-y-10 pointer-events-none z-[100]" id="toast">
+<span class="material-symbols-outlined text-green-400" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-body-sm font-semibold">Settings updated successfully!</span>
+</div>
+<script>
+        // Simple Interaction logic
+        const saveBtn = document.querySelector('button.bg-secondary.text-white');
+        const toast = document.getElementById('toast');
+
+        saveBtn.addEventListener('click', () => {
+            // Show toast
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            // Interaction effect
+            saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span> Saving...';
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                saveBtn.innerText = 'Save Changes';
+            }, 3000);
+        });
+
+        // Toggle currency selection visual
+        const currencyCards = document.querySelectorAll('.currency-card-toggle');
+        // (Functionality could be expanded here if needed)
+    </script>
+</body></html>

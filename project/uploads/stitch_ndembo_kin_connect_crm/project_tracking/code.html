@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NDÉMBO KIN - Event Management Board</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#3d5a6c",
+                    "surface-dim": "#c9dcf3",
+                    "secondary-container": "#e61b1c",
+                    "on-surface": "#091d2e",
+                    "inverse-surface": "#203243",
+                    "surface": "#f7f9ff",
+                    "surface-tint": "#456274",
+                    "primary": "#254354",
+                    "on-tertiary-fixed-variant": "#614000",
+                    "on-primary-fixed": "#001e2d",
+                    "background": "#f7f9ff",
+                    "tertiary-container": "#754f00",
+                    "surface-container-high": "#d9eaff",
+                    "inverse-primary": "#accbe0",
+                    "tertiary": "#573900",
+                    "panafrican-cyan": "#1E9FD8",
+                    "on-primary-fixed-variant": "#2d4a5c",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#410001",
+                    "primary-fixed": "#c8e7fc",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#d1e4fb",
+                    "stadium-gray": "#F8FAFC",
+                    "tertiary-fixed-dim": "#ffba43",
+                    "surface-container-low": "#edf4ff",
+                    "primary-fixed-dim": "#accbe0",
+                    "outline": "#72787c",
+                    "on-surface-variant": "#42474c",
+                    "tertiary-fixed": "#ffddaf",
+                    "on-secondary-container": "#fffbff",
+                    "secondary-fixed": "#ffdad5",
+                    "on-background": "#091d2e",
+                    "on-secondary-fixed-variant": "#930007",
+                    "surface-white": "#FFFFFF",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#281800",
+                    "secondary": "#bc000d",
+                    "inverse-on-surface": "#e8f2ff",
+                    "surface-variant": "#d1e4fb",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#c2c7cc",
+                    "surface-container": "#e3efff",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb4aa",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#b2d0e6",
+                    "on-tertiary-container": "#ffc15f",
+                    "surface-bright": "#f7f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "margin-desktop": "32px",
+                    "unit": "8px",
+                    "container-max": "1280px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Oswald"],
+                    "stats-md": ["JetBrains Mono"],
+                    "headline-xl": ["Oswald"],
+                    "display-lg": ["Oswald"],
+                    "label-caps": ["Open Sans"],
+                    "body-lg": ["Open Sans"],
+                    "stats-lg": ["JetBrains Mono"],
+                    "body-sm": ["Open Sans"],
+                    "title-md": ["Open Sans"],
+                    "headline-lg-mobile": ["Oswald"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "stats-md": ["18px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "headline-xl": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "display-lg": ["72px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "stats-lg": ["40px", {"lineHeight": "1", "letterSpacing": "-0.05em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "title-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrolling-touch {
+            -webkit-overflow-scrolling: touch;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+        .board-column {
+            background-color: #F8FAFC;
+            min-width: 320px;
+            height: calc(100vh - 180px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-lg text-on-surface">
+<div class="flex min-h-screen overflow-hidden">
+<!-- SideNavBar (Predicted from JSON) -->
+<aside class="hidden md:flex flex-col h-screen w-64 bg-primary dark:bg-inverse-surface border-r border-outline-variant/10 shadow-md py-6 fixed left-0 top-0 z-50">
+<div class="px-6 mb-10">
+<h1 class="text-headline-lg font-headline-lg font-bold text-on-primary dark:text-surface-bright tracking-tight">NDÉMBO KIN</h1>
+<p class="text-label-caps font-label-caps text-on-primary/60">Sports Management</p>
+</div>
+<nav class="flex-grow space-y-1">
+<!-- Dashboard -->
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all hover:bg-primary-container" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-lg">Dashboard</span>
+</a>
+<!-- Tournaments -->
+<a class="bg-secondary text-on-secondary rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span class="font-body-lg">Tournaments</span>
+</a>
+<!-- Scouting -->
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all hover:bg-primary-container" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="font-body-lg">Scouting</span>
+</a>
+<!-- Contracts -->
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all hover:bg-primary-container" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-body-lg">Contracts</span>
+</a>
+<!-- Financials -->
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all hover:bg-primary-container" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-body-lg">Financials</span>
+</a>
+<!-- Settings -->
+<a class="text-surface-variant hover:text-surface-white rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all hover:bg-primary-container" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-lg">Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full bg-secondary-container text-on-secondary py-3 rounded-lg font-title-md font-bold mb-6 hover:opacity-90 active:scale-95 transition-all">
+                    New Tournament
+                </button>
+<div class="space-y-1">
+<a class="text-surface-variant hover:text-surface-white rounded-lg px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-body-lg">Support</span>
+</a>
+<a class="text-surface-variant hover:text-surface-white rounded-lg px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-body-lg">Sign Out</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow md:ml-64 bg-surface min-h-screen">
+<!-- TopNavBar (Predicted from JSON) -->
+<header class="flex justify-between items-center px-margin-desktop h-16 w-full bg-surface-white border-b border-outline-variant/20 sticky top-0 z-40">
+<div class="flex items-center gap-6">
+<div class="relative w-64">
+<span class="absolute inset-y-0 left-3 flex items-center text-outline">
+<span class="material-symbols-outlined text-body-lg" data-icon="search">search</span>
+</span>
+<input class="pl-10 pr-4 py-1.5 w-full bg-stadium-gray border-none rounded-lg text-body-sm focus:ring-2 focus:ring-panafrican-cyan transition-all" placeholder="Search events..." type="text"/>
+</div>
+<nav class="hidden lg:flex gap-6">
+<a class="text-secondary font-bold border-b-2 border-secondary pb-1 font-title-md transition-all opacity-80 hover:opacity-100" href="#">Match Day</a>
+<a class="text-on-surface-variant hover:text-on-surface font-title-md transition-all opacity-80 hover:opacity-100 hover:bg-stadium-gray px-3 py-1 rounded-lg" href="#">Talent Pool</a>
+<a class="text-on-surface-variant hover:text-on-surface font-title-md transition-all opacity-80 hover:opacity-100 hover:bg-stadium-gray px-3 py-1 rounded-lg" href="#">Revenue</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg text-body-sm font-bold active:scale-95 transition-all">Create Invoice</button>
+<button class="text-on-surface-variant hover:bg-stadium-gray p-2 rounded-lg transition-all relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface-white"></span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30 cursor-pointer">
+<img alt="Executive Profile" data-alt="A professional headshot of a sports executive in a high-contrast corporate lighting setting. The background is a blurred stadium interior with deep slate blues and subtle red highlights reflecting the brand's palette. The subject is confident, wearing a modern business-casual suit, embodying African leadership and sports management authority. The overall image has a sharp, high-end editorial feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW5mPe8N_cl3qYXFtq-T0ibjifADhzsOsORuQ7qs42BkpQHLqygVdCyU-JQC7M2Gjl-GQ4oqWMjm0MAxciXME6VvwhxlLc2lHSpMA7OmcP4z3nC4IXKcJAzkjq2JJR_F1WnCDhL_oGzybDPp9d-lcxn5HLzEynsNdB-DKRplAiVY07YbuouT4EjC02WEaDqGcwa4iPlOybB2JcOkBy0mL89YgvDLIlfOXMDall7DZr-ho-wVfr0TtT"/>
+</div>
+</div>
+</header>
+<!-- Board View Container -->
+<div class="p-8">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-headline-xl font-headline-xl text-on-surface tracking-tight uppercase">Ksh Management Board</h2>
+<div class="flex items-center gap-2 mt-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 text-label-caps rounded">LIVE SEASON 2024</span>
+<span class="text-on-surface-variant text-body-sm">• 12 Active Tournaments</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="bg-stadium-gray text-primary border border-outline-variant/20 px-4 py-2 rounded flex items-center gap-2 hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+<span class="font-title-md">Filter</span>
+</button>
+<button class="bg-stadium-gray text-primary border border-outline-variant/20 px-4 py-2 rounded flex items-center gap-2 hover:bg-surface-variant transition-all">
+<span class="material-symbols-outlined" data-icon="view_week">view_week</span>
+<span class="font-title-md">Board View</span>
+</button>
+</div>
+</div>
+<!-- Kanban Board Scrollable Area -->
+<div class="flex gap-gutter overflow-x-auto pb-6 scrolling-touch">
+<!-- Planning Column -->
+<div class="board-column flex-shrink-0 w-80 rounded-xl flex flex-col border border-outline-variant/10">
+<div class="bg-primary text-on-primary p-4 rounded-t-xl flex justify-between items-center">
+<span class="font-headline-lg text-title-md uppercase tracking-wider">Planning</span>
+<span class="bg-on-primary/20 text-on-primary px-2 rounded-full text-label-caps">4</span>
+</div>
+<div class="p-3 flex-grow overflow-y-auto space-y-4">
+<!-- Card 1 -->
+<div class="bg-surface-white p-4 rounded-lg shadow-sm border-l-4 border-panafrican-cyan hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between mb-2">
+<span class="bg-panafrican-cyan/10 text-panafrican-cyan text-label-caps px-2 py-0.5 rounded">Scouting Trip</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="more_horiz">more_horiz</span>
+</div>
+<h3 class="font-title-md text-on-surface mb-3">Kinshasa Talent Hunt v2</h3>
+<div class="flex items-center gap-4 text-body-sm text-on-surface-variant mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+<span>Oct 12</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="chat_bubble_outline">chat_bubble_outline</span>
+<span>3</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex -space-x-2">
+<img alt="Owner" class="w-6 h-6 rounded-full border-2 border-surface-white" data-alt="A close-up portrait of a professional African scout wearing a tech-infused sports polo shirt. The lighting is crisp and modern, focusing on the determined expression. The background is a high-tech sports lab with data screens displaying football statistics in deep primary blues and cyan accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBybrvYPQlNdkNJTQAtpVsUVrmVnGKSJ7-2NLB5N1BMY-RHan7K655cjKpuw2pyxcCTRVvEo2-e17UXhFzBfntcBw5jq62dbZnIxsYWWeRdJ2EsCuZq2-N4ghab-vjjQfBoTjzDZssqezlQAg3hcdF4xiUyNN5j0NbRaYO-PSXodi36FQ8MN8E4kA9ClTrDJNuF-B25TDAfJqQVFUxLuRrpZnjTNGamATh-IBmkFKyRwFKaWTlM6Ish"/>
+<img alt="Collaborator" class="w-6 h-6 rounded-full border-2 border-surface-white" data-alt="A portrait of a male data analyst in a professional sports management office. He is smiling slightly, wearing a sharp button-down shirt. The aesthetic is clean and corporate with a cool blue lighting atmosphere. His presence suggests expertise and collaboration in a sports context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8ndwsfIFwUVp1ErSdVk5r3X8wwcCQbSMSqaz1D5F8J0cAaU0upGCLigNXOZuDuhMZK7ZhyiNXQNlySauC0Wnz9XvnXuFLUKbH2anqipUwLyOYafyB67fiZlgyboGu3dXzRg_wS0TYGT0oP2E7zMU8XlB-MNoxg_we3D_yU18Tk9r-DknmbF9HY9QDc1-SLct3R1bRxmD4Mbl6pwGZyleKkNZ5hWNgqyLpWiZjVJpU29tWqAFAfQNH"/>
+</div>
+<span class="text-label-caps text-outline">Low Priority</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-white p-4 rounded-lg shadow-sm border-l-4 border-tertiary hover:shadow-md transition-all cursor-pointer group">
+<div class="flex justify-between mb-2">
+<span class="bg-tertiary/10 text-tertiary text-label-caps px-2 py-0.5 rounded">Logistics</span>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors" data-icon="more_horiz">more_horiz</span>
+</div>
+<h3 class="font-title-md text-on-surface mb-3">U17 Stadium Booking</h3>
+<div class="flex items-center gap-4 text-body-sm text-on-surface-variant mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+<span>Oct 15</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="w-6 h-6 rounded-full bg-surface-dim flex items-center justify-center text-[10px] font-bold border-2 border-surface-white text-primary">NK</div>
+<span class="text-label-caps text-tertiary">Medium</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Preparation Column -->
+<div class="board-column flex-shrink-0 w-80 rounded-xl flex flex-col border border-outline-variant/10">
+<div class="bg-primary-container text-on-primary p-4 rounded-t-xl flex justify-between items-center">
+<span class="font-headline-lg text-title-md uppercase tracking-wider">Preparation</span>
+<span class="bg-on-primary/20 text-on-primary px-2 rounded-full text-label-caps">2</span>
+</div>
+<div class="p-3 flex-grow overflow-y-auto space-y-4">
+<!-- Card High Priority -->
+<div class="bg-surface-white p-4 rounded-lg shadow-sm border-t-4 border-secondary border-l border-r border-b border-outline-variant/10 hover:shadow-lg transition-all cursor-pointer group">
+<div class="flex justify-between mb-2">
+<span class="bg-secondary/10 text-secondary text-label-caps px-2 py-0.5 rounded">Emergency</span>
+<span class="material-symbols-outlined text-secondary" data-icon="priority_high">priority_high</span>
+</div>
+<h3 class="font-title-md text-on-surface mb-3">Player Health Insurance Renewals</h3>
+<div class="flex items-center gap-4 text-body-sm text-on-surface-variant mb-4">
+<div class="flex items-center gap-1 text-secondary font-bold">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span>
+<span>OVERDUE</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<img alt="Owner" class="w-6 h-6 rounded-full border-2 border-surface-white" data-alt="A portrait of a focused female sports administrator in a minimalist office. High-contrast lighting highlights her professional and determined demeanor. The color palette is modern and sleek, featuring deep navy and bright white with subtle red accents in the background elements, fitting a sports leadership atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoB8GWwmZ7newT8uvS9DX4E3rPIzNS6Wi7z98Lt9SIY7B-tJI0MWDW6CEuG9NdMuOtNJBySnBgTkbLvKESgL_pubqLOsUmXVjVD3gF7OIQuF-JGO1fRmHjXwMjQdwYjFzgaFZ7m2HZwPpRMll76h9IRKgRF1IXCMVjPFQ1-ZtdsE_0ZxoVe9AHfX0l03WC9VujTRBbgBIfQc4Q-DQ_bZTg5Wx6-33_zdCFdMD_OLivzy1WkPwi3NGP"/>
+<span class="bg-secondary text-on-secondary text-label-caps px-2 py-0.5 rounded">Urgent</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Column -->
+<div class="board-column flex-shrink-0 w-80 rounded-xl flex flex-col border border-outline-variant/10 bg-surface-container-low">
+<div class="bg-secondary text-on-secondary p-4 rounded-t-xl flex justify-between items-center relative overflow-hidden">
+<span class="font-headline-lg text-title-md uppercase tracking-wider relative z-10">Live Action</span>
+<div class="flex items-center gap-2 relative z-10">
+<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+<span class="bg-on-secondary/20 text-on-secondary px-2 rounded-full text-label-caps">3</span>
+</div>
+<div class="absolute inset-0 bg-white/10 skew-x-12 transform translate-x-32"></div>
+</div>
+<div class="p-3 flex-grow overflow-y-auto space-y-4">
+<!-- Card Live Match -->
+<div class="bg-surface-white p-4 rounded-xl shadow-md border border-outline-variant/10 hover:shadow-lg transition-all cursor-pointer">
+<div class="flex items-center justify-between mb-4">
+<span class="text-label-caps bg-on-surface text-on-primary px-2 py-1 rounded">MATCH DAY 14</span>
+<span class="text-secondary font-stats-md animate-pulse">72'</span>
+</div>
+<div class="space-y-3 mb-4">
+<div class="flex justify-between items-center">
+<span class="font-headline-lg text-[20px]">KINSHASA FC</span>
+<span class="font-stats-lg text-primary">2</span>
+</div>
+<div class="flex justify-between items-center opacity-60">
+<span class="font-headline-lg text-[20px]">MATADI STARS</span>
+<span class="font-stats-lg text-primary">0</span>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-outline-variant/10 pt-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline" data-icon="location_on">location_on</span>
+<span class="text-body-sm text-on-surface-variant">Martyrs Stadium</span>
+</div>
+<button class="text-panafrican-cyan hover:underline text-label-caps">WATCH LIVE</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Completed Column -->
+<div class="board-column flex-shrink-0 w-80 rounded-xl flex flex-col border border-outline-variant/10">
+<div class="bg-outline text-on-primary p-4 rounded-t-xl flex justify-between items-center">
+<span class="font-headline-lg text-title-md uppercase tracking-wider">Completed</span>
+<span class="bg-on-primary/20 text-on-primary px-2 rounded-full text-label-caps">28</span>
+</div>
+<div class="p-3 flex-grow overflow-y-auto space-y-4">
+<div class="bg-surface-white/60 p-4 rounded-lg border border-outline-variant/10 grayscale opacity-70 group hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer">
+<div class="flex justify-between mb-2">
+<span class="text-label-caps text-outline line-through">Press Conf</span>
+<span class="material-symbols-outlined text-panafrican-cyan" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<h3 class="font-title-md text-on-surface mb-1">Pre-Tournament Brief</h3>
+<p class="text-body-sm text-outline mb-3">All media kits distributed</p>
+<div class="flex items-center gap-2">
+<img alt="Owner" class="w-5 h-5 rounded-full" data-alt="A high-end portrait of a media coordinator in a modern press room. The background features blurred cameras and studio lighting in slate blue and charcoal gray. The subject is professional, wearing a sleek black blazer, conveying organization and successful completion of events." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEtKcWPIRSYzr2oThQ2xLFnNN5738S2rdL_p6L9IXshqmRtfvPGIzJJ_2doLu7Njs5Oyv8s3QYeDPNOTCHWVsfJlBIPvvcixgRYAwEl8gCTIO1ni8qR9e7BbURc97p4ZtQV8jUoFqyjUpCiND_yxO6X7DVVbEFTls5DO4YVBEIHrweuUA8ysK60HLH74TcoxN_tUlo_UZfmCsYYe1XUWXxk76lro2-Z5MsfnUwrLO1BVK-bwiLv8ed"/>
+<span class="text-label-caps text-outline">Closed Oct 01</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Add New Column -->
+<button class="flex-shrink-0 w-80 h-32 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-panafrican-cyan hover:bg-panafrican-cyan/5 transition-all text-on-surface-variant hover:text-panafrican-cyan">
+<span class="material-symbols-outlined text-[32px]" data-icon="add_circle">add_circle</span>
+<span class="font-title-md uppercase">Add Phase</span>
+</button>
+</div>
+</div>
+<!-- Dashboard Stats Bar (Bento Pattern) -->
+<div class="p-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-outline-variant/10 flex items-center justify-between">
+<div>
+<p class="text-label-caps text-on-surface-variant">Revenue Target</p>
+<h4 class="font-stats-lg text-primary">$452K</h4>
+</div>
+<div class="w-12 h-12 bg-panafrican-cyan/10 rounded-full flex items-center justify-center text-panafrican-cyan">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-outline-variant/10 flex items-center justify-between">
+<div>
+<p class="text-label-caps text-on-surface-variant">Match Capacity</p>
+<h4 class="font-stats-lg text-secondary">94%</h4>
+</div>
+<div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+</div>
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-outline-variant/10 flex items-center justify-between">
+<div>
+<p class="text-label-caps text-on-surface-variant">Active Scouts</p>
+<h4 class="font-stats-lg text-primary">12</h4>
+</div>
+<div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="radar">radar</span>
+</div>
+</div>
+<div class="bg-inverse-surface p-6 rounded-xl shadow-sm flex items-center justify-between">
+<div>
+<p class="text-label-caps text-surface-variant">Award Pool</p>
+<h4 class="font-stats-lg text-tertiary-fixed-dim">🏆 8</h4>
+</div>
+<button class="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded text-label-caps">Details</button>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-white border-t border-outline-variant/20 h-16 flex items-center justify-around z-50">
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-label-caps">DASHBOARD</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-secondary">
+<span class="material-symbols-outlined" data-icon="emoji_events" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+<span class="text-[10px] font-label-caps">EVENTS</span>
+</button>
+<div class="bg-primary -mt-8 w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-on-primary">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</div>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="text-[10px] font-label-caps">SCOUTS</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-label-caps">SETTINGS</span>
+</button>
+</nav>
+<script>
+        // Micro-interactions for card hovering
+        document.querySelectorAll('.board-column > div > div').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-panafrican-cyan');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-panafrican-cyan');
+        });
+    </script>
+</body></html>

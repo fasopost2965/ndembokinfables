@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #F2F5F8; }
+    * { box-sizing: border-box; }
+    input, button, select, textarea { font-family: inherit; }
+    @keyframes nkSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes nkToastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 920px) {
+      [data-sidebar] { display: none !important; }
+      [data-profile-meta] { display: none !important; }
+      [data-main-pad] { padding: 16px !important; }
+      [data-evt-drawer] { width: 100% !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Événements" style="display: flex; width: 100%; min-height: 100vh; background: #F2F5F8; font-family: 'Open Sans', sans-serif; color: #091D2E">
+  <dc-import name="Sidebar" active="evenements" hint-size="248px,100vh"></dc-import>
+
+  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+    <dc-import name="Topbar" active="evenements" searchPlaceholder="Rechercher un événement, un camp…" hint-size="100%,64px"></dc-import>
+
+    <main data-main-pad="true" style="flex: 1; padding: 28px 32px 48px 32px; max-width: 1380px; width: 100%; margin: 0 auto">
+
+      <sc-if value="{{ isListe }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #BC000D; margin-bottom: 6px">Opérations sportives</div>
+            <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Événements &amp; camps</h1>
+            <p style="margin: 6px 0 0 0; font-size: 13.5px; color: #5B6B77">Tournois, galas, détections et camps d'entraînement — inscriptions, budgets et accès VIP.</p>
+          </div>
+          <button onClick="{{ openCreate }}" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; background: #BC000D; border: none; border-radius: 6px; font-size: 13.5px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+            {{ createLabel }}
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 4px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 5px; margin-bottom: 18px; width: fit-content; max-width: 100%">
+          <sc-for list="{{ topTabs }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.onClick }}" style="height: 34px; padding: 0 18px; border: none; border-radius: 6px; background: {{ t.bg }}; color: {{ t.color }}; font-size: 13px; font-weight: 700; cursor: pointer">{{ t.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-left: 3px solid {{ k.accent }}; border-radius: 8px; padding: 16px 18px">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5B6B77">{{ k.label }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; letter-spacing: -0.03em; margin-top: 8px">{{ k.value }}</div>
+              <div style="font-size: 11.5px; color: #8896A0; margin-top: 4px">{{ k.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px">
+          <sc-for list="{{ cards }}" as="c" hint-placeholder-count="4">
+            <div onClick="{{ c.onOpen }}" style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-top: 3px solid {{ c.accent }}; border-radius: 8px; padding: 18px 20px; cursor: pointer; display: flex; flex-direction: column; gap: 12px" style-hover="border-color: rgba(30,159,216,0.5)">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+                <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: {{ c.typeBg }}; color: {{ c.typeColor }}">{{ c.type }}</span>
+                <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: {{ c.badgeBg }}; color: {{ c.badgeColor }}">{{ c.statut }}</span>
+              </div>
+              <div>
+                <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 17px; color: #254354; line-height: 1.25; text-transform: uppercase; letter-spacing: 0.01em">{{ c.nom }}</div>
+                <div style="display: flex; align-items: center; gap: 7px; margin-top: 7px; font-size: 12.5px; color: #5B6B77">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0zM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
+                  {{ c.lieu }}
+                </div>
+                <div style="display: flex; align-items: center; gap: 7px; margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #8896A0">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path></svg>
+                  {{ c.dates }}
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #5B6B77; margin-bottom: 5px"><span>Inscriptions</span><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #254354">{{ c.inscritsLabel }}</span></div>
+                <div style="height: 6px; background: #EAF0F4; border-radius: 99px; overflow: hidden"><div style="height: 100%; width: {{ c.pct }}; background: {{ c.accent }}; border-radius: 99px"></div></div>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(37,67,84,0.08)">
+                <span style="font-size: 11px; color: #8896A0">{{ c.metaLabel }}</span>
+                <span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #254354">{{ c.metaValue }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <button onClick="{{ backToList }}" style="display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 12.5px; font-weight: 600; color: #254354; cursor: pointer; margin-bottom: 16px" style-hover="background: #F8FAFC">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+          {{ backLabel }}
+        </button>
+
+        <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-top: 3px solid {{ selAccent }}; border-radius: 8px; padding: 22px 24px; margin-bottom: 16px">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px">
+            <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: {{ selTypeBg }}; color: {{ selTypeColor }}">{{ selType }}</span>
+            <span style="display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: {{ selBadgeBg }}; color: {{ selBadgeColor }}">{{ selStatut }}</span>
+          </div>
+          <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 26px; margin: 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">{{ selNom }}</h1>
+          <div style="display: flex; gap: 18px; flex-wrap: wrap; margin-top: 9px; font-size: 13px; color: #5B6B77">
+            <span>{{ selLieu }}</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px">{{ selDates }}</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 18px">
+          <sc-for list="{{ selKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-left: 3px solid {{ k.accent }}; border-radius: 8px; padding: 14px 16px">
+              <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">{{ k.label }}</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 20px; letter-spacing: -0.03em; margin-top: 6px; color: #091D2E">{{ k.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px">
+            <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354; margin-bottom: 14px">Taux de remplissage</div>
+            <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px"><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 32px; color: #254354">{{ selPct }}</span><span style="font-size: 12px; color: #8896A0">{{ selInscritsLabel }}</span></div>
+            <div style="height: 10px; background: #EAF0F4; border-radius: 99px; overflow: hidden"><div style="height: 100%; width: {{ selPct }}; background: {{ selAccent }}; border-radius: 99px"></div></div>
+          </div>
+          <div style="background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 8px; padding: 20px 22px">
+            <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: #254354; margin-bottom: 14px">Objets liés</div>
+            <div style="display: flex; flex-direction: column; gap: 9px">
+              <sc-for list="{{ selRelations }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" style="display: flex; align-items: center; gap: 11px; padding: 10px 12px; border: 1px solid rgba(37,67,84,0.10); border-radius: 6px; text-decoration: none; color: inherit" style-hover="background: #F5F9FD">
+                  <span style="width: 30px; height: 30px; border-radius: 7px; background: {{ r.iconBg }}; color: {{ r.iconColor }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.icon }}"></path></svg></span>
+                  <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 12.5px; font-weight: 700; color: #254354">{{ r.titre }}</span><span style="display: block; font-size: 11px; color: #8896A0">{{ r.sous }}</span></span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+                </a>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 200; display: flex; justify-content: flex-end">
+      <div onClick="{{ closeDrawer }}" style="position: absolute; inset: 0; background: rgba(9,29,46,0.42)"></div>
+      <div data-evt-drawer="true" style="position: relative; width: 470px; max-width: 100%; height: 100%; background: #FFFFFF; box-shadow: -12px 0 40px rgba(9,29,46,0.2); display: flex; flex-direction: column; animation: nkSlideIn 0.22s ease">
+        <div style="padding: 20px 24px; border-bottom: 1px solid rgba(37,67,84,0.10); display: flex; align-items: center; justify-content: space-between">
+          <div>
+            <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #BC000D">{{ drawerKicker }}</div>
+            <div style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 20px; text-transform: uppercase; letter-spacing: 0.02em; color: #254354; margin-top: 2px">{{ drawerTitle }}</div>
+          </div>
+          <button onClick="{{ closeDrawer }}" style="width: 34px; height: 34px; border: 1px solid rgba(37,67,84,0.16); background: #FFFFFF; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5B6B77" style-hover="background: #F8FAFC">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">{{ nomLabel }} <span style="color: #BC000D">*</span></span>
+            <input type="text" value="{{ fNom }}" onChange="{{ setFNom }}" placeholder="{{ nomPlaceholder }}" style="height: 40px; border: 1px solid {{ nomBorder }}; border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+            <sc-if value="{{ nomError }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size: 11px; color: #BC000D; font-weight: 600">Le nom est obligatoire.</span>
+            </sc-if>
+          </label>
+
+          <sc-if value="{{ drawerIsEvt }}" hint-placeholder-val="{{ true }}">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Type d’événement</span>
+              <select value="{{ fType }}" onChange="{{ setFType }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                <option value="Tournoi">Tournoi</option>
+                <option value="Gala">Gala</option>
+                <option value="Détection">Détection</option>
+              </select>
+            </label>
+          </sc-if>
+
+          <sc-if value="{{ drawerIsCamp }}" hint-placeholder-val="{{ false }}">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Catégorie</span>
+              <select value="{{ fCategorie }}" onChange="{{ setFCategorie }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+                <option value="U13">U13</option>
+                <option value="U15">U15</option>
+                <option value="U17">U17</option>
+                <option value="Senior">Senior</option>
+                <option value="Spécifique">Spécifique (gardiens, etc.)</option>
+              </select>
+            </label>
+          </sc-if>
+
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Lieu <span style="color: #BC000D">*</span></span>
+            <input type="text" value="{{ fLieu }}" onChange="{{ setFLieu }}" placeholder="Stade, ville…" style="height: 40px; border: 1px solid {{ lieuBorder }}; border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+            <sc-if value="{{ lieuError }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size: 11px; color: #BC000D; font-weight: 600">Indiquez un lieu.</span>
+            </sc-if>
+          </label>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Début</span>
+              <input type="date" value="{{ fDebut }}" onChange="{{ setFDebut }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Fin</span>
+              <input type="date" value="{{ fFin }}" onChange="{{ setFFin }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <label style="display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">{{ capaciteLabel }}</span>
+              <input type="number" min="0" value="{{ fCapacite }}" onChange="{{ setFCapacite }}" placeholder="0" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+            </label>
+            <sc-if value="{{ drawerIsEvt }}" hint-placeholder-val="{{ true }}">
+              <label style="display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Budget (USD)</span>
+                <input type="number" min="0" value="{{ fBudget }}" onChange="{{ setFBudget }}" placeholder="0" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8" />
+              </label>
+            </sc-if>
+          </div>
+
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Statut</span>
+            <select value="{{ fStatut }}" onChange="{{ setFStatut }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+              <sc-for list="{{ statutOptions }}" as="so" hint-placeholder-count="4">
+                <option value="{{ so }}">{{ so }}</option>
+              </sc-for>
+            </select>
+          </label>
+
+          <label style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Client organisateur / sponsor</span>
+            <select value="{{ fClientId }}" onChange="{{ setFClient }}" style="height: 40px; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; background: #FFFFFF; padding: 0 10px; font-size: 13px; outline: none" style-focus="border-color: #1E9FD8">
+              <option value="">— Aucun / interne Ndembo Kin —</option>
+              <sc-for list="{{ clientsOptions }}" as="c" hint-placeholder-count="6">
+                <option value="{{ c.id }}">{{ c.nom }}</option>
+              </sc-for>
+            </select>
+          </label>
+        </div>
+
+        <div style="padding: 16px 24px; border-top: 1px solid rgba(37,67,84,0.10); display: flex; gap: 10px; justify-content: flex-end; background: #F8FAFC">
+          <button onClick="{{ closeDrawer }}" style="height: 40px; padding: 0 18px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.18); border-radius: 6px; font-size: 13px; font-weight: 700; color: #5B6B77; cursor: pointer" style-hover="background: #F2F5F8">Annuler</button>
+          <button onClick="{{ saveEvent }}" style="height: 40px; padding: 0 22px; background: #BC000D; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; color: #FFFFFF; cursor: pointer" style-hover="background: #E61B1C">{{ saveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 300; background: #16242F; color: #FFFFFF; border-radius: 8px; padding: 13px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 14px 36px rgba(9,29,46,0.32); animation: nkToastIn 0.25s ease">
+      <span style="width: 26px; height: 26px; border-radius: 99px; background: #177E54; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+      </span>
+      <span style="font-size: 13px; font-weight: 600">{{ toast }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { tab: 'evenements', view: 'liste', selId: null, evs: [], camps: [], clients: [],
+    drawerOpen: false, showErrors: false, toast: '', extraEvs: [], extraCamps: [],
+    f: { nom: '', type: 'Tournoi', lieu: '', dateDebut: '2026-07-01', dateFin: '2026-07-01', budget: '', capacite: '', categorie: 'U17', places: '', statut: 'Planification', clientId: '' } };
+
+  componentDidMount() {
+    import('./crm-data.js').then((m) => { this._m = m; this.setState({ evs: m.EVENEMENTS, camps: m.CAMPS, clients: m.CLIENTS }); });
+  }
+
+  renderVals() {
+    const S = this.state;
+    const M = this._m;
+    const badge = (st) => (M && M.STATUT_BADGE[st]) || { bg: 'rgba(37,67,84,.10)', color: '#42474C' };
+    const dFr = (iso) => (M ? M.dateFr(iso) : iso);
+    const fmt = (n) => (M ? M.fmtUsd(n) : ('$' + n));
+    const clientNom = (id) => { const c = (S.clients || []).find((x) => x.id === id); return c ? c.nom : null; };
+    const TYPE_STYLE = {
+      'Tournoi': { bg: 'rgba(188,0,13,0.10)', color: '#BC000D', accent: '#BC000D' },
+      'Gala': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00', accent: '#F4A800' },
+      'Détection': { bg: 'rgba(30,159,216,0.14)', color: '#1E78A8', accent: '#1E9FD8' },
+      'Camp': { bg: 'rgba(37,67,84,0.10)', color: '#254354', accent: '#254354' },
+    };
+    const isCamps = S.tab === 'camps';
+    const dateRange = (a, b) => (a === b ? dFr(a) : dFr(a) + ' → ' + dFr(b));
+    const pct = (i, t) => (t ? Math.round((i / t) * 100) : 0) + '%';
+
+    const evsAll = [...(S.evs || []), ...S.extraEvs];
+    const campsAll = [...(S.camps || []), ...S.extraCamps];
+
+    const list = isCamps
+      ? campsAll.map((c) => ({ kind: 'camp', id: c.id, nom: c.nom, type: 'Camp', lieu: c.lieu, debut: c.dateDebut, fin: c.dateFin, statut: c.statut, inscrits: c.inscrits, capacite: c.places, metaLabel: c.categorie, metaValue: c.inscrits + '/' + c.places, clientId: c.clientId }))
+      : evsAll.map((e) => ({ kind: 'evt', id: e.id, nom: e.nom, type: e.type, lieu: e.lieu, debut: e.dateDebut, fin: e.dateFin, statut: e.statut, inscrits: e.inscrits, capacite: e.capacite, metaLabel: 'Budget', metaValue: fmt(e.budget), budget: e.budget, clientId: e.clientId }));
+
+    const cards = list.map((it) => {
+      const ts = TYPE_STYLE[it.type] || TYPE_STYLE['Camp'];
+      const b = badge(it.statut);
+      return {
+        ...it,
+        accent: ts.accent, typeBg: ts.bg, typeColor: ts.color,
+        badgeBg: b.bg, badgeColor: b.color,
+        dates: dateRange(it.debut, it.fin),
+        inscritsLabel: it.inscrits + ' / ' + it.capacite,
+        pct: pct(it.inscrits, it.capacite),
+        onOpen: () => this.setState({ view: 'detail', selId: it.id }),
+      };
+    });
+
+    // KPIs par onglet
+    let kpis;
+    if (isCamps) {
+      const actifs = campsAll.filter((c) => c.statut !== 'Terminé').length;
+      const places = campsAll.reduce((s, c) => s + c.places, 0);
+      const inscrits = campsAll.reduce((s, c) => s + c.inscrits, 0);
+      kpis = [
+        { label: 'Camps programmés', value: String(campsAll.length), note: actifs + ' actifs', accent: '#254354' },
+        { label: 'Places ouvertes', value: String(places), note: 'Toutes catégories', accent: '#1E9FD8' },
+        { label: 'Inscrits', value: String(inscrits), note: 'Athlètes confirmés', accent: '#177E54' },
+        { label: 'Taux de remplissage', value: pct(inscrits, places), note: 'Moyenne globale', accent: '#F4A800' },
+      ];
+    } else {
+      const avenir = evsAll.filter((e) => e.statut !== 'Terminé').length;
+      const inscrits = evsAll.reduce((s, e) => s + e.inscrits, 0);
+      const budget = evsAll.reduce((s, e) => s + e.budget, 0);
+      kpis = [
+        { label: 'Événements à venir', value: String(avenir), note: 'Saison 2026', accent: '#BC000D' },
+        { label: 'Participants attendus', value: String(inscrits), note: 'Inscriptions confirmées', accent: '#1E9FD8' },
+        { label: 'Budget cumulé', value: fmt(budget), note: 'Tous événements', accent: '#177E54' },
+        { label: 'Tournois', value: String(evsAll.filter((e) => e.type === 'Tournoi').length), note: 'Compétitions', accent: '#F4A800' },
+      ];
+    }
+
+    // Détail
+    const sel = list.find((x) => x.id === S.selId) || null;
+    const selTs = sel ? (TYPE_STYLE[sel.type] || TYPE_STYLE['Camp']) : TYPE_STYLE['Camp'];
+    const selB = sel ? badge(sel.statut) : { bg: '', color: '' };
+    const orga = sel ? clientNom(sel.clientId) : null;
+    const selKpis = sel ? (
+      sel.kind === 'evt'
+        ? [
+            { label: 'Budget', value: fmt(sel.budget), accent: '#177E54' },
+            { label: 'Inscrits', value: String(sel.inscrits), accent: '#1E9FD8' },
+            { label: 'Capacité', value: String(sel.capacite), accent: '#254354' },
+            { label: 'Places restantes', value: String(Math.max(0, sel.capacite - sel.inscrits)), accent: '#BC000D' },
+          ]
+        : [
+            { label: 'Catégorie', value: sel.metaLabel, accent: '#254354' },
+            { label: 'Inscrits', value: String(sel.inscrits), accent: '#1E9FD8' },
+            { label: 'Places', value: String(sel.capacite), accent: '#F4A800' },
+            { label: 'Places restantes', value: String(Math.max(0, sel.capacite - sel.inscrits)), accent: '#BC000D' },
+          ]
+    ) : [];
+
+    const relations = [];
+    if (sel) {
+      if (orga) relations.push({ titre: orga, sous: 'Client organisateur / sponsor', href: 'Clients.dc.html', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354' });
+      relations.push({ titre: 'Projet opérationnel', sous: 'Planification & exécution', href: 'Projets.dc.html', icon: 'M4 4h4.5v16H4zM9.75 4h4.5v10h-4.5zM15.5 4H20v7h-4.5z', iconBg: 'rgba(30,159,216,0.14)', iconColor: '#1E9FD8' });
+      relations.push({ titre: 'Accès membres VIP', sous: 'Billetterie & invitations', href: 'Membres VIP.dc.html', icon: 'M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z', iconBg: 'rgba(244,168,0,0.16)', iconColor: '#B07800' });
+    }
+
+    const nomErr = S.showErrors && !S.f.nom.trim();
+    const lieuErr = S.showErrors && !S.f.lieu.trim();
+    const statutOptions = isCamps
+      ? ['Planifié', 'Inscriptions', 'En cours', 'Terminé']
+      : ['Planification', 'Inscriptions', 'Confirmé', 'Terminé'];
+
+    return {
+      drawerOpen: S.drawerOpen,
+      drawerIsCamp: isCamps,
+      drawerIsEvt: !isCamps,
+      drawerKicker: isCamps ? 'Camp d’entraînement' : 'Événement sportif',
+      drawerTitle: isCamps ? 'Nouveau camp' : 'Nouvel événement',
+      saveLabel: isCamps ? 'Créer le camp' : 'Créer l’événement',
+      nomLabel: isCamps ? 'Nom du camp' : 'Nom de l’événement',
+      nomPlaceholder: isCamps ? 'Camp Élite U17…' : 'Tournoi International…',
+      capaciteLabel: isCamps ? 'Places' : 'Capacité',
+      statutOptions,
+      clientsOptions: S.clients || [],
+      openCreate: () => this.openCreate(),
+      closeDrawer: () => this.setState({ drawerOpen: false, showErrors: false }),
+      saveEvent: () => this.saveEvent(),
+      toast: S.toast,
+      fNom: S.f.nom, setFNom: (e) => this.setState({ f: { ...S.f, nom: e.target.value } }),
+      fType: S.f.type, setFType: (e) => this.setState({ f: { ...S.f, type: e.target.value } }),
+      fCategorie: S.f.categorie, setFCategorie: (e) => this.setState({ f: { ...S.f, categorie: e.target.value } }),
+      fLieu: S.f.lieu, setFLieu: (e) => this.setState({ f: { ...S.f, lieu: e.target.value } }),
+      fDebut: S.f.dateDebut, setFDebut: (e) => this.setState({ f: { ...S.f, dateDebut: e.target.value } }),
+      fFin: S.f.dateFin, setFFin: (e) => this.setState({ f: { ...S.f, dateFin: e.target.value } }),
+      fCapacite: S.f.capacite, setFCapacite: (e) => this.setState({ f: { ...S.f, capacite: e.target.value } }),
+      fBudget: S.f.budget, setFBudget: (e) => this.setState({ f: { ...S.f, budget: e.target.value } }),
+      fStatut: S.f.statut, setFStatut: (e) => this.setState({ f: { ...S.f, statut: e.target.value } }),
+      fClientId: String(S.f.clientId || ''), setFClient: (e) => this.setState({ f: { ...S.f, clientId: e.target.value } }),
+      nomError: nomErr, lieuError: lieuErr,
+      nomBorder: nomErr ? '#BC000D' : 'rgba(37,67,84,0.18)',
+      lieuBorder: lieuErr ? '#BC000D' : 'rgba(37,67,84,0.18)',
+      isListe: S.view === 'liste',
+      isDetail: S.view === 'detail',
+      backToList: () => this.setState({ view: 'liste', selId: null }),
+      backLabel: isCamps ? 'Tous les camps' : 'Tous les événements',
+      createLabel: isCamps ? 'Nouveau camp' : 'Nouvel événement',
+      topTabs: [
+        { key: 'evenements', label: 'Événements' },
+        { key: 'camps', label: 'Camps d’entraînement' },
+      ].map((t) => ({
+        label: t.label,
+        bg: S.tab === t.key ? '#254354' : 'transparent',
+        color: S.tab === t.key ? '#FFFFFF' : '#5B6B77',
+        onClick: () => this.setState({ tab: t.key, view: 'liste', selId: null }),
+      })),
+      kpis,
+      cards,
+      selNom: sel ? sel.nom : '', selType: sel ? sel.type : '', selLieu: sel ? sel.lieu : '',
+      selDates: sel ? dateRange(sel.debut, sel.fin) : '', selStatut: sel ? sel.statut : '',
+      selAccent: selTs.accent, selTypeBg: selTs.bg, selTypeColor: selTs.color,
+      selBadgeBg: selB.bg, selBadgeColor: selB.color,
+      selPct: sel ? pct(sel.inscrits, sel.capacite) : '0%',
+      selInscritsLabel: sel ? (sel.inscrits + ' / ' + sel.capacite + ' inscrits') : '',
+      selKpis,
+      selRelations: relations,
+    };
+  }
+
+  openCreate() {
+    const isCamps = this.state.tab === 'camps';
+    this.setState({
+      drawerOpen: true, showErrors: false,
+      f: { nom: '', type: 'Tournoi', lieu: '', dateDebut: '2026-07-01', dateFin: '2026-07-01',
+           budget: '', capacite: '', categorie: 'U17', places: '',
+           statut: isCamps ? 'Planifié' : 'Planification', clientId: '' },
+    });
+  }
+
+  saveEvent() {
+    const S = this.state;
+    const f = S.f;
+    if (!f.nom.trim() || !f.lieu.trim()) { this.setState({ showErrors: true }); return; }
+    const cid = f.clientId ? Number(f.clientId) : null;
+    if (S.tab === 'camps') {
+      const id = 'CMP-' + String(90 + S.extraCamps.length + 1);
+      const camp = { id, nom: f.nom.trim(), lieu: f.lieu.trim(), dateDebut: f.dateDebut, dateFin: f.dateFin,
+        categorie: f.categorie, places: Number(f.capacite) || 0, inscrits: 0, statut: f.statut, clientId: cid };
+      this.setState({ extraCamps: [...S.extraCamps, camp], drawerOpen: false, showErrors: false,
+        toast: 'Camp « ' + camp.nom + ' » créé.' });
+    } else {
+      const id = 'EVT-' + String(90 + S.extraEvs.length + 1);
+      const evt = { id, nom: f.nom.trim(), type: f.type, lieu: f.lieu.trim(), dateDebut: f.dateDebut, dateFin: f.dateFin,
+        budget: Number(f.budget) || 0, statut: f.statut, inscrits: 0, capacite: Number(f.capacite) || 0, clientId: cid };
+      this.setState({ extraEvs: [...S.extraEvs, evt], drawerOpen: false, showErrors: false,
+        toast: 'Événement « ' + evt.nom + ' » créé.' });
+    }
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2800);
+  }
+}
+</script>
+</body>
+</html>

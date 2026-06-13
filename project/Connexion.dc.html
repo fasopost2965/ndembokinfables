@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #091D2E; }
+    * { box-sizing: border-box; }
+    input, button, select { font-family: inherit; }
+    @keyframes nkSpin { to { transform: rotate(360deg); } }
+    @keyframes nkFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes nkFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-18px); } }
+    @media (max-width: 900px) {
+      [data-brand] { display: none !important; }
+      [data-mobile-brand] { display: flex !important; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Connexion" style="display: flex; width: 100%; min-height: 100vh; font-family: 'Open Sans', sans-serif; color: #091D2E; background: #F2F5F8">
+
+  <section data-brand="true" style="width: 46%; max-width: 620px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 48px; background: linear-gradient(150deg, #16242F 0%, #091D2E 58%, #16242F 100%)">
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #1E9FD8, #BC000D 45%, #F4A800 80%, transparent)"></div>
+    <div style="position: absolute; inset: 0; background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0); background-size: 26px 26px"></div>
+    <div style="position: absolute; top: 14%; left: -90px; width: 280px; height: 280px; border-radius: 99px; background: rgba(30,159,216,0.16); filter: blur(70px); animation: nkFloat 9s ease-in-out infinite"></div>
+    <div style="position: absolute; bottom: 12%; right: -80px; width: 260px; height: 260px; border-radius: 99px; background: rgba(188,0,13,0.18); filter: blur(70px); animation: nkFloat 11s ease-in-out infinite"></div>
+    <div style="position: absolute; right: -70px; bottom: -90px; width: 300px; height: 300px; border-radius: 99px; border: 1.5px solid rgba(255,255,255,0.06)"></div>
+    <div style="position: absolute; right: -30px; bottom: -50px; width: 200px; height: 200px; border-radius: 99px; border: 1.5px solid rgba(255,255,255,0.06)"></div>
+
+    <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; max-width: 420px; width: 100%">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 92px; height: 92px; background: #FFFFFF; border-radius: 18px; box-shadow: 0 18px 44px rgba(0,0,0,0.35); margin-bottom: 30px">
+        <img src="assets/logo.png" alt="Ndembo Kin Connect" style="width: 76px; height: 76px; object-fit: contain" />
+      </div>
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #1E9FD8; margin-bottom: 14px">Ndembo Kin Connect · CRM</div>
+      <h1 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 42px; line-height: 1.08; margin: 0; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.01em">La gestion d'élite<br />du football africain</h1>
+      <p style="margin: 18px 0 0 0; font-size: 15px; line-height: 1.65; color: rgba(255,255,255,0.62); max-width: 380px">Talents, contrats, événements et programme VIP — performance, précision et victoire réunies sur une seule plateforme.</p>
+
+      <div style="display: flex; gap: 14px; margin-top: 40px">
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 16px 22px; border-radius: 10px; backdrop-filter: blur(4px)">
+          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 30px; letter-spacing: -0.04em; color: #1E9FD8">2.4k</div>
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-top: 4px">Talents gérés</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 16px 22px; border-radius: 10px; backdrop-filter: blur(4px)">
+          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 30px; letter-spacing: -0.04em; color: #F4A800">50+</div>
+          <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-top: 4px">Tournois</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 48px; font-size: 12px; color: rgba(255,255,255,0.42)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0zM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
+        Kinshasa · République Démocratique du Congo
+      </div>
+    </div>
+  </section>
+
+  <section style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: #F2F5F8; background-image: radial-gradient(circle at 1px 1px, rgba(37,67,84,0.07) 1px, transparent 0); background-size: 22px 22px">
+    <div style="width: 100%; max-width: 432px; background: #FFFFFF; border: 1px solid rgba(37,67,84,0.10); border-radius: 14px; box-shadow: 0 20px 56px rgba(9,29,46,0.10); padding: 38px 36px">
+
+      <div data-mobile-brand="true" style="display: none; align-items: center; gap: 12px; margin-bottom: 28px">
+        <span style="width: 46px; height: 46px; border-radius: 11px; background: #16242F; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0"><img src="assets/logo.png" alt="" style="width: 36px; height: 36px; object-fit: contain" /></span>
+        <span>
+          <span style="display: block; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 17px; color: #254354; letter-spacing: 0.04em; text-transform: uppercase">Ndembo Kin Connect</span>
+          <span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1E9FD8">CRM Sport</span>
+        </span>
+      </div>
+
+      <!-- ===== LOGIN ===== -->
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; background: rgba(30,159,216,0.10); color: #1E78A8; margin-bottom: 18px">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path><circle cx="12" cy="16" r="1"></circle></svg>
+          </span>
+          <h2 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 27px; margin: 0 0 6px 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Connexion</h2>
+          <p style="margin: 0 0 26px 0; font-size: 13.5px; color: #5B6B77">Accédez à votre espace de gestion Ndembo Kin.</p>
+
+          <div style="display: flex; flex-direction: column; gap: 18px">
+            <label style="display: flex; flex-direction: column; gap: 7px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Adresse e-mail</span>
+              <span style="position: relative; display: block">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 13px; top: 50%; transform: translateY(-50%)"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="M22 6l-10 7L2 6"></path></svg>
+                <input type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="nom@ndembokin.com" style="width: 100%; height: 46px; border: 1px solid {{ emailBorder }}; border-radius: 8px; padding: 0 14px 0 40px; font-size: 14px; color: #091D2E; outline: none" style-focus="border-color: #1E9FD8; box-shadow: 0 0 0 3px rgba(30,159,216,0.12)" />
+              </span>
+            </label>
+
+            <label style="display: flex; flex-direction: column; gap: 7px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Mot de passe</span>
+              <span style="position: relative; display: block">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 13px; top: 50%; transform: translateY(-50%)"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <input type="{{ pwdType }}" value="{{ pwd }}" onChange="{{ setPwd }}" placeholder="••••••••" style="width: 100%; height: 46px; border: 1px solid {{ pwdBorder }}; border-radius: 8px; padding: 0 44px 0 40px; font-size: 14px; color: #091D2E; outline: none" style-focus="border-color: #1E9FD8; box-shadow: 0 0 0 3px rgba(30,159,216,0.12)" />
+                <button type="button" onClick="{{ toggleShowPwd }}" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; color: #8896A0; display: flex; align-items: center; justify-content: center; border-radius: 6px" style-hover="background: #F2F5F8; color: #254354">
+                  <sc-if value="{{ hidePwd }}" hint-placeholder-val="{{ true }}">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </sc-if>
+                  <sc-if value="{{ showPwd }}" hint-placeholder-val="{{ false }}">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path><path d="M6.6 6.6A13.5 13.5 0 0 0 2 12s3.5 7 10 7a9.1 9.1 0 0 0 5.4-1.6"></path><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M2 2l20 20"></path></svg>
+                  </sc-if>
+                </button>
+              </span>
+            </label>
+
+            <sc-if value="{{ loginErr }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; align-items: center; gap: 9px; padding: 10px 13px; background: rgba(188,0,13,0.07); border: 1px solid rgba(188,0,13,0.25); border-radius: 8px; font-size: 12.5px; color: #BC000D; font-weight: 600">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                Vérifiez votre e-mail et votre mot de passe.
+              </div>
+            </sc-if>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+              <button type="button" onClick="{{ toggleRemember }}" style="display: inline-flex; align-items: center; gap: 9px; background: none; border: none; cursor: pointer; padding: 0; font-size: 12.5px; color: #5B6B77; font-weight: 600">
+                <span style="width: 19px; height: 19px; border-radius: 5px; border: 1.5px solid {{ rememberBorder }}; background: {{ rememberBg }}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s">
+                  <sc-if value="{{ remember }}" hint-placeholder-val="{{ true }}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                  </sc-if>
+                </span>
+                Se souvenir de moi
+              </button>
+              <button type="button" onClick="{{ goRecovery }}" style="background: none; border: none; cursor: pointer; padding: 0; font-size: 12.5px; font-weight: 700; color: #1E78A8" style-hover="color: #BC000D">Mot de passe oublié ?</button>
+            </div>
+
+            <button type="button" onClick="{{ submitLogin }}" disabled="{{ loading }}" style="width: 100%; height: 50px; margin-top: 4px; background: #BC000D; border: none; border-radius: 8px; font-size: 14.5px; font-weight: 700; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; box-shadow: 0 10px 24px rgba(188,0,13,0.22)" style-hover="background: #E61B1C">
+              <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+                <span style="width: 17px; height: 17px; border: 2.5px solid rgba(255,255,255,0.35); border-top-color: #FFFFFF; border-radius: 99px; animation: nkSpin 0.7s linear infinite"></span>
+              </sc-if>
+              {{ loginBtnLabel }}
+              <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+
+          <div style="margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(37,67,84,0.10); text-align: center; font-size: 12px; color: #8896A0; line-height: 1.6">
+            Accès réservé aux collaborateurs.<br />Besoin d'un compte ? <a href="mailto:contact@ndembokin.com" style="color: #1E78A8; font-weight: 700; text-decoration: none">Contactez l'administrateur</a>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== RECOVERY FORM ===== -->
+      <sc-if value="{{ isRecoveryForm }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; background: rgba(244,168,0,0.16); color: #B07800; margin-bottom: 18px">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"></circle><path d="M10.85 12.15 19 4"></path><path d="m18 5 2 2"></path><path d="m15 8 2 2"></path></svg>
+          </span>
+          <h2 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 27px; margin: 0 0 6px 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Mot de passe oublié</h2>
+          <p style="margin: 0 0 26px 0; font-size: 13.5px; color: #5B6B77">Saisissez votre adresse e-mail pour recevoir un lien de réinitialisation sécurisé.</p>
+
+          <div style="display: flex; flex-direction: column; gap: 18px">
+            <label style="display: flex; flex-direction: column; gap: 7px">
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #5B6B77">Adresse e-mail</span>
+              <span style="position: relative; display: block">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 13px; top: 50%; transform: translateY(-50%)"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="M22 6l-10 7L2 6"></path></svg>
+                <input type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="nom@ndembokin.com" style="width: 100%; height: 46px; border: 1px solid {{ emailBorder }}; border-radius: 8px; padding: 0 14px 0 40px; font-size: 14px; color: #091D2E; outline: none" style-focus="border-color: #1E9FD8; box-shadow: 0 0 0 3px rgba(30,159,216,0.12)" />
+              </span>
+              <sc-if value="{{ emailErr }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 11.5px; color: #BC000D; font-weight: 600">Saisissez une adresse e-mail valide.</span>
+              </sc-if>
+            </label>
+
+            <button type="button" onClick="{{ submitRecovery }}" disabled="{{ loading }}" style="width: 100%; height: 50px; background: #BC000D; border: none; border-radius: 8px; font-size: 14.5px; font-weight: 700; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; box-shadow: 0 10px 24px rgba(188,0,13,0.22)" style-hover="background: #E61B1C">
+              <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+                <span style="width: 17px; height: 17px; border: 2.5px solid rgba(255,255,255,0.35); border-top-color: #FFFFFF; border-radius: 99px; animation: nkSpin 0.7s linear infinite"></span>
+              </sc-if>
+              {{ recoveryBtnLabel }}
+              <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+
+          <div style="margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(37,67,84,0.10); text-align: center">
+            <button type="button" onClick="{{ goLogin }}" style="display: inline-flex; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #254354" style-hover="color: #1E78A8">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+              Retour à la connexion
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== RECOVERY SENT ===== -->
+      <sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align: center">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 99px; background: rgba(23,126,84,0.12); color: #177E54; margin-bottom: 20px">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M22 4L12 14.01l-3-3"></path></svg>
+          </span>
+          <h2 style="font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 25px; margin: 0 0 10px 0; color: #254354; text-transform: uppercase; letter-spacing: 0.02em">Lien envoyé</h2>
+          <p style="margin: 0 auto 6px auto; font-size: 13.5px; color: #5B6B77; line-height: 1.6; max-width: 320px">Un lien de réinitialisation a été envoyé à</p>
+          <p style="margin: 0 0 22px 0; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; color: #254354; word-break: break-all">{{ sentEmail }}</p>
+          <div style="display: flex; align-items: flex-start; gap: 9px; text-align: left; padding: 12px 14px; background: rgba(30,159,216,0.07); border: 1px solid rgba(30,159,216,0.22); border-radius: 8px; margin-bottom: 24px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E78A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+            <span style="font-size: 12px; color: #1E78A8; line-height: 1.5">Vérifiez votre boîte de réception et vos spams. Le lien expire dans 30 minutes.</span>
+          </div>
+          <button type="button" onClick="{{ goLogin }}" style="width: 100%; height: 48px; background: #254354; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px" style-hover="background: #3D5A6C">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+            Retour à la connexion
+          </button>
+          <button type="button" onClick="{{ resend }}" style="margin-top: 14px; background: none; border: none; cursor: pointer; font-size: 12.5px; color: #8896A0; font-weight: 600" style-hover="color: #254354">Vous n'avez rien reçu ? <span style="color: #1E78A8; font-weight: 700">Renvoyer le lien</span></button>
+        </div>
+      </sc-if>
+
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { view: 'login', sent: false, email: '', pwd: '', remember: true, showPwd: false, loading: false, emailErr: false, loginErr: false, sentEmail: '' };
+
+  validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e || '').trim()); }
+
+  submitLogin() {
+    const { email, pwd, loading } = this.state;
+    if (loading) return;
+    if (!this.validEmail(email) || !pwd) { this.setState({ loginErr: true }); return; }
+    this.setState({ loading: true, loginErr: false });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => { window.location.href = 'Dashboard.dc.html'; }, 1100);
+  }
+
+  submitRecovery() {
+    const { email, loading } = this.state;
+    if (loading) return;
+    if (!this.validEmail(email)) { this.setState({ emailErr: true }); return; }
+    this.setState({ loading: true, emailErr: false });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => { this.setState({ loading: false, sent: true, sentEmail: email.trim() }); }, 1100);
+  }
+
+  renderVals() {
+    const S = this.state;
+    return {
+      isLogin: S.view === 'login',
+      isRecoveryForm: S.view === 'recovery' && !S.sent,
+      isSent: S.view === 'recovery' && S.sent,
+
+      email: S.email,
+      setEmail: (e) => this.setState({ email: e.target.value }),
+      pwd: S.pwd,
+      setPwd: (e) => this.setState({ pwd: e.target.value }),
+      pwdType: S.showPwd ? 'text' : 'password',
+      showPwd: S.showPwd,
+      hidePwd: !S.showPwd,
+      toggleShowPwd: () => this.setState({ showPwd: !S.showPwd }),
+
+      remember: S.remember,
+      rememberBg: S.remember ? '#254354' : '#FFFFFF',
+      rememberBorder: S.remember ? '#254354' : 'rgba(37,67,84,0.30)',
+      toggleRemember: () => this.setState({ remember: !S.remember }),
+
+      goRecovery: () => this.setState({ view: 'recovery', sent: false, loading: false, emailErr: false }),
+      goLogin: () => this.setState({ view: 'login', sent: false, loading: false, loginErr: false }),
+      submitLogin: () => this.submitLogin(),
+      submitRecovery: () => this.submitRecovery(),
+      resend: () => this.submitRecovery(),
+
+      loading: S.loading,
+      notLoading: !S.loading,
+      loginErr: S.loginErr,
+      emailErr: S.emailErr,
+      emailBorder: (S.emailErr || S.loginErr) ? '#BC000D' : 'rgba(37,67,84,0.18)',
+      pwdBorder: S.loginErr ? '#BC000D' : 'rgba(37,67,84,0.18)',
+      sentEmail: S.sentEmail,
+      loginBtnLabel: S.loading ? 'Connexion…' : 'Se connecter',
+      recoveryBtnLabel: S.loading ? 'Envoi en cours…' : 'Envoyer le lien',
+    };
+  }
+}
+</script>
+</body>
+</html>
