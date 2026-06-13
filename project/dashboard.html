@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Ndembo Kin Connect CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Open Sans',sans-serif;background:#F2F5F8;color:#091D2E}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font-family:inherit}
+svg{display:block}
+
+/* ── Layout ── */
+.app{display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:248px;min-height:100vh;background:#203243;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;z-index:50}
+.sidebar-logo{display:flex;align-items:center;gap:12px;padding:20px 18px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-logo-box{width:42px;height:42px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.sidebar-logo-box img{width:100%;height:100%;object-fit:contain}
+.sidebar-brand-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.06em;color:#fff;line-height:1.1}
+.sidebar-brand-sub{font-size:10px;font-weight:700;letter-spacing:.14em;color:#7E97A8;text-transform:uppercase;margin-top:3px}
+.sidebar-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:18px}
+.sidebar-sec-title{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#5F7A8C;padding:0 12px 8px}
+.sidebar-sec-items{display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:#B9CBD8;font-size:13.5px;font-weight:400;transition:background .15s,color .15s}
+.nav-item:hover{color:#fff}
+.nav-item.active{background:#BC000D;color:#fff;font-weight:700}
+.nav-item svg{flex-shrink:0}
+.nav-item-label{flex:1}
+.nav-badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;border-radius:99px;padding:2px 7px;background:rgba(30,159,216,.18);color:#6FC4EA}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.22);color:#fff}
+.sidebar-footer{padding:14px 12px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:2px}
+.sidebar-help{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;color:#8FA6B5;font-size:13px;transition:color .15s}
+.sidebar-help:hover{color:#fff}
+.sidebar-version{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 0}
+.sidebar-version span{font-size:10.5px;color:#5F7A8C}
+.sidebar-dot{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#5F7A8C}
+.sidebar-dot::before{content:'';width:6px;height:6px;border-radius:99px;background:#1E9FD8}
+
+/* ── Main wrapper ── */
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* ── Topbar ── */
+.topbar{height:64px;background:#fff;border-bottom:1px solid rgba(37,67,84,.12);display:flex;align-items:center;gap:16px;padding:0 28px;position:sticky;top:0;z-index:60}
+.hamburger{width:38px;height:38px;display:none;align-items:center;justify-content:center;background:#fff;border:1px solid rgba(37,67,84,.18);border-radius:6px;cursor:pointer;color:#254354;flex-shrink:0}
+.topbar-search{position:relative;flex:1;max-width:420px}
+.topbar-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:#72787C}
+.topbar-search input{width:100%;height:38px;border:1px solid rgba(37,67,84,.18);border-radius:6px;background:#F8FAFC;padding:0 12px 0 36px;font-size:13px;color:#091D2E;outline:none;transition:border-color .15s,box-shadow .15s}
+.topbar-search input:focus{border-color:#1E9FD8;background:#fff;box-shadow:0 0 0 3px rgba(30,159,216,.15)}
+.topbar-spacer{flex:1}
+.create-btn{display:flex;align-items:center;gap:8px;height:38px;padding:0 16px;background:#BC000D;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+.create-btn:hover{background:#E61B1C}
+.notif-btn{position:relative;width:38px;height:38px;border:1px solid rgba(37,67,84,.14);background:#fff;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#254354}
+.notif-btn:hover{background:#F8FAFC}
+.notif-badge{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#BC000D;border:1.5px solid #fff;color:#fff;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.topbar-divider{width:1px;height:26px;background:rgba(37,67,84,.14)}
+.profile-btn{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:none;padding:4px 6px;border-radius:8px;transition:background .15s}
+.profile-btn:hover{background:#F2F5F8}
+.profile-avatar{width:36px;height:36px;border-radius:99px;background:#254354;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:.04em;flex-shrink:0}
+.profile-meta{line-height:1.25;text-align:left}
+.profile-name{font-size:12.5px;font-weight:700;color:#091D2E}
+.profile-role{font-size:11px;color:#72787C}
+
+/* ── Dropdowns ── */
+.dropdown-backdrop{position:fixed;inset:0;z-index:90;display:none}
+.dropdown-backdrop.open{display:block}
+.dropdown-panel{position:absolute;background:#fff;border:1px solid rgba(37,67,84,.14);border-radius:8px;box-shadow:0 12px 32px rgba(9,29,46,.16);z-index:100;display:none}
+.dropdown-panel.open{display:block}
+.dropdown-wrapper{position:relative}
+
+.create-menu{right:0;top:46px;width:230px;padding:6px}
+.create-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;color:#091D2E;font-size:13px;font-weight:600;transition:background .15s}
+.create-link:hover{background:#EDF4FF}
+.create-link-icon{width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.notif-panel{right:0;top:46px;width:326px;overflow:hidden}
+.notif-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(37,67,84,.10)}
+.notif-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:#254354}
+.notif-mark-read{border:none;background:transparent;color:#1E9FD8;font-size:11.5px;font-weight:700;cursor:pointer}
+.notif-list{max-height:340px;overflow-y:auto}
+.notif-item{display:flex;gap:11px;padding:12px 16px;border-bottom:1px solid rgba(37,67,84,.06);transition:background .15s}
+.notif-item:hover{background:#F5F9FD}
+.notif-dot{width:8px;height:8px;border-radius:99px;margin-top:5px;flex-shrink:0}
+.notif-text{font-size:12.5px;color:#42474C;line-height:1.45}
+.notif-date{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#8896A0;margin-top:2px}
+
+.profile-menu{right:0;top:52px;width:220px;padding:6px}
+.profile-menu-header{padding:10px 12px;border-bottom:1px solid rgba(37,67,84,.08);margin-bottom:4px}
+.profile-menu-name{font-size:13px;font-weight:700;color:#091D2E}
+.profile-menu-email{font-size:11px;color:#8896A0;margin-top:1px}
+.profile-menu-link{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:#091D2E;font-size:13px;font-weight:600;transition:background .15s}
+.profile-menu-link:hover{background:#EDF4FF}
+.profile-menu-divider{height:1px;background:rgba(37,67,84,.08);margin:4px 0}
+.profile-menu-logout{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:6px;color:#BC000D;font-size:13px;font-weight:700;transition:background .15s}
+.profile-menu-logout:hover{background:rgba(188,0,13,.06)}
+
+/* ── Search dropdown ── */
+.search-panel{position:absolute;left:0;right:0;top:46px;background:#fff;border:1px solid rgba(37,67,84,.14);border-radius:8px;box-shadow:0 12px 32px rgba(9,29,46,.16);padding:8px;z-index:100;max-height:400px;overflow-y:auto;display:none}
+.search-panel.open{display:block}
+.search-group-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8896A0;padding:6px 8px}
+.search-result{display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;transition:background .15s}
+.search-result:hover{background:#EDF4FF}
+.search-result-icon{width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Oswald',sans-serif;font-size:11px;font-weight:600}
+.search-result-label{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-result-sub{display:block;font-size:11px;color:#8896A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-no-results{padding:22px;text-align:center;font-size:12.5px;color:#8896A0}
+
+/* ── Mobile nav overlay ── */
+.mobile-overlay{position:fixed;inset:0;z-index:300;display:flex;display:none}
+.mobile-overlay.open{display:flex}
+.mobile-backdrop{position:absolute;inset:0;background:rgba(9,29,46,.5)}
+.mobile-drawer{position:relative;width:266px;max-width:82%;height:100%;background:#203243;display:flex;flex-direction:column;overflow-y:auto;animation:slideIn .22s ease}
+@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.mobile-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.mobile-drawer-brand{display:flex;align-items:center;gap:11px}
+.mobile-close-btn{width:32px;height:32px;border:none;background:rgba(255,255,255,.08);border-radius:6px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mobile-nav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:16px}
+
+/* ── Dashboard main ── */
+.dash-main{flex:1;padding:28px 32px 48px;max-width:1380px;width:100%;margin:0 auto}
+
+/* ── Page header ── */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.page-eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#BC000D;margin-bottom:6px}
+.page-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:30px;line-height:1.15;color:#254354;text-transform:uppercase;letter-spacing:.02em}
+.page-desc{margin-top:6px;font-size:13.5px;color:#5B6B77}
+.header-btns{display:flex;gap:10px}
+.btn-outline{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;background:#fff;border:1px solid rgba(37,67,84,.18);border-radius:6px;font-size:13px;font-weight:600;color:#254354;cursor:pointer}
+.btn-outline:hover{background:#F8FAFC}
+.btn-solid{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;background:#254354;border:none;border-radius:6px;font-size:13px;font-weight:700;color:#fff;cursor:pointer}
+.btn-solid:hover{background:#3D5A6C}
+
+/* ── KPI grid ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:16px}
+.kpi-card{background:#fff;border:1px solid rgba(37,67,84,.10);border-radius:8px;padding:18px 20px}
+.kpi-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kpi-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#5B6B77}
+.kpi-icon{width:30px;height:30px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:27px;letter-spacing:-.04em;color:#091D2E;line-height:1}
+.kpi-delta{margin-top:8px;font-size:12px;color:#5B6B77}
+
+/* ── Pipeline ── */
+.pipeline-bar{background:#fff;border:1px solid rgba(37,67,84,.10);border-radius:8px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pipeline-label-block{min-width:150px}
+.pipeline-bar-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#5B6B77}
+.pipeline-bar-sub{font-size:12px;color:#8896A0;margin-top:3px}
+.pipeline-stages{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap}
+.pipeline-stage{display:flex;align-items:center;gap:14px;flex:1;min-width:200px}
+.pipeline-item{flex:1;border:1px solid;border-radius:6px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pipeline-item-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.pipeline-item-note{font-size:11.5px;color:#5B6B77;margin-top:2px}
+.pipeline-item-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px}
+.pipeline-arrow{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+.pipeline-conv{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:#1E9FD8}
+
+/* ── Dashboard 2-col grid ── */
+.dash-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px;align-items:start}
+.dash-left{display:flex;flex-direction:column;gap:16px;min-width:0}
+.dash-right{display:flex;flex-direction:column;gap:16px;min-width:0}
+
+/* ── Chart card ── */
+.chart-card{background:#fff;border:1px solid rgba(37,67,84,.10);border-radius:8px;padding:20px 22px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.chart-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;text-transform:uppercase;letter-spacing:.03em;color:#254354}
+.chart-sub{font-size:12px;color:#8896A0;margin-top:2px}
+.chart-legend{display:flex;gap:14px;font-size:11.5px;color:#5B6B77}
+.legend-dot{display:inline-flex;align-items:center;gap:6px}
+.legend-dot-box{width:10px;height:10px;border-radius:2px}
+.legend-dot-line{width:12px;height:2px}
+.chart-svg{width:100%;height:auto}
+
+/* ── Recent docs ── */
+.docs-card{background:#fff;border:1px solid rgba(37,67,84,.10);border-radius:8px;overflow:hidden}
+.docs-card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(37,67,84,.10)}
+.docs-card-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;text-transform:uppercase;letter-spacing:.03em;color:#254354}
+.docs-card-link{font-size:12.5px;font-weight:700;color:#1E9FD8}
+.docs-card-link:hover{text-decoration:underline}
+.docs-th{display:grid;grid-template-columns:120px 1fr 1fr 110px 100px;padding:10px 22px;background:#F8FAFC;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5B6B77}
+.docs-th span:last-child,.docs-th span:nth-last-child(2){text-align:right}
+.docs-row{display:grid;grid-template-columns:120px 1fr 1fr 110px 100px;align-items:center;padding:13px 22px;border-top:1px solid rgba(37,67,84,.07);color:inherit;transition:background .15s}
+.docs-row:hover{background:#F5F9FD}
+.docs-ref{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#254354}
+.docs-client{font-size:13px;font-weight:600}
+.docs-objet{font-size:12.5px;color:#5B6B77}
+.docs-montant{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;text-align:right}
+.docs-statut{text-align:right}
+.status-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:99px}
+
+/* ── Quick actions ── */
+.quick-card{background:#fff;border:1px solid rgba(37,67,84,.10);border-radius:8px;padding:18px 20px}
+.quick-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;letter-spacing:.03em;color:#254354;margin-bottom:14px}
+.quick-actions-list{display:flex;flex-direction:column;gap:8px}
+.quick-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid rgba(37,67,84,.12);border-radius:6px;color:#091D2E;transition:border-color .15s,background .15s}
+.quick-link:hover{border-color:#1E9FD8;background:#F5FAFE}
+.quick-link-icon{width:30px;height:30px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.quick-link-label{flex:1;font-size:13px;font-weight:700}
+.quick-link-arrow{color:#8896A0}
+
+/* ── Deadlines ── */
+.deadlines-card{background:#fff;border:1px solid rgba(37,67,84,.10);border-radius:8px;padding:18px 20px}
+.deadlines-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;text-transform:uppercase;letter-spacing:.03em;color:#254354;margin-bottom:14px}
+.deadline-item{display:flex;gap:12px;padding:11px 0;border-top:1px solid rgba(37,67,84,.07)}
+.deadline-dot{width:8px;height:8px;border-radius:99px;margin-top:5px;flex-shrink:0}
+.deadline-body{flex:1;min-width:0}
+.deadline-name{font-size:13px;font-weight:600;line-height:1.35}
+.deadline-detail{font-size:11.5px;color:#8896A0;margin-top:2px}
+.deadline-date{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;white-space:nowrap}
+
+/* ── VIP teaser ── */
+.vip-teaser{background:linear-gradient(140deg,#203243 0%,#254354 60%,#2D4A5C 100%);border-radius:8px;padding:20px;color:#fff;position:relative;overflow:hidden}
+.vip-teaser-bar{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#F4A800,#BC000D)}
+.vip-teaser-tag{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#F4A800;margin-bottom:8px}
+.vip-teaser-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:19px;text-transform:uppercase;letter-spacing:.02em;line-height:1.25}
+.vip-teaser-desc{margin:8px 0 14px;font-size:12.5px;color:#B9CBD8;line-height:1.5}
+.vip-teaser-btn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;background:#F4A800;color:#254354;border-radius:6px;font-size:12.5px;font-weight:700;transition:background .15s}
+.vip-teaser-btn:hover{background:#FFBA43}
+
+/* ── Responsive ── */
+@media(max-width:920px){
+  .sidebar{display:none}
+  .profile-meta{display:none}
+  .hamburger{display:flex}
+  .dash-main{padding:16px}
+  .dash-grid{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .docs-th,.docs-row{grid-template-columns:110px 1fr 90px}
+  .docs-th span:nth-child(3),.docs-row .docs-objet,
+  .docs-th span:nth-child(4),.docs-row .docs-montant{display:none}
+  .pipeline-stages{flex-direction:column}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Mobile nav overlay -->
+<div class="mobile-overlay" id="mobileOverlay">
+  <div class="mobile-backdrop" id="mobileBackdrop"></div>
+  <aside class="mobile-drawer">
+    <div class="mobile-drawer-header">
+      <div class="mobile-drawer-brand">
+        <span style="width:38px;height:38px;background:#fff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+          <img src="assets/logo.png" alt="Ndembo Kin Connect" style="width:100%;height:100%;object-fit:contain">
+        </span>
+        <span>
+          <span style="display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.06em;color:#fff">NDEMBO KIN</span>
+          <span style="display:block;font-size:9px;font-weight:700;letter-spacing:.14em;color:#7E97A8;text-transform:uppercase">Connect SARL</span>
+        </span>
+      </div>
+      <button class="mobile-close-btn" id="mobileClose">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav"><!-- filled by JS --></nav>
+  </aside>
+</div>
+
+<div class="app">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-box">
+        <img src="assets/logo.png" alt="Ndembo Kin Connect">
+      </div>
+      <div>
+        <div class="sidebar-brand-name">NDEMBO KIN</div>
+        <div class="sidebar-brand-sub">Connect SARL</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"><!-- filled by JS --></nav>
+    <div class="sidebar-footer">
+      <a href="Parametres.dc.html" class="sidebar-help">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17h.01M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/></svg>
+        <span>Aide &amp; support</span>
+      </a>
+      <div class="sidebar-version">
+        <span>CRM v1.0</span>
+        <span class="sidebar-dot">Kinshasa, RDC</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+
+      <div class="topbar-search">
+        <span class="topbar-search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></svg>
+        </span>
+        <input type="text" id="searchInput" placeholder="Rechercher clients, documents, projets…">
+        <div class="search-panel" id="searchPanel"></div>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <!-- Create -->
+      <div class="dropdown-wrapper">
+        <button class="create-btn" id="createBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Créer
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dropdown-panel create-menu" id="createMenu">
+          <a href="Devis.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(30,159,216,.14);color:#1E9FD8"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8"/></svg></span>
+            Nouveau devis
+          </a>
+          <a href="Factures.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(188,0,13,.10);color:#BC000D"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5"/></svg></span>
+            Nouvelle facture
+          </a>
+          <a href="Contrats.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(37,67,84,.10);color:#254354"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+            Nouveau contrat
+          </a>
+          <a href="Projets.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(30,159,216,.14);color:#1E9FD8"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4.5v16H4zM9.75 4h4.5v10h-4.5zM15.5 4H20v7h-4.5z"/></svg></span>
+            Nouveau projet
+          </a>
+          <a href="Evenements.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(188,0,13,.10);color:#BC000D"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M17 4H7v5a5 5 0 0 0 10 0zM17 4h4v2a3 3 0 0 1-3 3M7 4H3v2a3 3 0 0 0 3 3"/></svg></span>
+            Nouvel événement
+          </a>
+          <a href="Clients.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(23,126,84,.12);color:#177E54"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span>
+            Nouveau client
+          </a>
+          <a href="Membres VIP.dc.html" class="create-link">
+            <span class="create-link-icon" style="background:rgba(244,168,0,.16);color:#B07800"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg></span>
+            Ajouter un membre VIP
+          </a>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="dropdown-wrapper">
+        <button class="notif-btn" id="notifBtn">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="notif-badge" id="notifBadge">3</span>
+        </button>
+        <div class="dropdown-panel notif-panel" id="notifPanel">
+          <div class="notif-header">
+            <span class="notif-title">Notifications</span>
+            <button class="notif-mark-read" id="markAllReadBtn">Tout marquer comme lu</button>
+          </div>
+          <div class="notif-list" id="notifList"><!-- filled by JS --></div>
+        </div>
+      </div>
+
+      <div class="topbar-divider"></div>
+
+      <!-- Profile -->
+      <div class="dropdown-wrapper">
+        <button class="profile-btn" id="profileBtn">
+          <div class="profile-avatar">AN</div>
+          <div class="profile-meta">
+            <div class="profile-name">A. Ndembo</div>
+            <div class="profile-role">Directeur Général</div>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dropdown-panel profile-menu" id="profileMenu">
+          <div class="profile-menu-header">
+            <div class="profile-menu-name">A. Ndembo</div>
+            <div class="profile-menu-email">contact@ndembokin.com</div>
+          </div>
+          <a href="Parametres.dc.html" class="profile-menu-link">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5B6B77" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Paramètres
+          </a>
+          <div class="profile-menu-divider"></div>
+          <a href="Connexion.dc.html" class="profile-menu-logout">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#BC000D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Se déconnecter
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard content -->
+    <main class="dash-main" id="dashMain">
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <div class="page-eyebrow">Pilotage</div>
+          <h1 class="page-title">Tableau de bord</h1>
+          <p class="page-desc">Vue d'ensemble de l'activité — Ndembo Kin Connect SARL, Kinshasa.</p>
+        </div>
+        <div class="header-btns">
+          <button class="btn-outline">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+            30 derniers jours
+          </button>
+          <button class="btn-solid">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exporter
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card" style="border-top:3px solid #1E9FD8">
+          <div class="kpi-card-top"><span class="kpi-label">Revenus encaissés</span><span class="kpi-icon" style="background:rgba(30,159,216,.12);color:#1E9FD8"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span></div>
+          <div class="kpi-value" id="kpiRevenue">—</div>
+          <div class="kpi-delta" id="kpiRevenueDelta">chargement…</div>
+        </div>
+        <div class="kpi-card" style="border-top:3px solid #F4A800">
+          <div class="kpi-card-top"><span class="kpi-label">Devis en attente</span><span class="kpi-icon" style="background:rgba(244,168,0,.14);color:#F4A800"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8"/></svg></span></div>
+          <div class="kpi-value" id="kpiDevis">—</div>
+          <div class="kpi-delta" id="kpiDevisDelta">chargement…</div>
+        </div>
+        <div class="kpi-card" style="border-top:3px solid #BC000D">
+          <div class="kpi-card-top"><span class="kpi-label">Projets actifs</span><span class="kpi-icon" style="background:rgba(188,0,13,.10);color:#BC000D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h4.5v16H4zM9.75 4h4.5v10h-4.5zM15.5 4H20v7h-4.5z"/></svg></span></div>
+          <div class="kpi-value" id="kpiProjets">—</div>
+          <div class="kpi-delta" id="kpiProjetsDelta">chargement…</div>
+        </div>
+        <div class="kpi-card" style="border-top:3px solid #254354">
+          <div class="kpi-card-top"><span class="kpi-label">Membres VIP actifs</span><span class="kpi-icon" style="background:rgba(37,67,84,.10);color:#254354"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg></span></div>
+          <div class="kpi-value" id="kpiVip">—</div>
+          <div class="kpi-delta" id="kpiVipDelta">chargement…</div>
+        </div>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="pipeline-bar" id="pipelineBar">
+        <div class="pipeline-label-block">
+          <div class="pipeline-bar-title">Pipeline commercial</div>
+          <div class="pipeline-bar-sub">Conversion ce trimestre</div>
+        </div>
+        <div class="pipeline-stages" id="pipelineStages">
+          <div style="font-size:13px;color:#8896A0">Chargement…</div>
+        </div>
+      </div>
+
+      <!-- 2-col grid -->
+      <div class="dash-grid">
+        <div class="dash-left">
+          <!-- Revenue chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Revenus — 6 derniers mois</div>
+                <div class="chart-sub">Encaissements USD, objectif mensuel en or</div>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-dot"><span class="legend-dot-box" style="background:#3D5A6C"></span>Encaissé</span>
+                <span class="legend-dot"><span class="legend-dot-box" style="background:#BC000D"></span>Mois courant</span>
+                <span class="legend-dot"><span class="legend-dot-line" style="background:#F4A800"></span>Objectif</span>
+              </div>
+            </div>
+            <svg id="revenueChart" class="chart-svg" viewBox="0 0 560 200"></svg>
+          </div>
+
+          <!-- Recent docs -->
+          <div class="docs-card">
+            <div class="docs-card-header">
+              <div class="docs-card-title">Documents récents</div>
+              <a href="Devis.dc.html" class="docs-card-link">Tout voir →</a>
+            </div>
+            <div class="docs-th">
+              <span>Référence</span><span>Client</span><span>Objet</span>
+              <span style="text-align:right">Montant</span><span style="text-align:right">Statut</span>
+            </div>
+            <div id="recentDocs">
+              <div style="padding:28px 22px;text-align:center;font-size:13px;color:#8896A0">Chargement…</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-right">
+          <!-- Quick actions -->
+          <div class="quick-card">
+            <div class="quick-title">Actions rapides</div>
+            <div class="quick-actions-list">
+              <a href="Devis.dc.html" class="quick-link">
+                <span class="quick-link-icon" style="background:rgba(30,159,216,.14);color:#1E9FD8"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8"/></svg></span>
+                <span class="quick-link-label">Créer un devis</span>
+                <svg class="quick-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+              <a href="Factures.dc.html" class="quick-link">
+                <span class="quick-link-icon" style="background:rgba(188,0,13,.10);color:#BC000D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5"/></svg></span>
+                <span class="quick-link-label">Nouvelle facture</span>
+                <svg class="quick-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+              <a href="Contrats.dc.html" class="quick-link">
+                <span class="quick-link-icon" style="background:rgba(37,67,84,.10);color:#254354"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+                <span class="quick-link-label">Rédiger un contrat</span>
+                <svg class="quick-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+              <a href="Membres VIP.dc.html" class="quick-link">
+                <span class="quick-link-icon" style="background:rgba(244,168,0,.16);color:#B07800"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z"/></svg></span>
+                <span class="quick-link-label">Ajouter un membre VIP</span>
+                <svg class="quick-link-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Deadlines -->
+          <div class="deadlines-card">
+            <div class="deadlines-title">Échéances à venir</div>
+            <div id="deadlinesList">
+              <div style="font-size:13px;color:#8896A0">Chargement…</div>
+            </div>
+          </div>
+
+          <!-- VIP teaser -->
+          <div class="vip-teaser">
+            <div class="vip-teaser-bar"></div>
+            <div class="vip-teaser-tag">Programme VIP</div>
+            <div class="vip-teaser-title">12 adhésions expirent en juillet</div>
+            <p class="vip-teaser-desc">Lancez la campagne de renouvellement avant le Tournoi International de décembre.</p>
+            <a href="Membres VIP.dc.html" class="vip-teaser-btn">Gérer les renouvellements</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script type="module">
+import {
+  FACTURES, DEVIS, CONTRATS, PROJETS, VIP_MEMBERS, CLIENTS, EVENEMENTS,
+  STATUT_BADGE, fmtUsd, dateFr
+} from './crm-data.js';
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const badge = (st) => STATUT_BADGE[st] || { bg: 'rgba(37,67,84,.10)', color: '#42474C' };
+const clientNom = (id) => { const c = CLIENTS.find(c => c.id === id); return c ? c.nom : '—'; };
+
+// ── Sidebar nav ────────────────────────────────────────────────────────────
+const ICONS = {
+  dashboard: 'M3.5 3.5h7v7h-7zM13.5 3.5h7v7h-7zM13.5 13.5h7v7h-7zM3.5 13.5h7v7h-7z',
+  devis: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+  factures: 'M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5',
+  contrats: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+  projets: 'M4 4h4.5v16H4zM9.75 4h4.5v10h-4.5zM15.5 4H20v7h-4.5z',
+  clients: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  evenements: 'M8 21h8M12 17v4M17 4H7v5a5 5 0 0 0 10 0zM17 4h4v2a3 3 0 0 1-3 3M7 4H3v2a3 3 0 0 0 3 3',
+  vip: 'M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z',
+  parametres: 'M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+};
+const NAV_SECTIONS = [
+  { title: 'Pilotage', items: [{ key: 'dashboard', label: 'Tableau de bord', href: 'Dashboard.dc.html' }] },
+  { title: 'Commercial', items: [
+    { key: 'devis', label: 'Devis', href: 'Devis.dc.html', count: String(DEVIS.length) },
+    { key: 'factures', label: 'Factures', href: 'Factures.dc.html', count: String(FACTURES.filter(f => f.statut !== 'Payée').length) },
+    { key: 'contrats', label: 'Contrats', href: 'Contrats.dc.html' },
+    { key: 'projets', label: 'Projets', href: 'Projets.dc.html', count: String(PROJETS.filter(p => p.statut === 'En cours').length) },
+  ]},
+  { title: 'Opérations', items: [{ key: 'evenements', label: 'Événements', href: 'Evenements.dc.html' }] },
+  { title: 'Relations', items: [
+    { key: 'clients', label: 'Clients', href: 'Clients.dc.html', count: String(CLIENTS.length) },
+    { key: 'vip', label: 'Membres VIP', href: 'Membres VIP.dc.html' },
+  ]},
+  { title: 'Système', items: [{ key: 'parametres', label: 'Paramètres', href: 'Parametres.dc.html' }] },
+];
+const active = 'dashboard';
+
+function buildNavHTML(sections, forMobile) {
+  return sections.map(sec => `
+    <div>
+      <div class="sidebar-sec-title">${sec.title}</div>
+      <div class="sidebar-sec-items">
+        ${sec.items.map(it => {
+          const isActive = it.key === active;
+          const cls = isActive ? 'nav-item active' : 'nav-item';
+          return `<a href="${it.href}" class="${cls}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[it.key]}"/></svg>
+            <span class="nav-item-label">${it.label}</span>
+            ${it.count ? `<span class="nav-badge">${it.count}</span>` : ''}
+          </a>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('sidebarNav').innerHTML = buildNavHTML(NAV_SECTIONS, false);
+document.getElementById('mobileNav').innerHTML = buildNavHTML(NAV_SECTIONS, true);
+
+// ── KPI cards ──────────────────────────────────────────────────────────────
+const encaisse = FACTURES.filter(f => f.statut === 'Payée').reduce((s, f) => s + f.montant, 0);
+const devisEnCours = DEVIS.filter(d => ['Brouillon', 'Envoyé'].includes(d.statut));
+const projetsActifs = PROJETS.filter(p => ['En cours', 'Planifié'].includes(p.statut)).length;
+const vipActifs = VIP_MEMBERS.filter(v => v.statut === 'Actif').length;
+
+document.getElementById('kpiRevenue').textContent = fmtUsd(encaisse);
+document.getElementById('kpiRevenueDelta').innerHTML = `<span style="font-weight:700;color:#177E54">${FACTURES.filter(f => f.statut === 'Payée').length} factures</span> payées`;
+document.getElementById('kpiDevis').textContent = String(devisEnCours.length);
+document.getElementById('kpiDevisDelta').innerHTML = `<span style="font-weight:700;color:#B07800">${fmtUsd(devisEnCours.reduce((s, d) => s + d.montant, 0))}</span> en négociation`;
+document.getElementById('kpiProjets').textContent = String(projetsActifs);
+document.getElementById('kpiProjetsDelta').innerHTML = `<span style="font-weight:700;color:#1E78A8">${PROJETS.filter(p => p.statut === 'Terminé').length}</span> terminés`;
+document.getElementById('kpiVip').textContent = String(vipActifs);
+document.getElementById('kpiVipDelta').innerHTML = `<span style="font-weight:700;color:#B07800">${VIP_MEMBERS.length}</span> cartes NFC total`;
+
+// ── Pipeline ───────────────────────────────────────────────────────────────
+const conv = (arr, st) => arr.length ? Math.round(arr.filter(x => x.statut === st).length / arr.length * 100) + '%' : null;
+const stages = [
+  { label: 'Devis', note: 'en cours de validité', value: devisEnCours.length, conv: conv(DEVIS, 'Accepté'), bg: 'rgba(30,159,216,.07)', border: 'rgba(30,159,216,.25)', labelColor: '#1E78A8', numColor: '#1E9FD8' },
+  { label: 'Factures', note: 'émises', value: FACTURES.length, conv: conv(FACTURES, 'Payée'), bg: 'rgba(244,168,0,.07)', border: 'rgba(244,168,0,.30)', labelColor: '#9A6B00', numColor: '#B07800' },
+  { label: 'Projets', note: 'lancés et suivis', value: PROJETS.length, conv: null, bg: 'rgba(188,0,13,.05)', border: 'rgba(188,0,13,.22)', labelColor: '#93000A', numColor: '#BC000D' },
+];
+document.getElementById('pipelineStages').innerHTML = stages.map((p, i) => `
+  <div class="pipeline-stage">
+    <div class="pipeline-item" style="background:${p.bg};border-color:${p.border}">
+      <div>
+        <div class="pipeline-item-label" style="color:${p.labelColor}">${p.label}</div>
+        <div class="pipeline-item-note">${p.note}</div>
+      </div>
+      <div class="pipeline-item-num" style="color:${p.numColor}">${p.value}</div>
+    </div>
+    ${p.conv ? `<div class="pipeline-arrow">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8896A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <span class="pipeline-conv">${p.conv}</span>
+    </div>` : ''}
+  </div>
+`).join('');
+
+// ── Revenue chart ──────────────────────────────────────────────────────────
+const MONTHS = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
+const LABELS = ['Jan','Fév','Mar','Avr','Mai','Juin'];
+const cur = '2026-06';
+const totals = MONTHS.map(m => {
+  const paid = FACTURES.filter(f => f.statut === 'Payée' && (f.echeance||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0);
+  const pend = m === cur ? FACTURES.filter(f => ['En attente','En retard'].includes(f.statut) && (f.echeance||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0) : 0;
+  return { val: paid + pend, isCurrent: m === cur };
+});
+const maxVal = Math.max(...totals.map(t => t.val), 1000);
+const objVal = maxVal * 1.25;
+const objY = Math.round(160 - (maxVal / objVal) * 140);
+
+const bars = totals.map((t, i) => {
+  const x = 20 + i * 87, cx = x + 22;
+  const h = Math.round((t.val / objVal) * 140);
+  const y = 160 - h;
+  const fill = t.isCurrent ? '#BC000D' : '#3D5A6C';
+  const short = t.val > 0 ? (t.val >= 1000 ? '$' + (t.val/1000).toFixed(1) + 'k' : '$' + t.val) : '';
+  return { x, cx, y: h > 0 ? y : 160, h: Math.max(h,0), fill, hasLabel: t.val > 0, short, labelY: Math.max(y-5, 14),
+    month: LABELS[i], monthColor: t.isCurrent ? '#091D2E' : '#5B6B77', monthWeight: t.isCurrent ? '700' : '400' };
+});
+
+document.getElementById('revenueChart').innerHTML = `
+  <line x1="0" y1="160" x2="560" y2="160" stroke="rgba(37,67,84,.15)" stroke-width="1"/>
+  <line x1="0" y1="110" x2="560" y2="110" stroke="rgba(37,67,84,.07)" stroke-width="1"/>
+  <line x1="0" y1="60" x2="560" y2="60" stroke="rgba(37,67,84,.07)" stroke-width="1"/>
+  <line x1="14" y1="${objY}" x2="546" y2="${objY}" stroke="#F4A800" stroke-width="2.5" stroke-dasharray="7 5"/>
+  ${bars.map(b => `
+    <rect x="${b.x}" y="${b.y}" width="44" height="${b.h}" rx="3" fill="${b.fill}"/>
+    ${b.hasLabel ? `<text x="${b.cx}" y="${b.labelY}" text-anchor="middle" font-family="JetBrains Mono" font-size="10" font-weight="700" fill="${b.fill}">${b.short}</text>` : ''}
+    <text x="${b.cx}" y="178" text-anchor="middle" font-family="Open Sans" font-size="11" fill="${b.monthColor}" font-weight="${b.monthWeight}">${b.month}</text>
+  `).join('')}
+`;
+
+// ── Recent docs ────────────────────────────────────────────────────────────
+const allDocs = [
+  ...DEVIS.map(d => ({ ref: d.ref, client: clientNom(d.clientId), objet: d.objet, montant: fmtUsd(d.montant), statut: d.statut, href: 'Devis.dc.html', date: d.date })),
+  ...FACTURES.map(f => ({ ref: f.ref, client: clientNom(f.clientId), objet: f.objet, montant: fmtUsd(f.montant), statut: f.statut, href: 'Factures.dc.html', date: f.echeance })),
+].sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,5);
+
+document.getElementById('recentDocs').innerHTML = allDocs.map(d => {
+  const b = badge(d.statut);
+  return `<a href="${d.href}" class="docs-row">
+    <span class="docs-ref">${d.ref}</span>
+    <span class="docs-client">${d.client}</span>
+    <span class="docs-objet">${d.objet}</span>
+    <span class="docs-montant">${d.montant}</span>
+    <span class="docs-statut"><span class="status-badge" style="background:${b.bg};color:${b.color}">${d.statut}</span></span>
+  </a>`;
+}).join('');
+
+// ── Deadlines ──────────────────────────────────────────────────────────────
+const deadlines = [
+  ...FACTURES.filter(f => ['En retard','En attente'].includes(f.statut)).map(f => ({
+    titre: f.ref + (f.statut === 'En retard' ? ' — en retard' : ' — échéance'),
+    detail: clientNom(f.clientId) + ' · ' + fmtUsd(f.montant),
+    date: dateFr(f.echeance).toUpperCase(), dot: f.statut === 'En retard' ? '#BC000D' : '#F4A800',
+    dateColor: f.statut === 'En retard' ? '#BC000D' : '#9A6B00',
+  })),
+  ...CONTRATS.filter(c => c.statut === 'Expire bientôt' && c.expire).map(c => ({
+    titre: c.ref + ' — expiration', detail: clientNom(c.clientId) + ' · ' + c.type,
+    date: dateFr(c.expire).toUpperCase(), dot: '#F4A800', dateColor: '#9A6B00',
+  })),
+  ...EVENEMENTS.filter(e => e.statut !== 'Terminé').slice(0,2).map(e => ({
+    titre: e.nom.length > 42 ? e.nom.slice(0,39) + '…' : e.nom,
+    detail: e.lieu + ' · ' + e.type, date: dateFr(e.dateDebut).toUpperCase(),
+    dot: '#1E9FD8', dateColor: '#1E78A8',
+  })),
+].slice(0,5);
+
+document.getElementById('deadlinesList').innerHTML = deadlines.map(dl => `
+  <div class="deadline-item">
+    <span class="deadline-dot" style="background:${dl.dot}"></span>
+    <div class="deadline-body">
+      <div class="deadline-name">${dl.titre}</div>
+      <div class="deadline-detail">${dl.detail}</div>
+    </div>
+    <span class="deadline-date" style="color:${dl.dateColor}">${dl.date}</span>
+  </div>
+`).join('');
+
+// ── Notifications ──────────────────────────────────────────────────────────
+let notifs = [
+  { id:1, texte:'Facture FAC-2026-019 en retard — Mazembe Corp', date:'il y a 2 h', href:'Factures.dc.html', read:false, accent:'#BC000D' },
+  { id:2, texte:'Devis DEV-2026-039 accepté — Académie Les Aiglons', date:'il y a 5 h', href:'Devis.dc.html', read:false, accent:'#177E54' },
+  { id:3, texte:'Carte VIP de B. Kalala expire bientôt', date:'hier', href:'Membres VIP.dc.html', read:false, accent:'#F4A800' },
+  { id:4, texte:'Contrat CTR-2026-013 expire le 15 août', date:'hier', href:'Contrats.dc.html', read:true, accent:'#1E9FD8' },
+];
+
+function renderNotifs() {
+  const unread = notifs.filter(n => !n.read).length;
+  const badge = document.getElementById('notifBadge');
+  if (unread > 0) { badge.textContent = String(unread); badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+  document.getElementById('notifList').innerHTML = notifs.map(n => `
+    <a href="${n.href}" class="notif-item" style="background:${n.read ? '#fff' : 'rgba(30,159,216,.05)'}">
+      <span class="notif-dot" style="background:${n.accent}"></span>
+      <span><span class="notif-text">${n.texte}</span><span class="notif-date">${n.date}</span></span>
+    </a>
+  `).join('');
+}
+renderNotifs();
+
+document.getElementById('markAllReadBtn').addEventListener('click', () => {
+  notifs = notifs.map(n => ({ ...n, read: true }));
+  renderNotifs();
+});
+
+// ── Search ────────────────────────────────────────────────────────────────
+const searchInput = document.getElementById('searchInput');
+const searchPanel = document.getElementById('searchPanel');
+const initials = (nom) => nom.split(' ').filter(Boolean).map(p => p[0]).join('').slice(0,2).toUpperCase();
+
+const docs = [
+  ...DEVIS.map(d => ({ ref: d.ref, objet: d.objet, href: 'Devis.dc.html' })),
+  ...FACTURES.map(f => ({ ref: f.ref, objet: f.objet, href: 'Factures.dc.html' })),
+  ...CONTRATS.map(c => ({ ref: c.ref, objet: c.type, href: 'Contrats.dc.html' })),
+];
+
+function updateSearch() {
+  const sq = searchInput.value.trim().toLowerCase();
+  if (!sq) { searchPanel.classList.remove('open'); return; }
+  const pageItems = NAV_SECTIONS.flatMap(s => s.items).filter(it => it.label.toLowerCase().includes(sq)).slice(0,4)
+    .map(it => ({ label: it.label, sub: 'Écran', href: it.href, badge: it.label.charAt(0), iconBg: 'rgba(37,67,84,.10)', iconColor: '#254354' }));
+  const cliItems = CLIENTS.filter(c => c.nom.toLowerCase().includes(sq)).slice(0,4)
+    .map(c => ({ label: c.nom, sub: c.type + ' · ' + c.ville, href: 'Clients.dc.html', badge: initials(c.nom), iconBg: 'rgba(30,159,216,.14)', iconColor: '#1E78A8' }));
+  const docItems = docs.filter(d => (d.ref + ' ' + d.objet).toLowerCase().includes(sq)).slice(0,4)
+    .map(d => ({ label: d.ref, sub: d.objet, href: d.href, badge: d.ref.charAt(0), iconBg: 'rgba(244,168,0,.16)', iconColor: '#9A6B00' }));
+  const groups = [{ title: 'Écrans', items: pageItems }, { title: 'Clients', items: cliItems }, { title: 'Documents', items: docItems }].filter(g => g.items.length > 0);
+  if (groups.length === 0) {
+    searchPanel.innerHTML = `<div class="search-no-results">Aucun résultat pour « ${sq} »</div>`;
+  } else {
+    searchPanel.innerHTML = groups.map(g => `
+      <div>
+        <div class="search-group-title">${g.title}</div>
+        ${g.items.map(r => `<a href="${r.href}" class="search-result">
+          <span class="search-result-icon" style="background:${r.iconBg};color:${r.iconColor}">${r.badge}</span>
+          <span><span class="search-result-label">${r.label}</span><span class="search-result-sub">${r.sub}</span></span>
+        </a>`).join('')}
+      </div>
+    `).join('');
+  }
+  searchPanel.classList.add('open');
+}
+
+searchInput.addEventListener('input', updateSearch);
+searchInput.addEventListener('focus', updateSearch);
+document.addEventListener('click', e => {
+  if (!e.target.closest('.topbar-search')) searchPanel.classList.remove('open');
+});
+
+// ── Dropdown toggles ──────────────────────────────────────────────────────
+function setupDropdown(btnId, panelId, exclusions = []) {
+  const btn = document.getElementById(btnId);
+  const panel = document.getElementById(panelId);
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = panel.classList.contains('open');
+    // close all
+    document.querySelectorAll('.dropdown-panel.open').forEach(p => p.classList.remove('open'));
+    if (!isOpen) panel.classList.add('open');
+  });
+}
+
+setupDropdown('createBtn', 'createMenu');
+setupDropdown('notifBtn', 'notifPanel');
+setupDropdown('profileBtn', 'profileMenu');
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown-wrapper')) {
+    document.querySelectorAll('.dropdown-panel.open').forEach(p => p.classList.remove('open'));
+  }
+});
+
+// ── Mobile nav ────────────────────────────────────────────────────────────
+const overlay = document.getElementById('mobileOverlay');
+const openMobile = () => overlay.classList.add('open');
+const closeMobile = () => overlay.classList.remove('open');
+
+document.getElementById('hamburgerBtn').addEventListener('click', openMobile);
+document.getElementById('mobileClose').addEventListener('click', closeMobile);
+document.getElementById('mobileBackdrop').addEventListener('click', closeMobile);
+</script>
+</body>
+</html>
