@@ -159,7 +159,7 @@ export default function Clients() {
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button onClick={() => openEditDrawer(client)} style={{ background: 'var(--white)', color: 'var(--navy-deep)', border: '1px solid var(--border-input)', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Éditer le profil</button>
-            <button onClick={() => navigate('/devis')} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>+ Nouveau devis</button>
+            <button onClick={() => navigate(`/devis?clientId=${client.id}`)} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>+ Nouveau devis</button>
           </div>
         </div>
 
@@ -414,7 +414,7 @@ export default function Clients() {
                       <span style={{ display: 'block', fontFamily: 'var(--font-jetbrains)', fontSize: '11px', color: 'var(--text-3)' }}>{c.tel}</span>
                     </span>
                     <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(clientCA(c.id))}</span>
-                    <span style={{ textAlign: 'right', fontSize: '12px', color: 'var(--text-2)' }}>{factures.filter(f => f.clientId === c.id).length}</span>
+                    <span style={{ textAlign: 'right', fontSize: '12px', color: 'var(--text-2)' }}>{devis.filter(d => d.clientId === c.id).length + factures.filter(f => f.clientId === c.id).length + contrats.filter(ct => ct.clientId === c.id).length}</span>
                     <span style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px' }}>
                       <button onClick={(e) => handleDeleteClient(e, c)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-3)' }} title="Supprimer" onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>

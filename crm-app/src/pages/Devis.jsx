@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { STATUT_BADGE, fmtUsd, dateFr, nextNumero } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
 import StatusBadge from '../components/ui/StatusBadge';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import EmptyState from '../components/ui/EmptyState';
+import { FormSection, FormRow, TextField, TextareaField, AmountField, DateField, TypeCards, EntitySelector, ValidationSummary } from '../components/ui/FormControls';
 
 const STATUTS = ['Tous', 'Brouillon', 'Envoyé', 'Accepté', 'Converti', 'Expiré'];
 
@@ -22,10 +23,38 @@ export default function Devis() {
   const [editTarget, setEditTarget] = useState(null);
   const [fClient, setFClient] = useState('');
   const [fObjet, setFObjet] = useState('');
+  const [fDescription, setFDescription] = useState('');
   const [fMontant, setFMontant] = useState('');
+  const [fDateEmission, setFDateEmission] = useState('');
+  const [fExpiration, setFExpiration] = useState('');
+  const [fStatut, setFStatut] = useState('Brouillon');
+  const [errors, setErrors] = useState({});
 
-  const openCreate = () => { setEditTarget(null); setFClient(''); setFObjet(''); setFMontant(''); setIsDrawerOpen(true); };
-  const openEdit = (d) => { setEditTarget(d); setFClient(String(d.clientId)); setFObjet(d.objet); setFMontant(String(d.montant)); setIsDrawerOpen(true); };
+  const today = () => new Date().toISOString().slice(0,10);
+  const addDays = (n) => { const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const preId = searchParams.get('clientId');
+    if (preId) {
+      setFClient(preId); setFObjet(''); setFDescription(''); setFMontant('');
+      setFDateEmission(today()); setFExpiration(addDays(30)); setFStatut('Brouillon');
+      setEditTarget(null); setErrors({}); setIsDrawerOpen(true);
+    }
+  }, []);
+
+  const openCreate = () => {
+    setEditTarget(null); setFClient(''); setFObjet(''); setFDescription('');
+    setFMontant(''); setFDateEmission(today()); setFExpiration(addDays(30));
+    setFStatut('Brouillon'); setErrors({}); setIsDrawerOpen(true);
+  };
+  const openEdit = (d) => {
+    if (d.statut === 'Converti') { addToast('Un devis converti ne peut plus être modifié.', 'error'); return; }
+    setEditTarget(d); setFClient(String(d.clientId)); setFObjet(d.objet);
+    setFDescription(d.description || ''); setFMontant(String(d.montant));
+    setFDateEmission(d.date || today()); setFExpiration(d.expiration || addDays(30));
+    setFStatut(d.statut); setErrors({}); setIsDrawerOpen(true);
+  };
 
   const filtered = devis.filter(d => {
     const matchFilter = filter === 'Tous' || d.statut === filter;
@@ -37,18 +66,22 @@ export default function Devis() {
   const totalAccepte = devis.filter(d => d.statut === 'Accepté').reduce((s,d) => s+d.montant,0);
 
   const handleSave = () => {
-    if (!fObjet.trim() || !fMontant) { addToast('Remplissez tous les champs requis', 'error'); return; }
+    const errs = {};
+    if (!fClient) errs.client = 'Veuillez sélectionner un client';
+    if (!fObjet.trim()) errs.objet = "L'objet est requis";
+    if (!fMontant || Number(fMontant) <= 0) errs.montant = 'Montant requis (> 0)';
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     if (editTarget) {
-      dispatch({ type: 'UPDATE_DEVIS', payload: { ...editTarget, clientId: Number(fClient) || editTarget.clientId, objet: fObjet, montant: Number(fMontant) } });
+      dispatch({ type: 'UPDATE_DEVIS', payload: { ...editTarget, clientId: Number(fClient), objet: fObjet, description: fDescription, montant: Number(fMontant), date: fDateEmission, expiration: fExpiration, statut: fStatut } });
       addToast('Devis mis à jour.');
     } else {
-      const now = new Date().toISOString().slice(0,10);
       const nextRef = nextNumero('DEV-', new Date().getFullYear(), devis.map(d => d.ref));
-      dispatch({ type: 'ADD_DEVIS', payload: { ref: nextRef, clientId: Number(fClient) || 1, objet: fObjet, montant: Number(fMontant), statut: 'Brouillon', date: now } });
+      dispatch({ type: 'ADD_DEVIS', payload: { ref: nextRef, clientId: Number(fClient), objet: fObjet, description: fDescription, montant: Number(fMontant), statut: 'Brouillon', date: fDateEmission, expiration: fExpiration } });
       addToast('Devis créé avec succès !');
     }
     setIsDrawerOpen(false);
-    setFObjet(''); setFMontant(''); setFClient('');
   };
 
   const handleConvert = (e, devisToConvert) => {
@@ -202,31 +235,79 @@ export default function Devis() {
       </div>
 
       {/* Drawer */}
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editTarget ? 'Modifier le devis' : 'Créer un devis'} width="460px"
+      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editTarget ? 'Modifier le devis' : 'Nouveau devis'} width="520px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
-            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>{editTarget ? 'Enregistrer' : 'Créer le devis'}</button>
+            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>{editTarget ? 'Enregistrer les modifications' : 'Créer le devis'}</button>
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Client <span style={{ color: 'var(--red)' }}>*</span></span>
-            <select value={fClient} onChange={e => setFClient(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-              <option value="">— Choisir un client —</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
-            </select>
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Objet <span style={{ color: 'var(--red)' }}>*</span></span>
-            <input type="text" value={fObjet} onChange={e => setFObjet(e.target.value)} placeholder="Ex. Tournoi corporate — Stade des Martyrs" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Montant USD <span style={{ color: 'var(--red)' }}>*</span></span>
-            <input type="number" value={fMontant} onChange={e => setFMontant(e.target.value)} placeholder="0" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px', fontFamily: 'var(--font-jetbrains)' }} />
-          </label>
-        </div>
+        <ValidationSummary errors={errors} />
+
+        <FormSection title="Identification commerciale" subtitle="Client et objet de la proposition">
+          <EntitySelector
+            label="Client" value={fClient} onChange={setFClient} required
+            options={clients} error={errors.client}
+            placeholder="Rechercher un client…"
+          />
+          <TextField
+            label="Objet" value={fObjet} onChange={setFObjet} required
+            placeholder="Ex. Activation sponsoring — Tournoi International" maxLength={100}
+            error={errors.objet}
+          />
+          <TextareaField
+            label="Description (optionnelle)" value={fDescription} onChange={setFDescription}
+            placeholder="Détails de la prestation, conditions particulières…" rows={3} maxLength={500}
+          />
+        </FormSection>
+
+        <FormSection title="Montant & Validité" subtitle="Valeur et période de validité du devis">
+          <AmountField label="Montant" value={fMontant} onChange={setFMontant} required error={errors.montant} hint="Montant hors taxes en USD" />
+          <FormRow>
+            <DateField label="Date d'émission" value={fDateEmission} onChange={setFDateEmission} required />
+            <DateField
+              label="Date d'expiration" value={fExpiration} onChange={setFExpiration}
+              shortcuts={[
+                { label: '+15 j', value: addDays(15) },
+                { label: '+30 j', value: addDays(30) },
+                { label: '+45 j', value: addDays(45) },
+              ]}
+              hint="Validité de l'offre"
+            />
+          </FormRow>
+        </FormSection>
+
+        {editTarget && (
+          <FormSection title="Statut du devis">
+            <TypeCards label="Statut" value={fStatut} onChange={setFStatut} options={[
+              { value: 'Brouillon', label: 'Brouillon', icon: '✏️', color: 'var(--text-2)', bg: 'var(--bg-page)' },
+              { value: 'Envoyé', label: 'Envoyé', icon: '📤', color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' },
+              { value: 'Accepté', label: 'Accepté', icon: '✅', color: 'var(--success)', bg: 'rgba(23,126,84,0.08)' },
+              { value: 'Expiré', label: 'Expiré', icon: '⌛', color: 'var(--red)', bg: 'rgba(188,0,13,0.06)' },
+            ]} />
+          </FormSection>
+        )}
+
+        {fMontant > 0 && fClient && (
+          <div style={{ background: 'var(--bg-page)', borderRadius: '8px', padding: '14px 16px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '8px' }}>Récapitulatif</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px' }}>
+              <span style={{ color: 'var(--text-2)' }}>Client</span>
+              <span style={{ fontWeight: 700 }}>{clients.find(c => String(c.id) === String(fClient))?.nom || '—'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginTop: '6px' }}>
+              <span style={{ color: 'var(--text-2)' }}>Montant</span>
+              <span style={{ fontFamily: 'var(--font-jetbrains)', fontWeight: 700, color: 'var(--navy-deep)', fontSize: '15px' }}>{fmtUsd(Number(fMontant))}</span>
+            </div>
+            {fExpiration && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginTop: '6px' }}>
+                <span style={{ color: 'var(--text-2)' }}>Expire le</span>
+                <span style={{ fontFamily: 'var(--font-jetbrains)' }}>{dateFr(fExpiration)}</span>
+              </div>
+            )}
+          </div>
+        )}
       </Drawer>
     </div>
   );

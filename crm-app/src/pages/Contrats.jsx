@@ -5,6 +5,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/ui/EmptyState';
+import { FormSection, FormRow, AmountField, DateField, TypeCards, EntitySelector, ValidationSummary } from '../components/ui/FormControls';
 
 
 const TYPES_CONTRAT = ['Représentation', 'Sponsoring', 'Prestation'];
@@ -23,8 +24,25 @@ export default function Contrats() {
   const [fExpire, setFExpire] = useState('');
   const [fStatut, setFStatut] = useState('Brouillon');
 
-  const openCreate = () => { setEditTarget(null); setFClient(''); setFType('Représentation'); setFValeur(''); setFExpire(''); setFStatut('Brouillon'); setIsDrawerOpen(true); };
-  const openEdit = (c) => { setEditTarget(c); setFClient(String(c.clientId)); setFType(c.type); setFValeur(String(c.valeur)); setFExpire(c.expire || ''); setFStatut(c.statut); setIsDrawerOpen(true); };
+  const [fPartyMode, setFPartyMode] = useState('client');
+  const [errors, setErrors] = useState({});
+  const addDays = (n) => { const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+  const addMonths = (n) => { const d = new Date(); d.setMonth(d.getMonth()+n); return d.toISOString().slice(0,10); };
+  const [fDateDebut, setFDateDebut] = useState('');
+
+  const openCreate = () => {
+    setEditTarget(null); setFClient(''); setFType('Représentation'); setFValeur('');
+    setFExpire(addMonths(12)); setFStatut('Brouillon');
+    setFPartyMode('client'); setFDateDebut(new Date().toISOString().slice(0,10));
+    setErrors({}); setIsDrawerOpen(true);
+  };
+  const openEdit = (c) => {
+    setEditTarget(c); setFClient(String(c.clientId)); setFType(c.type); setFValeur(String(c.valeur));
+    setFExpire(c.expire || ''); setFStatut(c.statut);
+    setFPartyMode(athletes.some(a => a.id === c.clientId) ? 'athlete' : 'client');
+    setFDateDebut(c.dateDebut || new Date().toISOString().slice(0,10));
+    setErrors({}); setIsDrawerOpen(true);
+  };
 
   const filtered = items.filter(d => {
     const matchType = filterType === 'Tous' || d.type === filterType;
@@ -33,17 +51,25 @@ export default function Contrats() {
   });
 
   const handleSave = () => {
-    if (!fValeur) { addToast('Remplissez tous les champs requis', 'error'); return; }
+    const errs = {};
+    if (!fClient) errs.client = 'Veuillez sélectionner une partie contractante';
+    if (!fValeur || Number(fValeur) <= 0) errs.valeur = 'Valeur contractuelle requise (> 0)';
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
     if (editTarget) {
-      dispatch({ type: 'UPDATE_CONTRAT', payload: { ...editTarget, clientId: Number(fClient) || editTarget.clientId, type: fType, valeur: Number(fValeur), expire: fExpire, statut: fStatut } });
+      dispatch({ type: 'UPDATE_CONTRAT', payload: { ...editTarget, clientId: Number(fClient), type: fType, valeur: Number(fValeur), dateDebut: fDateDebut, expire: fExpire, statut: fStatut } });
       addToast('Contrat mis à jour.');
     } else {
       const nextRef = nextNumero('CTR-', new Date().getFullYear(), items.map(c => c.ref));
-      dispatch({ type: 'ADD_CONTRAT', payload: { ref: nextRef, clientId: Number(fClient) || 1, type: fType, valeur: Number(fValeur), statut: fStatut, expire: fExpire } });
+      dispatch({ type: 'ADD_CONTRAT', payload: { ref: nextRef, clientId: Number(fClient), type: fType, valeur: Number(fValeur), statut: fStatut, dateDebut: fDateDebut, expire: fExpire } });
+      const linkedAthlete = athletes.find(a => a.id === Number(fClient));
+      if (linkedAthlete && fType === 'Représentation') {
+        dispatch({ type: 'UPDATE_ATHLETE', payload: { ...linkedAthlete, contractRef: nextRef } });
+      }
       addToast('Contrat créé avec succès !');
     }
     setIsDrawerOpen(false);
-    setFValeur(''); setFExpire(''); setFClient(''); setFType('Représentation'); setFStatut('Brouillon');
   };
 
   const handleDelete = (e, c) => {
@@ -144,50 +170,80 @@ export default function Contrats() {
         </div>
       </div>
 
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editTarget ? 'Modifier le contrat' : 'Nouveau contrat'} width="460px"
+      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editTarget ? 'Modifier le contrat' : 'Nouveau contrat'} width="520px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
-            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>{editTarget ? 'Enregistrer' : 'Créer le contrat'}</button>
+            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>{editTarget ? 'Enregistrer les modifications' : 'Créer le contrat'}</button>
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Client</span>
-            <select value={fClient} onChange={e => setFClient(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-              <option value="">— Choisir une entité —</option>
-              <optgroup label="Clients B2B">
-                {clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
-              </optgroup>
-              <optgroup label="Athlètes">
-                {athletes.map(a => <option key={a.id} value={a.id}>{a.nom}</option>)}
-              </optgroup>
-            </select>
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Type</span>
-              <select value={fType} onChange={e => setFType(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-                {TYPES_CONTRAT.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Valeur USD</span>
-              <input type="number" value={fValeur} onChange={e => setFValeur(e.target.value)} placeholder="0" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
+        <ValidationSummary errors={errors} />
+
+        <FormSection title="Partie contractante" subtitle="Sélectionnez le type de relation">
+          <TypeCards label="Type de partie" value={fPartyMode} onChange={(v) => { setFPartyMode(v); setFClient(''); }} options={[
+            { value: 'client', label: 'Client B2B', icon: '🏢', color: 'var(--navy-deep)', bg: 'rgba(37,67,84,0.08)' },
+            { value: 'athlete', label: 'Athlète', icon: '⚽', color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' },
+          ]} />
+          <EntitySelector
+            label={fPartyMode === 'athlete' ? 'Athlète' : 'Client'}
+            value={fClient} onChange={setFClient} required
+            options={(fPartyMode === 'athlete' ? athletes : clients).map(e => ({ id: e.id, nom: e.nom, type: fPartyMode === 'athlete' ? (e.poste || 'Athlète') : (e.type || 'B2B'), ville: e.club || e.ville || '' }))}
+            placeholder={fPartyMode === 'athlete' ? 'Rechercher un athlète…' : 'Rechercher un client…'}
+            error={errors.client}
+          />
+        </FormSection>
+
+        <FormSection title="Nature du contrat" subtitle="Type et valeur de l'engagement">
+          <TypeCards label="Type de contrat" value={fType} onChange={setFType} options={[
+            { value: 'Représentation', label: 'Représentation', icon: '🤝', color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' },
+            { value: 'Sponsoring', label: 'Sponsoring', icon: '💼', color: 'var(--gold)', bg: 'rgba(244,168,0,0.08)' },
+            { value: 'Prestation', label: 'Prestation', icon: '🎯', color: 'var(--navy-mid)', bg: 'rgba(37,67,84,0.08)' },
+          ]} />
+          <AmountField label="Valeur contractuelle" value={fValeur} onChange={setFValeur} required error={errors.valeur} hint="Valeur totale ou annuelle du contrat" />
+        </FormSection>
+
+        <FormSection title="Durée & Validité" subtitle="Période d'engagement">
+          <FormRow>
+            <DateField label="Date de prise d'effet" value={fDateDebut} onChange={setFDateDebut} required />
+            <DateField
+              label="Date d'expiration" value={fExpire} onChange={setFExpire}
+              shortcuts={[
+                { label: '6 mois', value: addMonths(6) },
+                { label: '1 an', value: addMonths(12) },
+                { label: '2 ans', value: addMonths(24) },
+              ]}
+            />
+          </FormRow>
+          {fDateDebut && fExpire && (
+            <div style={{ fontSize: '11.5px', color: 'var(--text-3)', padding: '6px 10px', background: 'var(--bg-page)', borderRadius: '5px' }}>
+              Durée : {Math.max(0, Math.round((new Date(fExpire) - new Date(fDateDebut)) / (1000*60*60*24*30)))} mois
+            </div>
+          )}
+        </FormSection>
+
+        <FormSection title="Statut du contrat">
+          <TypeCards label="Statut" value={fStatut} onChange={setFStatut} options={[
+            { value: 'Brouillon', label: 'Brouillon', icon: '✏️', color: 'var(--text-2)', bg: 'var(--bg-page)' },
+            { value: 'Signé', label: 'Signé', icon: '✅', color: 'var(--success)', bg: 'rgba(23,126,84,0.08)' },
+            { value: 'Expire bientôt', label: 'Expire bientôt', icon: '⌛', color: 'var(--gold)', bg: 'rgba(244,168,0,0.08)' },
+            { value: 'Expiré', label: 'Expiré', icon: '🔴', color: 'var(--red)', bg: 'rgba(188,0,13,0.06)' },
+          ]} />
+        </FormSection>
+
+        {fValeur > 0 && (
+          <div style={{ background: 'var(--bg-page)', borderRadius: '8px', padding: '14px 16px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '8px' }}>Récapitulatif</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px' }}>
+              <span style={{ color: 'var(--text-2)' }}>Type</span>
+              <span style={{ fontWeight: 700 }}>{fType}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginTop: '6px' }}>
+              <span style={{ color: 'var(--text-2)' }}>Valeur</span>
+              <span style={{ fontFamily: 'var(--font-jetbrains)', fontWeight: 700, color: 'var(--navy-deep)', fontSize: '15px' }}>{fmtUsd(Number(fValeur))}</span>
+            </div>
           </div>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Date d'expiration</span>
-            <input type="date" value={fExpire} onChange={e => setFExpire(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Statut</span>
-            <select value={fStatut} onChange={e => setFStatut(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-              {['Brouillon', 'Signé', 'Expire bientôt', 'Expiré'].map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </label>
-        </div>
+        )}
       </Drawer>
     </div>
   );

@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   fmtUsd, dateFr, STATUT_BADGE
@@ -10,9 +9,17 @@ const badge = (st) => STATUT_BADGE[st] || { bg: 'rgba(37,67,84,.10)', color: '#4
 
 // Bar chart SVG
 function RevenueChart({ factures }) {
-  const MONTHS = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
-  const LABELS = ['Jan','Fév','Mar','Avr','Mai','Juin'];
-  const cur = '2026-06';
+  const MONTH_NAMES = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+  const MONTHS = (() => {
+    const result = []; const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      result.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+    return result;
+  })();
+  const LABELS = MONTHS.map(m => MONTH_NAMES[parseInt(m.split('-')[1]) - 1]);
+  const cur = MONTHS[MONTHS.length - 1];
 
   const totals = MONTHS.map(m => {
     const paid = factures.filter(f => f.statut === 'Payée' && (f.echeance||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0);
@@ -257,7 +264,7 @@ export default function Dashboard() {
           <div style={{ background: 'linear-gradient(140deg, #203243 0%, #254354 60%, #2D4A5C 100%)', borderRadius: '8px', padding: '20px', color: '#FFFFFF', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #F4A800, #BC000D)' }}></div>
             <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F4A800', marginBottom: '8px' }}>Programme VIP</div>
-            <div style={{ fontFamily: 'var(--font-oswald)', fontWeight: 600, fontSize: '19px', textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.25 }}>12 adhésions expirent en juillet</div>
+            <div style={{ fontFamily: 'var(--font-oswald)', fontWeight: 600, fontSize: '19px', textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.25 }}>{(() => { const n = vipMembers.filter(v => v.statut === 'Expire bientôt').length; return n > 0 ? `${n} adhésion${n > 1 ? 's' : ''} à renouveler` : 'Tous les membres VIP sont à jour'; })()}</div>
             <p style={{ margin: '8px 0 14px 0', fontSize: '12.5px', color: '#B9CBD8', lineHeight: 1.5 }}>Lancez la campagne de renouvellement avant le Tournoi International de décembre.</p>
             <Link to="/vip" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '34px', padding: '0 14px', background: '#F4A800', color: '#254354', borderRadius: '6px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none' }}>Gérer les renouvellements</Link>
           </div>

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { dateFr } from '../crm-data';
+import { dateFr, nextNumero } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
 import Drawer from '../components/ui/Drawer';
 import EmptyState from '../components/ui/EmptyState';
 import { useToast } from '../contexts/ToastContext';
 import StatusBadge from '../components/ui/StatusBadge';
+import { FormSection, FormRow, TextField, AmountField, DateField, TypeCards, EntitySelector, ValidationSummary } from '../components/ui/FormControls';
 
 const TYPE_CONFIG = {
   Tournoi:   { color: '#F4A800', bg: 'rgba(244,168,0,0.14)',  icon: '🏆', label: 'Tournoi' },
@@ -236,6 +237,8 @@ export default function Evenements() {
   const [fCapacite, setFCapacite] = useState('');
   const [fBudget, setFBudget] = useState('');
   const [fCategorie, setFCategorie] = useState('U17');
+  const [fStatut, setFStatut] = useState('Planification');
+  const [fClientId, setFClientId] = useState('');
 
   const clientNom = (id) => { if (!id) return '—'; const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
 
@@ -263,12 +266,17 @@ export default function Evenements() {
     );
   };
 
+  const [errors, setErrors] = useState({});
+  const today = () => new Date().toISOString().slice(0,10);
+
   const openDrawer = (kind) => {
     setEditTarget(null);
     setDrawerKind(kind);
     setFNom(''); setFType('Tournoi'); setFLieu('');
-    setFDateDebut(''); setFDateFin(''); setFCapacite(''); setFBudget('');
+    setFDateDebut(today()); setFDateFin(''); setFCapacite(''); setFBudget('');
     setFCategorie('U17');
+    setFStatut(kind === 'evenement' ? 'Planification' : 'Planifié');
+    setFClientId(''); setErrors({});
     setIsDrawerOpen(true);
   };
 
@@ -279,37 +287,44 @@ export default function Evenements() {
     setFLieu(item.lieu);
     setFDateDebut(item.dateDebut || '');
     setFDateFin(item.dateFin || '');
+    setFClientId(item.clientId ? String(item.clientId) : '');
     if (kind === 'evenement') {
       setFType(item.type || 'Tournoi');
       setFBudget(String(item.budget || ''));
       setFCapacite(String(item.capacite || ''));
+      setFStatut(item.statut || 'Planification');
     } else {
       setFCategorie(item.categorie || 'U17');
       setFCapacite(String(item.places || ''));
+      setFStatut(item.statut || 'Planifié');
     }
+    setErrors({});
     setIsDrawerOpen(true);
   };
 
   const handleSave = () => {
-    if (!fNom.trim() || !fLieu.trim() || !fDateDebut) {
-      addToast('Nom, lieu et date de début sont obligatoires', 'error');
-      return;
-    }
+    const errs = {};
+    if (!fNom.trim()) errs.nom = 'Le nom est requis';
+    if (!fLieu.trim()) errs.lieu = 'Le lieu est requis';
+    if (!fDateDebut) errs.dateDebut = 'La date de début est requise';
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    const year = new Date().getFullYear();
     if (editTarget) {
       const { item, kind } = editTarget;
       if (kind === 'evenement') {
-        dispatch({ type: 'UPDATE_EVENEMENT', payload: { ...item, nom: fNom, type: fType, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, budget: Number(fBudget) || 0, capacite: Number(fCapacite) || 0 } });
+        dispatch({ type: 'UPDATE_EVENEMENT', payload: { ...item, nom: fNom, type: fType, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, budget: Number(fBudget) || 0, capacite: Number(fCapacite) || 0, statut: fStatut, clientId: fClientId ? Number(fClientId) : null } });
       } else {
-        dispatch({ type: 'UPDATE_CAMP', payload: { ...item, nom: fNom, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, categorie: fCategorie, places: Number(fCapacite) || 0 } });
+        dispatch({ type: 'UPDATE_CAMP', payload: { ...item, nom: fNom, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, categorie: fCategorie, places: Number(fCapacite) || 0, statut: fStatut, clientId: fClientId ? Number(fClientId) : null } });
       }
       addToast(`"${fNom}" mis à jour.`);
     } else if (drawerKind === 'evenement') {
-      const nextId = 'EVT-' + String(evenements.length + 5).padStart(2, '0');
-      dispatch({ type: 'ADD_EVENEMENT', payload: { id: nextId, nom: fNom, type: fType, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, budget: Number(fBudget) || 0, statut: 'Planification', inscrits: 0, capacite: Number(fCapacite) || 0, clientId: null } });
+      const nextId = nextNumero('EVT-', year, evenements.map(e => e.id));
+      dispatch({ type: 'ADD_EVENEMENT', payload: { id: nextId, nom: fNom, type: fType, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, budget: Number(fBudget) || 0, statut: fStatut, inscrits: 0, capacite: Number(fCapacite) || 0, clientId: fClientId ? Number(fClientId) : null } });
       addToast(`Événement "${fNom}" créé !`);
     } else {
-      const nextId = 'CMP-' + String(camps.length + 4).padStart(2, '0');
-      dispatch({ type: 'ADD_CAMP', payload: { id: nextId, nom: fNom, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, categorie: fCategorie, places: Number(fCapacite) || 0, inscrits: 0, statut: 'Planifié', clientId: null, participants: [] } });
+      const nextId = nextNumero('CMP-', year, camps.map(c => c.id));
+      dispatch({ type: 'ADD_CAMP', payload: { id: nextId, nom: fNom, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, categorie: fCategorie, places: Number(fCapacite) || 0, inscrits: 0, statut: fStatut, clientId: fClientId ? Number(fClientId) : null, participants: [] } });
       addToast(`Camp "${fNom}" créé !`);
     }
     setIsDrawerOpen(false);
@@ -449,77 +464,91 @@ export default function Evenements() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         title={editTarget ? `Modifier ${drawerKind === 'evenement' ? "l'événement" : 'le camp'}` : drawerKind === 'evenement' ? 'Créer un événement' : 'Planifier un camp'}
-        width="460px"
+        width="520px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
             <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
-              {editTarget ? 'Enregistrer' : drawerKind === 'evenement' ? "Créer l'événement" : 'Planifier le camp'}
+              {editTarget ? 'Enregistrer les modifications' : drawerKind === 'evenement' ? "Créer l'événement" : 'Planifier le camp'}
             </button>
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Nom <span style={{ color: 'var(--red)' }}>*</span></span>
-            <input type="text" value={fNom} onChange={e => setFNom(e.target.value)}
-              placeholder={drawerKind === 'evenement' ? 'Ex. Tournoi International 2026' : 'Ex. Camp Élite U17'}
-              style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-          </label>
+        <ValidationSummary errors={errors} />
+
+        <FormSection title="Identité" subtitle={drawerKind === 'evenement' ? "Informations de l'événement" : "Informations du camp"}>
+          <TextField
+            label="Nom" value={fNom} onChange={setFNom} required
+            placeholder={drawerKind === 'evenement' ? 'Ex. Tournoi International 2026' : 'Ex. Camp Élite U17'}
+            error={errors.nom} maxLength={80}
+          />
 
           {drawerKind === 'evenement' ? (
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Type</span>
-              <select value={fType} onChange={e => setFType(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-                {EVT_TYPES.map(t => <option key={t} value={t}>{TYPE_CONFIG[t].icon} {t}</option>)}
-              </select>
-            </label>
+            <TypeCards label="Type d'événement" value={fType} onChange={setFType} options={[
+              { value: 'Tournoi', label: 'Tournoi', icon: '🏆', color: '#F4A800', bg: 'rgba(244,168,0,0.1)' },
+              { value: 'Gala', label: 'Gala', icon: '🎖️', color: '#254354', bg: 'rgba(37,67,84,0.1)' },
+              { value: 'Détection', label: 'Détection', icon: '🔍', color: '#177E54', bg: 'rgba(23,126,84,0.1)' },
+            ]} />
           ) : (
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Catégorie</span>
-              <select value={fCategorie} onChange={e => setFCategorie(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-                {CAMP_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </label>
+            <TypeCards label="Catégorie" value={fCategorie} onChange={setFCategorie} options={
+              CAMP_CATEGORIES.map(c => ({ value: c, label: c, color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' }))
+            } />
           )}
 
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Lieu <span style={{ color: 'var(--red)' }}>*</span></span>
-            <input type="text" value={fLieu} onChange={e => setFLieu(e.target.value)}
-              placeholder="Ex. Stade des Martyrs, Kinshasa"
-              style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-          </label>
+          <TextField
+            label="Lieu" value={fLieu} onChange={setFLieu} required
+            placeholder="Ex. Stade des Martyrs, Kinshasa"
+            error={errors.lieu}
+          />
+        </FormSection>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Date début <span style={{ color: 'var(--red)' }}>*</span></span>
-              <input type="date" value={fDateDebut} onChange={e => setFDateDebut(e.target.value)}
-                style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Date fin</span>
-              <input type="date" value={fDateFin} onChange={e => setFDateFin(e.target.value)}
-                style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-          </div>
+        <FormSection title="Dates" subtitle="Période de l'événement">
+          <FormRow>
+            <DateField label="Date de début" value={fDateDebut} onChange={setFDateDebut} required error={errors.dateDebut} />
+            <DateField label="Date de fin" value={fDateFin} onChange={setFDateFin} hint="Laisser vide = événement d'une journée" />
+          </FormRow>
+          {fDateDebut && fDateFin && fDateFin > fDateDebut && (
+            <div style={{ fontSize: '11.5px', color: 'var(--text-3)', padding: '6px 10px', background: 'var(--bg-page)', borderRadius: '5px' }}>
+              Durée : {Math.round((new Date(fDateFin) - new Date(fDateDebut)) / (1000*60*60*24))} jours
+            </div>
+          )}
+        </FormSection>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Capacité</span>
-              <input type="number" value={fCapacite} onChange={e => setFCapacite(e.target.value)}
-                placeholder="0"
-                style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
+        <FormSection title="Capacité & Budget">
+          <FormRow cols={drawerKind === 'evenement' ? '1fr 1fr' : '1fr'}>
+            <TextField
+              label={drawerKind === 'camp' ? 'Places disponibles' : 'Capacité'}
+              value={fCapacite} onChange={setFCapacite} type="number"
+              placeholder="0" hint="Nombre de participants max"
+            />
             {drawerKind === 'evenement' && (
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Budget ($)</span>
-                <input type="number" value={fBudget} onChange={e => setFBudget(e.target.value)}
-                  placeholder="0"
-                  style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px', fontFamily: 'var(--font-jetbrains)' }} />
-              </label>
+              <AmountField label="Budget prévisionnel" value={fBudget} onChange={setFBudget} hint="Budget total de l'événement" />
             )}
-          </div>
-        </div>
+          </FormRow>
+        </FormSection>
+
+        <FormSection title="Statut & Organisation">
+          <TypeCards label="Statut" value={fStatut} onChange={setFStatut} options={
+            drawerKind === 'evenement'
+              ? [
+                  { value: 'Planification', label: 'Planification', icon: '📋', color: 'var(--text-2)', bg: 'var(--bg-page)' },
+                  { value: 'Confirmé', label: 'Confirmé', icon: '✅', color: 'var(--success)', bg: 'rgba(23,126,84,0.08)' },
+                  { value: 'En cours', label: 'En cours', icon: '▶️', color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' },
+                  { value: 'Terminé', label: 'Terminé', icon: '🏁', color: 'var(--navy-mid)', bg: 'rgba(37,67,84,0.08)' },
+                ]
+              : [
+                  { value: 'Planifié', label: 'Planifié', icon: '📋', color: 'var(--text-2)', bg: 'var(--bg-page)' },
+                  { value: 'En cours', label: 'En cours', icon: '▶️', color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' },
+                  { value: 'Terminé', label: 'Terminé', icon: '🏁', color: 'var(--navy-mid)', bg: 'rgba(37,67,84,0.08)' },
+                ]
+          } />
+          {clients.length > 0 && (
+            <EntitySelector
+              label="Client associé (optionnel)" value={fClientId} onChange={setFClientId}
+              options={clients} placeholder="— Aucun client associé —"
+            />
+          )}
+        </FormSection>
       </Drawer>
     </div>
   );

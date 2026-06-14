@@ -190,6 +190,7 @@ export default function Athletes() {
   const [search, setSearch] = useState('');
   const [filterPoste, setFilterPoste] = useState('Tous');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [detailTab, setDetailTab] = useState('Profil');
   const addToast = useToast();
 
@@ -199,6 +200,13 @@ export default function Athletes() {
   const [fClub, setFClub] = useState('');
   const [fNationalite, setFNationalite] = useState('RDC');
   const [fValeur, setFValeur] = useState('');
+  const [fEmail, setFEmail] = useState('');
+  const [fTel, setFTel] = useState('');
+  const [fPied, setFPied] = useState('Droit');
+  const [fCommission, setFCommission] = useState('');
+
+  const openCreate = () => { setEditTarget(null); setFNom(''); setFAge(''); setFPoste('Attaquant'); setFClub(''); setFNationalite('RDC'); setFValeur(''); setFEmail(''); setFTel(''); setFPied('Droit'); setFCommission(''); setIsDrawerOpen(true); };
+  const openEdit = (a) => { setEditTarget(a); setFNom(a.nom); setFAge(String(a.age)); setFPoste(a.poste); setFClub(a.club); setFNationalite(a.nationalite); setFValeur(String(a.valeur)); setFEmail(a.email || ''); setFTel(a.tel || ''); setFPied(a.pied || 'Droit'); setFCommission(a.commissionPct ? String(a.commissionPct) : ''); setIsDrawerOpen(true); };
 
   const filtered = useMemo(() => {
     return athletes.filter(a => {
@@ -227,20 +235,16 @@ export default function Athletes() {
       addToast('Nom et Club sont obligatoires', 'error');
       return;
     }
-    const newAthlete = {
-      id: Date.now(),
-      nom: fNom, age: parseInt(fAge) || 20,
-      poste: fPoste, club: fClub,
-      valeur: Number(fValeur) || 0,
-      nationalite: fNationalite,
-      pied: 'Droit',
-      photo: `https://i.pravatar.cc/150?u=${Date.now()}`,
-      transferts: [], commissions: []
-    };
-    dispatch({ type: 'ADD_ATHLETE', payload: newAthlete });
+    if (editTarget) {
+      dispatch({ type: 'UPDATE_ATHLETE', payload: { ...editTarget, nom: fNom, age: parseInt(fAge) || editTarget.age, poste: fPoste, club: fClub, nationalite: fNationalite, valeur: Number(fValeur) || 0, pied: fPied, email: fEmail, tel: fTel, commissionPct: fCommission ? Number(fCommission) : editTarget.commissionPct } });
+      addToast('Fiche athlète mise à jour.');
+    } else {
+      const now = Date.now();
+      dispatch({ type: 'ADD_ATHLETE', payload: { id: now, nom: fNom, age: parseInt(fAge) || 20, poste: fPoste, club: fClub, valeur: Number(fValeur) || 0, nationalite: fNationalite, pied: fPied, email: fEmail, tel: fTel, commissionPct: fCommission ? Number(fCommission) : undefined, photo: `https://i.pravatar.cc/150?u=${now}`, transferts: [], commissions: [] } });
+      addToast('Athlète ajouté au portfolio !', 'success');
+    }
     setIsDrawerOpen(false);
-    addToast('Athlète ajouté au portfolio !', 'success');
-    setFNom(''); setFAge(''); setFClub(''); setFValeur('');
+    setFNom(''); setFAge(''); setFClub(''); setFValeur(''); setFEmail(''); setFTel(''); setFCommission('');
   };
 
   // ── VUE DÉTAIL 360° ────────────────────────────────────────────────────────
@@ -253,19 +257,22 @@ export default function Athletes() {
 
     return (
       <div style={{ animation: 'fadeIn 0.2s ease-out' }}>
-        {/* Retour */}
-        <button
-          onClick={() => { setSelectedId(null); setDetailTab('Profil'); }}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            height: '34px', padding: '0 14px',
-            background: 'var(--white)', border: '1px solid var(--border)',
-            borderRadius: '6px', fontWeight: 600, cursor: 'pointer',
-            marginBottom: '20px', fontSize: '13px', color: 'var(--text-2)'
-          }}
-        >
-          ← Portfolio Athlètes
-        </button>
+        {/* Retour + Edit */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <button
+            onClick={() => { setSelectedId(null); setDetailTab('Profil'); }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', fontSize: '13px', color: 'var(--text-2)' }}
+          >
+            ← Portfolio Athlètes
+          </button>
+          <button
+            onClick={() => openEdit(athlete)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 16px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier la fiche
+          </button>
+        </div>
 
         {/* Hero banner */}
         <div style={{
@@ -559,7 +566,7 @@ export default function Athletes() {
           </p>
         </div>
         <button
-          onClick={() => setIsDrawerOpen(true)}
+          onClick={openCreate}
           style={{
             background: 'var(--navy-deep)', color: 'var(--white)', border: 'none',
             padding: '11px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer',
@@ -613,7 +620,7 @@ export default function Athletes() {
             ? 'Modifiez vos filtres pour affiner la recherche.'
             : 'Ajoutez votre premier talent pour démarrer le portfolio.'}
           actionLabel="Ajouter un talent"
-          onAction={() => setIsDrawerOpen(true)}
+          onAction={openCreate}
         />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: '20px' }}>
@@ -628,16 +635,16 @@ export default function Athletes() {
         </div>
       )}
 
-      {/* Drawer création */}
+      {/* Drawer création / édition */}
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        title="Ajouter un talent"
+        title={editTarget ? 'Modifier la fiche athlète' : 'Ajouter un talent'}
         width="440px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
-            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Créer la fiche</button>
+            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>{editTarget ? 'Enregistrer' : 'Créer la fiche'}</button>
           </>
         }
       >
@@ -673,6 +680,30 @@ export default function Athletes() {
             <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Valeur marchande ($)</span>
               <input type="number" value={fValeur} onChange={e => setFValeur(e.target.value)} placeholder="0" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px', fontFamily: 'var(--font-jetbrains)' }} />
+            </label>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Pied fort</span>
+              <select value={fPied} onChange={e => setFPied(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
+                <option value="Droit">Droit</option>
+                <option value="Gauche">Gauche</option>
+                <option value="Ambidextre">Ambidextre</option>
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Commission agence (%)</span>
+              <input type="number" value={fCommission} onChange={e => setFCommission(e.target.value)} placeholder="Ex. 5" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
+            </label>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Email</span>
+              <input type="email" value={fEmail} onChange={e => setFEmail(e.target.value)} placeholder="athlete@exemple.com" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Téléphone</span>
+              <input type="text" value={fTel} onChange={e => setFTel(e.target.value)} placeholder="+243 ..." style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
             </label>
           </div>
         </div>
