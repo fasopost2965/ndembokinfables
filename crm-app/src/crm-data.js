@@ -7,6 +7,7 @@
 
 export const COMPANY = {
   nom: 'NDEMBO KIN CONNECT SARL',
+  logoUrl: '',
   rccm: 'CD/KIN/RCCM/23-B-0158',
   idNat: '01-83-N12345K',
   nif: 'A1234567B',

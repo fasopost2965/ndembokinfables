@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TYPE_QUALITE, fmtUsd, dateFr } from '../crm-data';
+import { TYPE_QUALITE, fmtUsd } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
+import { FormSection, FormRow, TextField, SelectField, ValidationSummary } from '../components/ui/FormControls';
 
 const TYPE_COLORS = {
   'Sponsor': { bg: 'rgba(23,126,84,0.12)', color: '#177E54' },
@@ -26,6 +27,8 @@ export default function Clients() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const addToast = useToast();
+  const [createErrors, setCreateErrors] = useState({});
+  const [editErrors, setEditErrors] = useState({});
 
   // Derive CA from paid invoices instead of hardcoded field
   const clientCA = (clientId) => factures.filter(f => f.clientId === clientId && f.statut === 'Payée').reduce((s, f) => s + f.montant, 0);
@@ -46,16 +49,22 @@ export default function Clients() {
 
   const openNewClientDrawer = () => {
     setFNom(''); setFType('Club'); setFEmail(''); setFTel(''); setFVille('');
+    setCreateErrors({});
     setIsDrawerOpen(true);
   };
 
   const openEditDrawer = (client) => {
     setEFNom(client.nom); setEFType(client.type); setEFEmail(client.email); setEFTel(client.tel || ''); setEFVille(client.ville || '');
+    setEditErrors({});
     setIsEditDrawerOpen(true);
   };
 
   const handleSaveEdit = (clientId) => {
-    if (!eFNom.trim() || !eFEmail.trim()) { addToast('Champs obligatoires manquants', 'error'); return; }
+    const errs = {};
+    if (!eFNom.trim()) errs.nom = 'Le nom est requis';
+    if (!eFEmail.trim()) errs.email = "L'email est requis";
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     const existing = clients.find(c => c.id === clientId);
     dispatch({ type: 'UPDATE_CLIENT', payload: { ...existing, nom: eFNom, type: eFType, email: eFEmail, tel: eFTel, ville: eFVille } });
     setIsEditDrawerOpen(false);
@@ -63,10 +72,11 @@ export default function Clients() {
   };
 
   const handleSaveClient = () => {
-    if (!fNom.trim() || !fEmail.trim()) {
-      addToast('Veuillez remplir les champs obligatoires (Nom, Email)', 'error');
-      return;
-    }
+    const errs = {};
+    if (!fNom.trim()) errs.nom = 'Le nom est requis';
+    if (!fEmail.trim()) errs.email = "L'email est requis";
+    setCreateErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     const newClient = {
       id: Date.now(),
       nom: fNom,
@@ -112,7 +122,8 @@ export default function Clients() {
 
   // --- STATS KPI ---
   const kpis = useMemo(() => {
-    const totalCa = clients.reduce((acc, c) => acc + clientCA(c.id), 0);
+    const ca = (clientId) => factures.filter(f => f.clientId === clientId && f.statut === 'Payée').reduce((s, f) => s + f.montant, 0);
+    const totalCa = clients.reduce((acc, c) => acc + ca(c.id), 0);
     const clubsCount = clients.filter(c => c.type === 'Club' || c.type === 'Académie').length;
     const sponsorsCount = clients.filter(c => c.type === 'Sponsor').length;
     return [
@@ -164,15 +175,41 @@ export default function Clients() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid var(--border)', marginTop: '24px', padding: '0 8px' }}>
-          {['Aperçu', 'Factures', 'Contrats & Projets'].map(tab => (
+        <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid var(--border)', marginTop: '24px', padding: '0 8px', overflowX: 'auto' }}>
+          {['Aperçu', 'Devis', 'Factures', 'Contrats & Projets'].map(tab => (
             <button key={tab} onClick={() => setDetailTab(tab)}
-              style={{ background: 'none', border: 'none', padding: '12px 0', fontSize: '14px', fontWeight: detailTab === tab ? 700 : 600, color: detailTab === tab ? 'var(--navy-deep)' : 'var(--text-3)', borderBottom: detailTab === tab ? '3px solid var(--red)' : '3px solid transparent', cursor: 'pointer', transition: 'all 0.2s ease' }}
+              style={{ background: 'none', border: 'none', padding: '12px 0', fontSize: '14px', fontWeight: detailTab === tab ? 700 : 600, color: detailTab === tab ? 'var(--navy-deep)' : 'var(--text-3)', borderBottom: detailTab === tab ? '3px solid var(--red)' : '3px solid transparent', cursor: 'pointer', transition: 'all 0.2s ease', whiteSpace: 'nowrap' }}
             >{tab}</button>
           ))}
         </div>
 
         <div style={{ marginTop: '24px' }}>
+          {/* Devis */}
+          {detailTab === 'Devis' && (
+            <div style={{ background: 'var(--white)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              {clientDevis.length === 0 ? (
+                <div style={{ padding: '40px' }}>
+                  <EmptyState title="Aucun devis" description="Ce client n'a pas encore de devis."
+                    actionLabel="+ Nouveau devis" onAction={() => navigate(`/devis?clientId=${client.id}`)} />
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 130px', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    <span>Référence</span><span>Objet</span><span style={{ textAlign: 'right' }}>Montant</span><span style={{ textAlign: 'right' }}>Statut</span>
+                  </div>
+                  {clientDevis.map(d => (
+                    <div key={d.ref} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 130px', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)' }}>
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{d.ref}</span>
+                      <span style={{ fontSize: '12.5px', color: 'var(--text-2)', paddingRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.objet}</span>
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(d.montant)}</span>
+                      <span style={{ textAlign: 'right' }}><StatusBadge status={d.statut} /></span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+
           {/* Aperçu */}
           {detailTab === 'Aperçu' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
@@ -269,7 +306,7 @@ export default function Clients() {
         </div>
 
         {/* Edit drawer */}
-        <Drawer isOpen={isEditDrawerOpen} onClose={() => setIsEditDrawerOpen(false)} title={`Éditer — ${client.nom}`} width="460px"
+        <Drawer isOpen={isEditDrawerOpen} onClose={() => setIsEditDrawerOpen(false)} title={`Éditer — ${client.nom}`} width="480px"
           footer={
             <>
               <button onClick={() => setIsEditDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
@@ -277,34 +314,37 @@ export default function Clients() {
             </>
           }
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Nom <span style={{ color: 'var(--red)' }}>*</span></span>
-              <input type="text" value={eFNom} onChange={e => setEFNom(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Type</span>
-                <select value={eFType} onChange={e => setEFType(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-                  {Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => <option key={t} value={t}>{TYPE_QUALITE[t]}</option>)}
-                </select>
-              </label>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Ville</span>
-                <input type="text" value={eFVille} onChange={e => setEFVille(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-              </label>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Email <span style={{ color: 'var(--red)' }}>*</span></span>
-                <input type="email" value={eFEmail} onChange={e => setEFEmail(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-              </label>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Téléphone</span>
-                <input type="text" value={eFTel} onChange={e => setEFTel(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-              </label>
-            </div>
-          </div>
+          <ValidationSummary errors={editErrors} />
+          <FormSection title="Identification" subtitle="Raison sociale et localisation">
+            <TextField
+              label="Nom" value={eFNom} onChange={setEFNom} required
+              placeholder="Ex. Mazembe Corp" maxLength={80}
+              error={editErrors.nom}
+            />
+            <FormRow>
+              <SelectField
+                label="Type" value={eFType} onChange={setEFType}
+                options={Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => ({ value: t, label: TYPE_QUALITE[t] }))}
+              />
+              <TextField
+                label="Ville" value={eFVille} onChange={setEFVille}
+                placeholder="Ex. Kinshasa"
+              />
+            </FormRow>
+          </FormSection>
+          <FormSection title="Contact" subtitle="Coordonnées du compte">
+            <FormRow>
+              <TextField
+                label="Email" value={eFEmail} onChange={setEFEmail} required
+                type="email" placeholder="contact@exemple.cd"
+                error={editErrors.email}
+              />
+              <TextField
+                label="Téléphone" value={eFTel} onChange={setEFTel}
+                placeholder="+243 ..."
+              />
+            </FormRow>
+          </FormSection>
         </Drawer>
       </div>
     );
@@ -448,7 +488,7 @@ export default function Clients() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         title="Créer un compte client"
-        width="460px"
+        width="480px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
@@ -456,36 +496,37 @@ export default function Clients() {
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Nom du client / entité <span style={{ color: 'var(--red)' }}>*</span></span>
-            <input type="text" value={fNom} onChange={e=>setFNom(e.target.value)} placeholder="Ex. Mazembe Corp" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-          </label>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Type</span>
-              <select value={fType} onChange={e=>setFType(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-                {Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => <option key={t} value={t}>{TYPE_QUALITE[t]}</option>)}
-              </select>
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Ville</span>
-              <input type="text" value={fVille} onChange={e=>setFVille(e.target.value)} placeholder="Kinshasa" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Email <span style={{ color: 'var(--red)' }}>*</span></span>
-              <input type="email" value={fEmail} onChange={e=>setFEmail(e.target.value)} placeholder="contact@exemple.cd" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Téléphone</span>
-              <input type="text" value={fTel} onChange={e=>setFTel(e.target.value)} placeholder="+243 ..." style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-          </div>
-        </div>
+        <ValidationSummary errors={createErrors} />
+        <FormSection title="Identification" subtitle="Raison sociale et localisation">
+          <TextField
+            label="Nom du client / entité" value={fNom} onChange={setFNom} required
+            placeholder="Ex. Mazembe Corp" maxLength={80}
+            error={createErrors.nom}
+          />
+          <FormRow>
+            <SelectField
+              label="Type" value={fType} onChange={setFType}
+              options={Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => ({ value: t, label: TYPE_QUALITE[t] }))}
+            />
+            <TextField
+              label="Ville" value={fVille} onChange={setFVille}
+              placeholder="Ex. Kinshasa"
+            />
+          </FormRow>
+        </FormSection>
+        <FormSection title="Contact" subtitle="Coordonnées du compte">
+          <FormRow>
+            <TextField
+              label="Email" value={fEmail} onChange={setFEmail} required
+              type="email" placeholder="contact@exemple.cd"
+              error={createErrors.email}
+            />
+            <TextField
+              label="Téléphone" value={fTel} onChange={setFTel}
+              placeholder="+243 ..."
+            />
+          </FormRow>
+        </FormSection>
       </Drawer>
     </div>
   );

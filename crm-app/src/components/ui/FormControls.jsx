@@ -219,13 +219,24 @@ export function EntitySelector({ label, value, onChange, options, placeholder = 
       <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: hasError ? 'var(--red)' : 'var(--text-2)' }}>
         {label}{required && <span style={{ color: 'var(--red)', marginLeft: '3px' }}>*</span>}
       </span>
-      <button type="button" onClick={() => setOpen(!open)}
-        style={{ height: '38px', border: `1px solid ${hasError ? 'var(--red)' : selected ? 'var(--cyan)' : 'var(--border-input)'}`, borderRadius: '6px', padding: '0 12px', fontSize: '13px', background: 'var(--white)', color: selected ? 'var(--text-1)' : 'var(--text-3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', transition: 'border-color 0.15s' }}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {selected ? (renderOption ? renderOption(selected) : selected.nom) : placeholder}
-        </span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <button type="button" onClick={() => setOpen(!open)}
+          style={{ flex: 1, height: '38px', border: `1px solid ${hasError ? 'var(--red)' : selected ? 'var(--cyan)' : 'var(--border-input)'}`, borderRadius: '6px', padding: '0 12px', fontSize: '13px', background: 'var(--white)', color: selected ? 'var(--text-1)' : 'var(--text-3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', transition: 'border-color 0.15s', minWidth: 0 }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {selected ? (renderOption ? renderOption(selected) : selected.nom) : placeholder}
+          </span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        {selected && (
+          <button type="button" onClick={() => { onChange(''); setSearch(''); }}
+            title="Effacer la sélection"
+            style={{ width: '38px', height: '38px', flexShrink: 0, border: '1px solid var(--border-input)', borderRadius: '6px', background: 'var(--white)', color: 'var(--text-3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--red)'; e.currentTarget.style.color = 'var(--red)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-input)'; e.currentTarget.style.color = 'var(--text-3)'; }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        )}
+      </div>
 
       {open && (
         <>

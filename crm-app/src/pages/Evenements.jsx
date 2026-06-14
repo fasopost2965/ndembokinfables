@@ -216,13 +216,13 @@ function EventCard({ item, kind, athletes, onDelete, onEdit, onViewParticipants 
   );
 }
 
-const ALL_TYPES = ['Tous', 'Tournoi', 'Gala', 'Détection', 'Camp', 'Stage'];
-const EVT_TYPES = ['Tournoi', 'Gala', 'Détection'];
+const ALL_TYPES = ['Tous', 'Tournoi', 'Gala', 'Détection', 'Camp'];
 const CAMP_CATEGORIES = ['U15', 'U17', 'U20', 'Senior', 'Spécifique'];
 
 export default function Evenements() {
   const { state: { evenements, camps, clients, athletes }, dispatch, confirmAction } = useCRM();
   const [filterType, setFilterType] = useState('Tous');
+  const [search, setSearch] = useState('');
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerKind, setDrawerKind] = useState('evenement');
@@ -240,19 +240,21 @@ export default function Evenements() {
   const [fStatut, setFStatut] = useState('Planification');
   const [fClientId, setFClientId] = useState('');
 
-  const clientNom = (id) => { if (!id) return '—'; const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
-
   const allItems = [
     ...evenements.map(e => ({ ...e, _kind: 'evenement' })),
     ...camps.map(c => ({ ...c, _kind: 'camp', type: 'Camp' })),
   ].sort((a, b) => (a.dateDebut || '').localeCompare(b.dateDebut || ''));
 
-  const filtered = filterType === 'Tous'
-    ? allItems
-    : allItems.filter(item => {
-        if (filterType === 'Camp') return item._kind === 'camp';
-        return item._kind === 'evenement' && item.type === filterType;
-      });
+  const filtered = allItems.filter(item => {
+    const matchType = filterType === 'Tous'
+      ? true
+      : filterType === 'Camp'
+        ? item._kind === 'camp'
+        : item._kind === 'evenement' && item.type === filterType;
+    const q = search.trim().toLowerCase();
+    const matchSearch = !q || item.nom?.toLowerCase().includes(q) || item.lieu?.toLowerCase().includes(q);
+    return matchType && matchSearch;
+  });
 
   const handleDelete = (e, item, kind) => {
     e.stopPropagation();
@@ -369,7 +371,16 @@ export default function Evenements() {
         ))}
       </div>
 
-      {/* Type filter */}
+      {/* Search + Type filter */}
+      <div style={{ marginBottom: '12px' }}>
+        <input
+          type="search"
+          placeholder="Rechercher par nom ou lieu…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ width: '100%', height: '38px', padding: '0 14px', border: '1px solid var(--border-input)', borderRadius: '8px', fontSize: '13px', background: 'var(--white)', color: 'var(--text-1)', boxSizing: 'border-box', outline: 'none' }}
+        />
+      </div>
       <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-page)', padding: '4px', borderRadius: '8px', marginBottom: '20px', overflowX: 'auto' }}>
         {ALL_TYPES.map(t => (
           <button

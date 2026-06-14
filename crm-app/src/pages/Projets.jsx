@@ -5,9 +5,9 @@ import EmptyState from '../components/ui/EmptyState';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 import { nextNumero } from '../crm-data';
-import { FormSection, TextField, TypeCards, EntitySelector, SliderField, ValidationSummary } from '../components/ui/FormControls';
+import { FormSection, FormRow, TextField, TextareaField, DateField, TypeCards, EntitySelector, SliderField, ValidationSummary } from '../components/ui/FormControls';
 
-const EMPTY_FORM = { clientId: '', nom: '', description: '', statut: 'Planifié', avancement: 0 };
+const EMPTY_FORM = { clientId: '', nom: '', description: '', statut: 'Planifié', avancement: 0, dateDebut: '', dateFin: '' };
 
 export default function Projets() {
   const { state: { projets, clients }, dispatch, confirmAction } = useCRM();
@@ -25,9 +25,21 @@ export default function Projets() {
 
   const openEdit = (p) => {
     setEditTarget(p);
-    setForm({ clientId: p.clientId ?? '', nom: p.nom, description: p.description || '', statut: p.statut, avancement: p.avancement });
+    setForm({ clientId: p.clientId ?? '', nom: p.nom, description: p.description || '', statut: p.statut, avancement: p.avancement, dateDebut: p.dateDebut || '', dateFin: p.dateFin || '' });
     setErrors({}); setDrawerOpen(true);
   };
+
+  const setStatut = (v) => setForm(f => ({
+    ...f,
+    statut: v,
+    avancement: v === 'Terminé' ? 100 : (v === 'Planifié' && f.avancement === 100 ? 0 : f.avancement),
+  }));
+
+  const setAvancement = (v) => setForm(f => ({
+    ...f,
+    avancement: v,
+    statut: v === 100 ? 'Terminé' : (f.statut === 'Terminé' ? 'En cours' : f.statut),
+  }));
 
   const handleSave = () => {
     const errs = {};
@@ -40,7 +52,7 @@ export default function Projets() {
       addToast('Projet mis à jour.');
     } else {
       const ref = nextNumero('PRJ-', new Date().getFullYear(), projets.map(p => p.ref));
-      dispatch({ type: 'ADD_PROJET', payload: { ref, clientId: Number(form.clientId), nom: form.nom, description: form.description, statut: form.statut, avancement: Number(form.avancement) } });
+      dispatch({ type: 'ADD_PROJET', payload: { ref, clientId: Number(form.clientId), nom: form.nom, description: form.description, statut: form.statut, avancement: Number(form.avancement), dateDebut: form.dateDebut, dateFin: form.dateFin } });
       addToast('Projet créé.');
     }
     setDrawerOpen(false);
@@ -148,20 +160,27 @@ export default function Projets() {
             required placeholder="Ex. Tournoi corporate Mazembe" maxLength={80}
             error={errors.nom}
           />
-          <TextField
+          <TextareaField
             label="Description (optionnelle)" value={form.description} onChange={v => setForm(f => ({ ...f, description: v }))}
-            placeholder="Contexte, objectifs, livrables attendus…" maxLength={200}
+            placeholder="Contexte, objectifs, livrables attendus…" rows={3} maxLength={400}
           />
         </FormSection>
 
+        <FormSection title="Calendrier" subtitle="Dates de début et de fin prévues">
+          <FormRow>
+            <DateField label="Date de début" value={form.dateDebut} onChange={v => setForm(f => ({ ...f, dateDebut: v }))} />
+            <DateField label="Date de fin prévue" value={form.dateFin} onChange={v => setForm(f => ({ ...f, dateFin: v }))} hint="Optionnelle" />
+          </FormRow>
+        </FormSection>
+
         <FormSection title="Statut & Avancement" subtitle="Progression du projet">
-          <TypeCards label="Statut" value={form.statut} onChange={v => setForm(f => ({ ...f, statut: v }))} options={[
+          <TypeCards label="Statut" value={form.statut} onChange={setStatut} options={[
             { value: 'Planifié', label: 'Planifié', icon: '📋', color: 'var(--text-2)', bg: 'var(--bg-page)' },
             { value: 'En cours', label: 'En cours', icon: '▶️', color: 'var(--cyan)', bg: 'rgba(30,159,216,0.08)' },
             { value: 'Terminé', label: 'Terminé', icon: '✅', color: 'var(--success)', bg: 'rgba(23,126,84,0.08)' },
           ]} />
           <SliderField
-            label="Avancement" value={Number(form.avancement)} onChange={v => setForm(f => ({ ...f, avancement: v }))}
+            label="Avancement" value={Number(form.avancement)} onChange={setAvancement}
             hint={form.statut === 'Terminé' ? 'Projet terminé — avancement à 100 %' : undefined}
           />
         </FormSection>

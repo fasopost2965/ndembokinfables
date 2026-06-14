@@ -106,13 +106,15 @@ export default function Parametres() {
                 {/* Logo upload */}
                 <div>
                   <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '8px' }}>Logo officiel</div>
-                  <div style={{ border: '2px dashed var(--border-input)', borderRadius: '8px', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer', background: 'var(--bg-page)', minHeight: '140px' }}
-                    onClick={() => addToast('Upload disponible avec le backend', 'info')}
-                  >
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    <span style={{ fontSize: '12.5px', color: 'var(--text-3)', textAlign: 'center' }}>Déposer le logo officiel<br/><span style={{ fontSize: '11px' }}>PNG transparent</span></span>
-                  </div>
-                  <p style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '8px', lineHeight: 1.5 }}>Apparaît sur les documents imprimables, les cartes NFC et les portails clients.</p>
+                  {form.logoUrl ? (
+                    <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+                      <img src={form.logoUrl} alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '6px', border: '1px solid var(--border)' }} onError={e => e.target.style.display = 'none'} />
+                      <div style={{ flex: 1, fontSize: '12px', color: 'var(--text-3)', wordBreak: 'break-all' }}>{form.logoUrl.slice(0, 60)}{form.logoUrl.length > 60 ? '…' : ''}</div>
+                      <button onClick={() => { set('logoUrl')(''); setDirty(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', fontWeight: 700, fontSize: '12px' }}>Supprimer</button>
+                    </div>
+                  ) : null}
+                  <InputField label="URL du logo (lien https:// ou base64)" value={form.logoUrl || ''} onChange={v => { set('logoUrl')(v); setDirty(true); }} placeholder="https://votre-domaine.com/logo.png" />
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '8px', lineHeight: 1.5 }}>Coller l'URL externe ou une data URI base64. Apparaît dans l'en-tête des contrats générés.</p>
                 </div>
 
                 {/* Brand colors */}

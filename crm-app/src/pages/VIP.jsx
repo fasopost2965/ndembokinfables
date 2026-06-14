@@ -5,6 +5,8 @@ import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
+import { useSearchParams } from 'react-router-dom';
+import { TypeCards, ValidationSummary } from '../components/ui/FormControls';
 
 const clientNom = (clients, id) => { const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
 
@@ -12,7 +14,6 @@ const inputStyle = { width: '100%', padding: '9px 12px', border: '1px solid var(
 const labelStyle = { fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', marginBottom: '6px', display: 'block' };
 const fieldStyle = { marginBottom: '20px' };
 
-const STATUTS_VIP = ['Actif', 'Expire bientôt', 'Expiré'];
 const EMPTY_FORM = { clientId: '', tier: 'Or', expire: '', statut: 'Actif' };
 
 function NFCCard({ member, clients }) {
@@ -44,9 +45,11 @@ function NFCCard({ member, clients }) {
 export default function VIP() {
   const { state: { vipMembers, clients }, dispatch, confirmAction } = useCRM();
   const addToast = useToast();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [drawerOpen, setDrawerOpen] = useState(() => searchParams.get('action') === 'new');
   const [editTarget, setEditTarget] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState({});
 
   const tierColors = {
     'Or': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00' },
@@ -59,18 +62,23 @@ export default function VIP() {
   const openCreate = () => {
     setEditTarget(null);
     setForm(EMPTY_FORM);
+    setErrors({});
     setDrawerOpen(true);
   };
 
   const openEdit = (m) => {
     setEditTarget(m);
     setForm({ clientId: m.clientId, tier: m.tier, expire: m.expire, statut: m.statut });
+    setErrors({});
     setDrawerOpen(true);
   };
 
   const handleSave = () => {
-    if (!editTarget && !form.clientId) { addToast('Sélectionnez un client.', 'error'); return; }
-    if (!form.expire) { addToast('La date d\'expiration est requise.', 'error'); return; }
+    const errs = {};
+    if (!editTarget && !form.clientId) errs.clientId = 'Sélectionnez un client';
+    if (!form.expire) errs.expire = "La date d'expiration est requise";
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
 
     const toExpireFormat = (raw) => {
       if (!raw) return raw;
@@ -210,13 +218,15 @@ export default function VIP() {
           </>
         }
       >
+        <ValidationSummary errors={errors} />
         {!editTarget && (
           <div style={fieldStyle}>
-            <label style={labelStyle}>Client *</label>
-            <select value={form.clientId} onChange={e => setForm(f => ({ ...f, clientId: e.target.value }))} style={inputStyle}>
+            <label style={{ ...labelStyle, color: errors.clientId ? 'var(--red)' : undefined }}>Client *</label>
+            <select value={form.clientId} onChange={e => setForm(f => ({ ...f, clientId: e.target.value }))} style={{ ...inputStyle, borderColor: errors.clientId ? 'var(--red)' : undefined }}>
               <option value="">— Sélectionner un client —</option>
               {clients.filter(c => !enrolledIds.has(c.id)).map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
             </select>
+            {errors.clientId && <div style={{ fontSize: '12px', color: 'var(--red)', marginTop: '4px' }}>{errors.clientId}</div>}
             {clients.filter(c => !enrolledIds.has(c.id)).length === 0 && (
               <div style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '6px' }}>Tous les clients sont déjà affiliés au programme VIP.</div>
             )}
@@ -230,20 +240,41 @@ export default function VIP() {
           </div>
         )}
         <div style={fieldStyle}>
-          <label style={labelStyle}>Tier</label>
-          <select value={form.tier} onChange={e => setForm(f => ({ ...f, tier: e.target.value }))} style={inputStyle}>
-            {Object.keys(VIP_TIERS).map(t => <option key={t} value={t}>{t} — {VIP_TIERS[t].remise} · {VIP_TIERS[t].prix} USD/an</option>)}
-          </select>
+          <TypeCards
+            label="Tier"
+            value={form.tier}
+            onChange={v => setForm(f => ({ ...f, tier: v }))}
+            options={Object.entries(VIP_TIERS).map(([t, info]) => ({
+              value: t, label: t,
+              icon: t === 'Or' ? '★' : t === 'Argent' ? '◈' : '◆',
+              color: info.chip, bg: info.bg,
+            }))}
+          />
+          <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '-8px', paddingLeft: '2px' }}>
+            {VIP_TIERS[form.tier]?.remise} · {VIP_TIERS[form.tier]?.prix} USD/an
+          </div>
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Date d'expiration *</label>
-          <input type="month" value={form.expire.includes('/') ? `${form.expire.split('/')[1]}-${form.expire.split('/')[0]}` : form.expire} onChange={e => setForm(f => ({ ...f, expire: e.target.value }))} style={inputStyle} />
+          <label style={{ ...labelStyle, color: errors.expire ? 'var(--red)' : undefined }}>Date d'expiration *</label>
+          <input
+            type="month"
+            value={form.expire.includes('/') ? `${form.expire.split('/')[1]}-${form.expire.split('/')[0]}` : form.expire}
+            onChange={e => setForm(f => ({ ...f, expire: e.target.value }))}
+            style={{ ...inputStyle, height: '40px', borderRadius: '6px', borderColor: errors.expire ? 'var(--red)' : undefined }}
+          />
+          {errors.expire && <div style={{ fontSize: '12px', color: 'var(--red)', marginTop: '4px' }}>{errors.expire}</div>}
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Statut</label>
-          <select value={form.statut} onChange={e => setForm(f => ({ ...f, statut: e.target.value }))} style={inputStyle}>
-            {STATUTS_VIP.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <TypeCards
+            label="Statut"
+            value={form.statut}
+            onChange={v => setForm(f => ({ ...f, statut: v }))}
+            options={[
+              { value: 'Actif', label: 'Actif', icon: '✓', color: 'var(--success)', bg: 'rgba(23,126,84,0.08)' },
+              { value: 'Expire bientôt', label: 'Expire bientôt', icon: '⚠', color: 'var(--gold-text)', bg: 'rgba(244,168,0,0.1)' },
+              { value: 'Expiré', label: 'Expiré', icon: '✕', color: 'var(--red)', bg: 'rgba(188,0,13,0.06)' },
+            ]}
+          />
         </div>
       </Drawer>
     </div>

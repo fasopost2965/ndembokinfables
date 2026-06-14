@@ -5,6 +5,7 @@ import Clients from './pages/Clients';
 import Devis from './pages/Devis';
 import Factures from './pages/Factures';
 import Contrats from './pages/Contrats';
+import ContratWizard from './pages/ContratWizard';
 import Projets from './pages/Projets';
 import VIP from './pages/VIP';
 import Evenements from './pages/Evenements';
@@ -37,6 +38,7 @@ function App() {
             <Route path="devis" element={<Devis />} />
             <Route path="factures" element={<Factures />} />
             <Route path="contrats" element={<Contrats />} />
+            <Route path="contrats/nouveau" element={<ContratWizard />} />
             <Route path="projets" element={<Projets />} />
             <Route path="evenements" element={<Evenements />} />
             <Route path="clients" element={<Clients />} />

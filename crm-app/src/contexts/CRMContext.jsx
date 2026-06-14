@@ -58,7 +58,11 @@ function crmReducer(state, action) {
         vipMembers: state.vipMembers.filter(v => v.clientId !== action.payload),
       };
     case 'DELETE_CONTRAT':
-      return { ...state, contrats: state.contrats.filter(c => c.ref !== action.payload) };
+      return {
+        ...state,
+        contrats: state.contrats.filter(c => c.ref !== action.payload),
+        athletes: state.athletes.map(a => a.contractRef === action.payload ? { ...a, contractRef: null } : a),
+      };
     case 'ADD_PROJET':
       return { ...state, projets: [action.payload, ...state.projets] };
     case 'UPDATE_PROJET':

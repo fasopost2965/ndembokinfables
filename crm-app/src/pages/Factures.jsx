@@ -5,6 +5,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/ui/EmptyState';
+import { useSearchParams } from 'react-router-dom';
 import { FormSection, FormRow, TextField, TextareaField, AmountField, DateField, TypeCards, EntitySelector, ValidationSummary } from '../components/ui/FormControls';
 
 
@@ -16,20 +17,22 @@ export default function Factures() {
   const clientNom = (id) => { const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
   const [filter, setFilter] = useState('Tous');
   const [search, setSearch] = useState('');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const addToast = useToast();
+  const [searchParams] = useSearchParams();
+
+  const today = () => new Date().toISOString().slice(0,10);
+  const addDays = (n) => { const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+
   const [editTarget, setEditTarget] = useState(null);
   const [fClient, setFClient] = useState('');
   const [fObjet, setFObjet] = useState('');
   const [fNotes, setFNotes] = useState('');
   const [fMontant, setFMontant] = useState('');
-  const [fDateEmission, setFDateEmission] = useState('');
-  const [fEcheance, setFEcheance] = useState('');
+  const [fDateEmission, setFDateEmission] = useState(() => searchParams.get('action') === 'new' ? new Date().toISOString().slice(0,10) : '');
+  const [fEcheance, setFEcheance] = useState(() => { if (searchParams.get('action') !== 'new') return ''; const d = new Date(); d.setDate(d.getDate()+30); return d.toISOString().slice(0,10); });
   const [fStatut, setFStatut] = useState('En attente');
   const [errors, setErrors] = useState({});
-
-  const today = () => new Date().toISOString().slice(0,10);
-  const addDays = (n) => { const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+  const [isDrawerOpen, setIsDrawerOpen] = useState(() => searchParams.get('action') === 'new');
 
   const openCreate = () => {
     setEditTarget(null); setFClient(''); setFObjet(''); setFNotes(''); setFMontant('');
@@ -178,9 +181,8 @@ export default function Factures() {
           </div>
         )}
 
-        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-3)' }}>
-          <span>{filtered.length} factures affichées</span>
-          <span style={{ fontFamily: 'var(--font-jetbrains)' }}>Page 1 / 1</span>
+        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-3)' }}>
+          {filtered.length} facture{filtered.length > 1 ? 's' : ''} affichée{filtered.length > 1 ? 's' : ''}
         </div>
       </div>
 

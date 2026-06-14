@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fmtUsd, dateFr, nextNumero } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -12,6 +13,7 @@ const TYPES_CONTRAT = ['Représentation', 'Sponsoring', 'Prestation'];
 
 export default function Contrats() {
   const { state: { contrats: items, clients, athletes }, dispatch, confirmAction, getNom } = useCRM();
+  const navigate = useNavigate();
   const clientNom = (id) => getNom(id);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('Tous');
@@ -26,7 +28,6 @@ export default function Contrats() {
 
   const [fPartyMode, setFPartyMode] = useState('client');
   const [errors, setErrors] = useState({});
-  const addDays = (n) => { const d = new Date(); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
   const addMonths = (n) => { const d = new Date(); d.setMonth(d.getMonth()+n); return d.toISOString().slice(0,10); };
   const [fDateDebut, setFDateDebut] = useState('');
 
@@ -94,9 +95,15 @@ export default function Contrats() {
           <h1 style={{ fontSize: '30px', margin: 0 }}>Contrats</h1>
           <p style={{ margin: '6px 0 0 0', color: 'var(--text-2)' }}>Représentation, sponsoring et prestation — suivi des engagements contractuels.</p>
         </div>
-        <button onClick={openCreate} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
-          + Nouveau contrat
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={openCreate} style={{ background: 'var(--white)', color: 'var(--navy-deep)', border: '1px solid var(--border-input)', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}>
+            + Saisie rapide
+          </button>
+          <button onClick={() => navigate('/contrats/nouveau')} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '7px' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            Générer un contrat
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px,1fr))', gap: '14px', marginBottom: '20px' }}>

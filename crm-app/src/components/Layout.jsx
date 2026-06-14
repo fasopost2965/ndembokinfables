@@ -1,24 +1,9 @@
-import { Outlet, useLocation, Link } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useState } from 'react';
-import Drawer from './ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 
-const PAGE_TITLES = {
-  '/dashboard': { kicker: 'Pilotage', title: 'Tableau de bord' },
-  '/devis': { kicker: 'Commercial', title: 'Devis' },
-  '/factures': { kicker: 'Commercial', title: 'Factures' },
-  '/contrats': { kicker: 'Commercial', title: 'Contrats' },
-  '/projets': { kicker: 'Commercial', title: 'Projets' },
-  '/evenements': { kicker: 'Opérations', title: 'Événements' },
-  '/clients': { kicker: 'Relations', title: 'Clients' },
-  '/vip': { kicker: 'Relations', title: 'Membres VIP' },
-  '/parametres': { kicker: 'Système', title: 'Paramètres' },
-};
-
 function Topbar({ onOpenSidebar }) {
-  const location = useLocation();
-  const page = PAGE_TITLES[location.pathname] || { kicker: '', title: 'CRM' };
   const [search, setSearch] = useState('');
   const addToast = useToast();
 
