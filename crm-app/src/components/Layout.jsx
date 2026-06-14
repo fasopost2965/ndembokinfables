@@ -2,9 +2,11 @@ import { Outlet, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useState } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import GlobalSearch from './GlobalSearch';
 
 function Topbar({ onOpenSidebar }) {
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const addToast = useToast();
 
   const QUICK_CREATE = [
@@ -38,17 +40,23 @@ function Topbar({ onOpenSidebar }) {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
         <div style={{ position: 'relative', width: '100%' }} className="desktop-only">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="2" strokeLinecap="round" style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="2" strokeLinecap="round" style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }}>
             <path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/>
           </svg>
           <input
             type="text"
-            placeholder="Recherche (Bientôt disponible)"
-            disabled
+            placeholder="Rechercher clients, devis, contrats…"
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ width: '100%', height: '36px', border: '1px solid var(--border-input)', borderRadius: '6px', background: 'var(--bg-page)', padding: '0 12px 0 32px', fontSize: '12.5px', outline: 'none', color: 'var(--text-3)', cursor: 'not-allowed' }}
+            onChange={e => { setSearch(e.target.value); setSearchOpen(true); }}
+            onFocus={() => setSearchOpen(true)}
+            style={{ width: '100%', height: '36px', border: '1px solid var(--border-input)', borderRadius: '6px', background: 'var(--bg-page)', padding: '0 12px 0 32px', fontSize: '12.5px', outline: 'none', color: 'var(--text-1)' }}
           />
+          {searchOpen && search.length > 0 && (
+            <>
+              <div onClick={() => { setSearchOpen(false); setSearch(''); }} style={{ position: 'fixed', inset: 0, zIndex: 190 }} />
+              <GlobalSearch query={search} onClose={() => { setSearchOpen(false); setSearch(''); }} />
+            </>
+          )}
         </div>
       </div>
 
