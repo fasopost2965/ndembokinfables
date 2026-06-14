@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
-import { CLIENTS, DEVIS, FACTURES, CONTRATS, PROJETS, EVENEMENTS, CAMPS, VIP_MEMBERS, ATHLETES } from '../crm-data';
+import { CLIENTS, DEVIS, FACTURES, CONTRATS, PROJETS, EVENEMENTS, CAMPS, VIP_MEMBERS, ATHLETES, COMPANY } from '../crm-data';
 
 const initialState = {
   clients: CLIENTS,
@@ -11,6 +11,7 @@ const initialState = {
   camps: CAMPS,
   vipMembers: VIP_MEMBERS,
   athletes: ATHLETES,
+  company: COMPANY,
   confirmModal: { isOpen: false, title: '', message: '', onConfirm: null }
 };
 
@@ -24,12 +25,16 @@ function crmReducer(state, action) {
       return { ...state, clients: state.clients.map(c => c.id === action.payload.id ? action.payload : c) };
     case 'ADD_DEVIS':
       return { ...state, devis: [action.payload, ...state.devis] };
+    case 'UPDATE_DEVIS':
+      return { ...state, devis: state.devis.map(d => d.ref === action.payload.ref ? { ...d, ...action.payload } : d) };
     case 'UPDATE_DEVIS_STATUT':
       return { ...state, devis: state.devis.map(d => d.ref === action.payload.ref ? { ...d, statut: action.payload.statut } : d) };
     case 'DELETE_DEVIS':
       return { ...state, devis: state.devis.filter(d => d.ref !== action.payload) };
     case 'ADD_FACTURE':
       return { ...state, factures: [action.payload, ...state.factures] };
+    case 'UPDATE_FACTURE':
+      return { ...state, factures: state.factures.map(f => f.ref === action.payload.ref ? { ...f, ...action.payload } : f) };
     case 'DELETE_FACTURE':
       return { ...state, factures: state.factures.filter(f => f.ref !== action.payload) };
     case 'ADD_CONTRAT':
@@ -38,26 +43,50 @@ function crmReducer(state, action) {
       return { ...state, contrats: state.contrats.map(c => c.ref === action.payload.ref ? action.payload : c) };
     case 'ADD_ATHLETE':
       return { ...state, athletes: [action.payload, ...state.athletes] };
+    case 'UPDATE_ATHLETE':
+      return { ...state, athletes: state.athletes.map(a => a.id === action.payload.id ? { ...a, ...action.payload } : a) };
     case 'DELETE_ATHLETE':
       return { ...state, athletes: state.athletes.filter(a => a.id !== action.payload) };
     case 'DELETE_CLIENT':
-      return { ...state, clients: state.clients.filter(c => c.id !== action.payload) };
+      return {
+        ...state,
+        clients: state.clients.filter(c => c.id !== action.payload),
+        devis: state.devis.filter(d => d.clientId !== action.payload),
+        factures: state.factures.filter(f => f.clientId !== action.payload),
+        contrats: state.contrats.filter(c => c.clientId !== action.payload),
+        projets: state.projets.filter(p => p.clientId !== action.payload),
+        vipMembers: state.vipMembers.filter(v => v.clientId !== action.payload),
+      };
     case 'DELETE_CONTRAT':
       return { ...state, contrats: state.contrats.filter(c => c.ref !== action.payload) };
+    case 'ADD_PROJET':
+      return { ...state, projets: [action.payload, ...state.projets] };
+    case 'UPDATE_PROJET':
+      return { ...state, projets: state.projets.map(p => p.ref === action.payload.ref ? { ...p, ...action.payload } : p) };
     case 'DELETE_PROJET':
       return { ...state, projets: state.projets.filter(p => p.ref !== action.payload) };
+    case 'ADD_VIP':
+      return { ...state, vipMembers: [action.payload, ...state.vipMembers] };
+    case 'UPDATE_VIP':
+      return { ...state, vipMembers: state.vipMembers.map(v => v.clientId === action.payload.clientId ? { ...v, ...action.payload } : v) };
     case 'DELETE_VIP':
       return { ...state, vipMembers: state.vipMembers.filter(v => v.clientId !== action.payload) };
     case 'ADD_EVENEMENT':
       return { ...state, evenements: [action.payload, ...state.evenements] };
+    case 'UPDATE_EVENEMENT':
+      return { ...state, evenements: state.evenements.map(e => e.id === action.payload.id ? { ...e, ...action.payload } : e) };
     case 'DELETE_EVENEMENT':
       return { ...state, evenements: state.evenements.filter(e => e.id !== action.payload) };
     case 'ADD_CAMP':
       return { ...state, camps: [action.payload, ...state.camps] };
+    case 'UPDATE_CAMP':
+      return { ...state, camps: state.camps.map(c => c.id === action.payload.id ? { ...c, ...action.payload } : c) };
     case 'DELETE_CAMP':
       return { ...state, camps: state.camps.filter(c => c.id !== action.payload) };
     case 'UPDATE_FACTURE_STATUT':
       return { ...state, factures: state.factures.map(f => f.ref === action.payload.ref ? { ...f, statut: action.payload.statut } : f) };
+    case 'UPDATE_COMPANY':
+      return { ...state, company: { ...state.company, ...action.payload } };
     case 'OPEN_CONFIRM':
       return { ...state, confirmModal: { isOpen: true, ...action.payload } };
     case 'CLOSE_CONFIRM':
