@@ -7,6 +7,7 @@
 
 export const COMPANY = {
   nom: 'NDEMBO KIN CONNECT SARL',
+  logoUrl: '',
   rccm: 'CD/KIN/RCCM/23-B-0158',
   idNat: '01-83-N12345K',
   nif: 'A1234567B',
@@ -17,6 +18,18 @@ export const COMPANY = {
   whatsapp: '0810188880',
   banque: 'Rawbank — compte USD n° 0501-1234567-89',
   swift: 'RAWBCDKI',
+  tauxUSD: 2850,
+  tauxCDF: 16,
+  prefixeDevis: 'DEV-2026-',
+  prefixeFactures: 'FAC-2026-',
+  prefixeContrats: 'CTR-2026-',
+  conditionsDefaut: 'Acompte de 40 % à la signature. Solde payable à 30 jours par virement bancaire (Rawbank). Pénalité de retard : 1,5 % par mois entamé.',
+  nomExpediteur: 'Ndembo Kin Connect SARL',
+  emailExpediteur: 'contact@ndembokin.com',
+  emailCC: 'direction@ndembokin.com',
+  objetDefaut: 'Votre document [REF] — Ndembo Kin Connect',
+  signatureEmail: 'Cordialement,\nL\'équipe Ndembo Kin Connect SARL\ncontact@ndembokin.com · +243 810 188 880 (WhatsApp)',
+  joindrePDF: true,
 };
 
 // Le « type » de client se mappe directement sur la qualité contractuelle.

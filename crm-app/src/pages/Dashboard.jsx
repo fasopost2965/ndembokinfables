@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   fmtUsd, dateFr, STATUT_BADGE
 } from '../crm-data';
@@ -10,9 +9,17 @@ const badge = (st) => STATUT_BADGE[st] || { bg: 'rgba(37,67,84,.10)', color: '#4
 
 // Bar chart SVG
 function RevenueChart({ factures }) {
-  const MONTHS = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
-  const LABELS = ['Jan','Fév','Mar','Avr','Mai','Juin'];
-  const cur = '2026-06';
+  const MONTH_NAMES = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+  const MONTHS = (() => {
+    const result = []; const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      result.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+    return result;
+  })();
+  const LABELS = MONTHS.map(m => MONTH_NAMES[parseInt(m.split('-')[1]) - 1]);
+  const cur = MONTHS[MONTHS.length - 1];
 
   const totals = MONTHS.map(m => {
     const paid = factures.filter(f => f.statut === 'Payée' && (f.echeance||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0);
@@ -52,6 +59,7 @@ function RevenueChart({ factures }) {
 
 export default function Dashboard() {
   const { state: { clients, devis, factures, contrats, projets, vipMembers, evenements } } = useCRM();
+  const navigate = useNavigate();
   const clientNom = (id) => { const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
 
   const encaisse = factures.filter(f => f.statut === 'Payée').reduce((s,f) => s+f.montant, 0);
@@ -94,11 +102,24 @@ export default function Dashboard() {
   ].slice(0,5);
 
   const quickActions = [
-    { label: 'Créer un devis', to: '/devis', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8', iconBg: 'rgba(30,159,216,0.14)', iconColor: '#1E9FD8' },
-    { label: 'Nouvelle facture', to: '/factures', icon: 'M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D' },
-    { label: 'Rédiger un contrat', to: '/contrats', icon: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354' },
-    { label: 'Ajouter membre VIP', to: '/vip', icon: 'M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z', iconBg: 'rgba(244,168,0,0.16)', iconColor: '#B07800' },
+    { label: 'Créer un devis', path: '/devis?action=new', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8', iconBg: 'rgba(30,159,216,0.14)', iconColor: '#1E9FD8' },
+    { label: 'Nouvelle facture', path: '/factures?action=new', icon: 'M5 3h14v18l-2.4-1.6L14.2 21l-2.2-1.6L9.8 21l-2.4-1.6L5 21zM9 8h6M9 12h6M9 16h3.5', iconBg: 'rgba(188,0,13,0.10)', iconColor: '#BC000D' },
+    { label: 'Générer un contrat', path: '/contrats/nouveau', icon: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', iconBg: 'rgba(37,67,84,0.10)', iconColor: '#254354' },
+    { label: 'Affilier un membre VIP', path: '/vip?action=new', icon: 'M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z', iconBg: 'rgba(244,168,0,0.16)', iconColor: '#B07800' },
   ];
+
+  const handleExport = () => {
+    const rows = [
+      ['Référence', 'Client', 'Objet', 'Montant', 'Statut', 'Date'],
+      ...devis.map(d => [d.ref, clientNom(d.clientId), d.objet, d.montant, d.statut, d.date || '']),
+      ...factures.map(f => [f.ref, clientNom(f.clientId), f.objet, f.montant, f.statut, f.echeance || '']),
+    ];
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'ndembokin-export.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const C = { card: { background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px' } };
 
@@ -111,16 +132,13 @@ export default function Dashboard() {
           <h1 style={{ fontSize: '30px', margin: 0 }}>Tableau de bord</h1>
           <p style={{ margin: '6px 0 0 0', fontSize: '13.5px', color: 'var(--text-2)' }}>Vue d'ensemble de l'activité — Ndembo Kin Connect SARL, Kinshasa.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '38px', padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontSize: '13px', fontWeight: 600, color: 'var(--navy-deep)', cursor: 'pointer' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><path d="M8 2v4M16 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
-            30 derniers jours
-          </button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '38px', padding: '0 14px', background: 'var(--navy-deep)', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700, color: 'var(--white)', cursor: 'pointer' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            Exporter
-          </button>
-        </div>
+        <button onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '38px', padding: '0 16px', background: 'var(--navy-deep)', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700, color: 'var(--white)', cursor: 'pointer' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--navy-mid)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'var(--navy-deep)'}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Exporter CSV
+        </button>
       </div>
 
       {/* KPIs */}
@@ -222,16 +240,17 @@ export default function Dashboard() {
             <div style={{ fontFamily: 'var(--font-oswald)', fontWeight: 600, fontSize: '16px', textTransform: 'uppercase', letterSpacing: '0.03em', color: 'var(--navy-deep)', marginBottom: '14px' }}>Actions rapides</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {quickActions.map((qa, i) => (
-                <Link key={i} to={qa.to} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 12px', border: '1px solid var(--border)', borderRadius: '6px', textDecoration: 'none', color: 'var(--text-1)', transition: 'border-color 0.15s ease' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.background = '#F5FAFE'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--white)'; }}
+                <button key={i} onClick={() => navigate(qa.path)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 12px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--white)', cursor: 'pointer', width: '100%', textAlign: 'left', transition: 'border-color 0.15s ease, background 0.15s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.background = '#F5FAFE'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--white)'; }}
                 >
                   <span style={{ width: '30px', height: '30px', borderRadius: '6px', background: qa.iconBg, color: qa.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={qa.icon}/></svg>
                   </span>
-                  <span style={{ flex: 1, fontSize: '13px', fontWeight: 700 }}>{qa.label}</span>
+                  <span style={{ flex: 1, fontSize: '13px', fontWeight: 700, color: 'var(--text-1)' }}>{qa.label}</span>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8896A0" strokeWidth="2" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-                </Link>
+                </button>
               ))}
             </div>
           </div>
@@ -257,7 +276,7 @@ export default function Dashboard() {
           <div style={{ background: 'linear-gradient(140deg, #203243 0%, #254354 60%, #2D4A5C 100%)', borderRadius: '8px', padding: '20px', color: '#FFFFFF', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #F4A800, #BC000D)' }}></div>
             <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#F4A800', marginBottom: '8px' }}>Programme VIP</div>
-            <div style={{ fontFamily: 'var(--font-oswald)', fontWeight: 600, fontSize: '19px', textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.25 }}>12 adhésions expirent en juillet</div>
+            <div style={{ fontFamily: 'var(--font-oswald)', fontWeight: 600, fontSize: '19px', textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.25 }}>{(() => { const n = vipMembers.filter(v => v.statut === 'Expire bientôt').length; return n > 0 ? `${n} adhésion${n > 1 ? 's' : ''} à renouveler` : 'Tous les membres VIP sont à jour'; })()}</div>
             <p style={{ margin: '8px 0 14px 0', fontSize: '12.5px', color: '#B9CBD8', lineHeight: 1.5 }}>Lancez la campagne de renouvellement avant le Tournoi International de décembre.</p>
             <Link to="/vip" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '34px', padding: '0 14px', background: '#F4A800', color: '#254354', borderRadius: '6px', fontSize: '12.5px', fontWeight: 700, textDecoration: 'none' }}>Gérer les renouvellements</Link>
           </div>

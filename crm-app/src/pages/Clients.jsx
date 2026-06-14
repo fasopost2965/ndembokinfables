@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TYPE_QUALITE, fmtUsd } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 import StatusBadge from '../components/ui/StatusBadge';
 import EmptyState from '../components/ui/EmptyState';
+import { FormSection, FormRow, TextField, SelectField, ValidationSummary } from '../components/ui/FormControls';
 
 const TYPE_COLORS = {
   'Sponsor': { bg: 'rgba(23,126,84,0.12)', color: '#177E54' },
@@ -14,15 +16,22 @@ const TYPE_COLORS = {
 };
 
 export default function Clients() {
-  const { state: { clients, devis, factures }, dispatch, confirmAction } = useCRM();
-  
+  const { state: { clients, devis, factures, contrats, projets }, dispatch, confirmAction } = useCRM();
+  const navigate = useNavigate();
+
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('Tous');
   const [detailTab, setDetailTab] = useState('Aperçu');
-  
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const addToast = useToast();
+  const [createErrors, setCreateErrors] = useState({});
+  const [editErrors, setEditErrors] = useState({});
+
+  // Derive CA from paid invoices instead of hardcoded field
+  const clientCA = (clientId) => factures.filter(f => f.clientId === clientId && f.statut === 'Payée').reduce((s, f) => s + f.montant, 0);
 
   // --- DRAWER STATE ---
   const [fNom, setFNom] = useState('');
@@ -31,20 +40,43 @@ export default function Clients() {
   const [fTel, setFTel] = useState('');
   const [fVille, setFVille] = useState('');
 
+  // Edit drawer state (mirrors create fields)
+  const [eFNom, setEFNom] = useState('');
+  const [eFType, setEFType] = useState('Club');
+  const [eFEmail, setEFEmail] = useState('');
+  const [eFTel, setEFTel] = useState('');
+  const [eFVille, setEFVille] = useState('');
+
   const openNewClientDrawer = () => {
-    setFNom('');
-    setFType('Club');
-    setFEmail('');
-    setFTel('');
-    setFVille('');
+    setFNom(''); setFType('Club'); setFEmail(''); setFTel(''); setFVille('');
+    setCreateErrors({});
     setIsDrawerOpen(true);
   };
 
+  const openEditDrawer = (client) => {
+    setEFNom(client.nom); setEFType(client.type); setEFEmail(client.email); setEFTel(client.tel || ''); setEFVille(client.ville || '');
+    setEditErrors({});
+    setIsEditDrawerOpen(true);
+  };
+
+  const handleSaveEdit = (clientId) => {
+    const errs = {};
+    if (!eFNom.trim()) errs.nom = 'Le nom est requis';
+    if (!eFEmail.trim()) errs.email = "L'email est requis";
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    const existing = clients.find(c => c.id === clientId);
+    dispatch({ type: 'UPDATE_CLIENT', payload: { ...existing, nom: eFNom, type: eFType, email: eFEmail, tel: eFTel, ville: eFVille } });
+    setIsEditDrawerOpen(false);
+    addToast('Profil client mis à jour !', 'success');
+  };
+
   const handleSaveClient = () => {
-    if (!fNom.trim() || !fEmail.trim()) {
-      addToast('Veuillez remplir les champs obligatoires (Nom, Email)', 'error');
-      return;
-    }
+    const errs = {};
+    if (!fNom.trim()) errs.nom = 'Le nom est requis';
+    if (!fEmail.trim()) errs.email = "L'email est requis";
+    setCreateErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     const newClient = {
       id: Date.now(),
       nom: fNom,
@@ -90,17 +122,17 @@ export default function Clients() {
 
   // --- STATS KPI ---
   const kpis = useMemo(() => {
-    const totalCa = clients.reduce((acc, c) => acc + c.ca, 0);
+    const ca = (clientId) => factures.filter(f => f.clientId === clientId && f.statut === 'Payée').reduce((s, f) => s + f.montant, 0);
+    const totalCa = clients.reduce((acc, c) => acc + ca(c.id), 0);
     const clubsCount = clients.filter(c => c.type === 'Club' || c.type === 'Académie').length;
     const sponsorsCount = clients.filter(c => c.type === 'Sponsor').length;
-    
     return [
       { label: 'Comptes B2B', value: clients.length, accent: 'var(--cyan)' },
       { label: 'Clubs & Académies', value: clubsCount, accent: 'var(--gold)' },
       { label: 'Sponsors Actifs', value: sponsorsCount, accent: 'var(--success)' },
-      { label: 'CA Global Cumulé', value: fmtUsd(totalCa), accent: 'var(--red)' }
+      { label: 'CA Encaissé', value: fmtUsd(totalCa), accent: 'var(--red)' }
     ];
-  }, [clients]);
+  }, [clients, factures]);
 
   // Si un client est sélectionné -> Vue Détail (Fiche 360)
   if (selectedId) {
@@ -113,80 +145,207 @@ export default function Clients() {
     const tStyle = TYPE_COLORS[client.type] || TYPE_COLORS['Institution'];
     const clientDevis = devis.filter(d => d.clientId === client.id);
     const clientFactures = factures.filter(f => f.clientId === client.id);
+    const clientContrats = contrats.filter(c => c.clientId === client.id);
+    const clientProjets = projets.filter(p => p.clientId === client.id);
+    const caEncaisse = clientCA(client.id);
 
     return (
       <div style={{ animation: 'fadeIn 0.2s ease-out' }}>
-        <button 
+        <button
           onClick={() => { setSelectedId(null); setDetailTab('Aperçu'); }}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '34px', padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', marginBottom: '20px' }}
         >
           &larr; Retour à la liste
         </button>
 
+        {/* Hero card */}
         <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '8px', borderTop: '3px solid var(--navy-deep)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h1 style={{ margin: 0, fontFamily: 'var(--font-oswald)', color: 'var(--navy-deep)', fontSize: '26px' }}>{client.nom}</h1>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', padding: '3px 10px', borderRadius: '99px', background: tStyle.bg, color: tStyle.color }}>{client.type}</span>
               <span style={{ fontSize: '12.5px', color: 'var(--text-2)' }}>{client.email} • {client.ville}</span>
+              <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--success)' }}>CA encaissé : {fmtUsd(caEncaisse)}</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
-             <button style={{ background: 'var(--white)', color: 'var(--navy-deep)', border: '1px solid var(--border-input)', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Éditer le profil</button>
-             <button style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>+ Nouveau devis</button>
+            <button onClick={() => openEditDrawer(client)} style={{ background: 'var(--white)', color: 'var(--navy-deep)', border: '1px solid var(--border-input)', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Éditer le profil</button>
+            <button onClick={() => navigate(`/devis?clientId=${client.id}`)} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 16px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>+ Nouveau devis</button>
           </div>
         </div>
-        
-        {/* Onglets */}
-        <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid var(--border)', marginTop: '24px', padding: '0 8px' }}>
-          {['Aperçu', 'Documents', 'Contrats & Projets'].map(tab => (
-            <button 
-              key={tab} 
-              onClick={() => setDetailTab(tab)}
-              style={{ background: 'none', border: 'none', padding: '12px 0', fontSize: '14px', fontWeight: detailTab === tab ? 700 : 600, color: detailTab === tab ? 'var(--navy-deep)' : 'var(--text-3)', borderBottom: detailTab === tab ? '3px solid var(--red)' : '3px solid transparent', cursor: 'pointer', transition: 'all 0.2s ease' }}
-            >
-              {tab}
-            </button>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid var(--border)', marginTop: '24px', padding: '0 8px', overflowX: 'auto' }}>
+          {['Aperçu', 'Devis', 'Factures', 'Contrats & Projets'].map(tab => (
+            <button key={tab} onClick={() => setDetailTab(tab)}
+              style={{ background: 'none', border: 'none', padding: '12px 0', fontSize: '14px', fontWeight: detailTab === tab ? 700 : 600, color: detailTab === tab ? 'var(--navy-deep)' : 'var(--text-3)', borderBottom: detailTab === tab ? '3px solid var(--red)' : '3px solid transparent', cursor: 'pointer', transition: 'all 0.2s ease', whiteSpace: 'nowrap' }}
+            >{tab}</button>
           ))}
         </div>
 
-        {/* Contenu des onglets */}
         <div style={{ marginTop: '24px' }}>
-          {detailTab === 'Aperçu' && (
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-                <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                   <h3 style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '0.1em' }}>Coordonnées & Infos</h3>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div><span style={{ color: 'var(--text-3)', fontSize: '11.5px', textTransform: 'uppercase', fontWeight: 700 }}>Email</span><br/><span style={{ fontWeight: 600, fontSize: '14px' }}>{client.email}</span></div>
-                      <div><span style={{ color: 'var(--text-3)', fontSize: '11.5px', textTransform: 'uppercase', fontWeight: 700 }}>Téléphone</span><br/><span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '14px' }}>{client.tel}</span></div>
-                      <div><span style={{ color: 'var(--text-3)', fontSize: '11.5px', textTransform: 'uppercase', fontWeight: 700 }}>Ville</span><br/><span style={{ fontSize: '14px' }}>{client.ville}</span></div>
-                   </div>
+          {/* Devis */}
+          {detailTab === 'Devis' && (
+            <div style={{ background: 'var(--white)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              {clientDevis.length === 0 ? (
+                <div style={{ padding: '40px' }}>
+                  <EmptyState title="Aucun devis" description="Ce client n'a pas encore de devis."
+                    actionLabel="+ Nouveau devis" onAction={() => navigate(`/devis?clientId=${client.id}`)} />
                 </div>
-                
-                <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                   <h3 style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '0.1em' }}>Activité Commerciale (Top 3)</h3>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                     {clientDevis.slice(0, 3).map(d => (
-                       <div key={d.ref} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                           <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{d.ref}</span>
-                           <span style={{ fontSize: '12.5px', color: 'var(--text-2)' }}>{d.objet}</span>
-                         </div>
-                         <StatusBadge status={d.statut} />
-                       </div>
-                     ))}
-                     {clientDevis.length === 0 && <span style={{ color: 'var(--text-3)', fontSize: '13px' }}>Aucun devis en cours.</span>}
-                   </div>
-                </div>
-             </div>
+              ) : (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 130px', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    <span>Référence</span><span>Objet</span><span style={{ textAlign: 'right' }}>Montant</span><span style={{ textAlign: 'right' }}>Statut</span>
+                  </div>
+                  {clientDevis.map(d => (
+                    <div key={d.ref} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 130px', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)' }}>
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{d.ref}</span>
+                      <span style={{ fontSize: '12.5px', color: 'var(--text-2)', paddingRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.objet}</span>
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(d.montant)}</span>
+                      <span style={{ textAlign: 'right' }}><StatusBadge status={d.statut} /></span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
           )}
 
-          {detailTab !== 'Aperçu' && (
-             <div style={{ background: 'var(--white)', padding: '40px', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                <p style={{ color: 'var(--text-2)', fontSize: '13.5px' }}>Les données de cet onglet seront intégrées prochainement.</p>
-             </div>
+          {/* Aperçu */}
+          {detailTab === 'Aperçu' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+              <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: '18px', letterSpacing: '0.1em' }}>Coordonnées</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {[['Email', client.email], ['Téléphone', client.tel], ['Ville', client.ville]].map(([lbl, val]) => (
+                    <div key={lbl}><div style={{ color: 'var(--text-3)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 700 }}>{lbl}</div><div style={{ fontWeight: 600, fontSize: '13.5px', marginTop: '3px' }}>{val || '—'}</div></div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: '18px', letterSpacing: '0.1em' }}>Devis récents</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {clientDevis.slice(0, 4).map(d => (
+                    <div key={d.ref} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '11.5px', fontWeight: 700, color: 'var(--navy-deep)' }}>{d.ref}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>{d.objet}</div>
+                      </div>
+                      <StatusBadge status={d.statut} />
+                    </div>
+                  ))}
+                  {clientDevis.length === 0 && <span style={{ color: 'var(--text-3)', fontSize: '13px' }}>Aucun devis.</span>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Factures */}
+          {detailTab === 'Factures' && (
+            <div style={{ background: 'var(--white)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              {clientFactures.length === 0 ? (
+                <div style={{ padding: '40px' }}><EmptyState title="Aucune facture" description="Ce client n'a pas encore de facture." /></div>
+              ) : (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 120px', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    <span>Référence</span><span>Objet</span><span style={{ textAlign: 'right' }}>Montant</span><span style={{ textAlign: 'right' }}>Statut</span>
+                  </div>
+                  {clientFactures.map(f => (
+                    <div key={f.ref} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 120px', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)' }}>
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{f.ref}</span>
+                      <span style={{ fontSize: '12.5px', color: 'var(--text-2)' }}>{f.objet}</span>
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(f.montant)}</span>
+                      <span style={{ textAlign: 'right' }}><StatusBadge status={f.statut} /></span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Contrats & Projets */}
+          {detailTab === 'Contrats & Projets' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Contrats */}
+              <div style={{ background: 'var(--white)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: '13px', color: 'var(--navy-deep)' }}>Contrats ({clientContrats.length})</div>
+                {clientContrats.length === 0 ? (
+                  <div style={{ padding: '32px' }}><EmptyState title="Aucun contrat" description="Aucun contrat lié à ce client." /></div>
+                ) : clientContrats.map(c => (
+                  <div key={c.ref} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{c.ref}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '2px' }}>{c.type} — {fmtUsd(c.valeur)}</div>
+                    </div>
+                    <StatusBadge status={c.statut} />
+                  </div>
+                ))}
+              </div>
+              {/* Projets */}
+              <div style={{ background: 'var(--white)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: '13px', color: 'var(--navy-deep)' }}>Projets ({clientProjets.length})</div>
+                {clientProjets.length === 0 ? (
+                  <div style={{ padding: '32px' }}><EmptyState title="Aucun projet" description="Aucun projet lié à ce client." /></div>
+                ) : clientProjets.map(p => (
+                  <div key={p.ref} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ flex: 1, marginRight: '16px' }}>
+                      <div style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{p.ref}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '2px' }}>{p.nom}</div>
+                      <div style={{ height: '4px', background: 'var(--border)', borderRadius: '99px', marginTop: '8px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${p.avancement || 0}%`, background: 'var(--cyan)', borderRadius: '99px' }} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                      <StatusBadge status={p.statut} />
+                      <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '11px', color: 'var(--text-3)' }}>{p.avancement || 0}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
+
+        {/* Edit drawer */}
+        <Drawer isOpen={isEditDrawerOpen} onClose={() => setIsEditDrawerOpen(false)} title={`Éditer — ${client.nom}`} width="480px"
+          footer={
+            <>
+              <button onClick={() => setIsEditDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={() => handleSaveEdit(client.id)} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Enregistrer</button>
+            </>
+          }
+        >
+          <ValidationSummary errors={editErrors} />
+          <FormSection title="Identification" subtitle="Raison sociale et localisation">
+            <TextField
+              label="Nom" value={eFNom} onChange={setEFNom} required
+              placeholder="Ex. Mazembe Corp" maxLength={80}
+              error={editErrors.nom}
+            />
+            <FormRow>
+              <SelectField
+                label="Type" value={eFType} onChange={setEFType}
+                options={Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => ({ value: t, label: TYPE_QUALITE[t] }))}
+              />
+              <TextField
+                label="Ville" value={eFVille} onChange={setEFVille}
+                placeholder="Ex. Kinshasa"
+              />
+            </FormRow>
+          </FormSection>
+          <FormSection title="Contact" subtitle="Coordonnées du compte">
+            <FormRow>
+              <TextField
+                label="Email" value={eFEmail} onChange={setEFEmail} required
+                type="email" placeholder="contact@exemple.cd"
+                error={editErrors.email}
+              />
+              <TextField
+                label="Téléphone" value={eFTel} onChange={setEFTel}
+                placeholder="+243 ..."
+              />
+            </FormRow>
+          </FormSection>
+        </Drawer>
       </div>
     );
   }
@@ -294,8 +453,8 @@ export default function Clients() {
                       <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--text-2)' }}>{c.email}</span>
                       <span style={{ display: 'block', fontFamily: 'var(--font-jetbrains)', fontSize: '11px', color: 'var(--text-3)' }}>{c.tel}</span>
                     </span>
-                    <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(c.ca)}</span>
-                    <span style={{ textAlign: 'right', fontSize: '12px', color: 'var(--text-2)' }}>{c.docs}</span>
+                    <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(clientCA(c.id))}</span>
+                    <span style={{ textAlign: 'right', fontSize: '12px', color: 'var(--text-2)' }}>{devis.filter(d => d.clientId === c.id).length + factures.filter(f => f.clientId === c.id).length + contrats.filter(ct => ct.clientId === c.id).length}</span>
                     <span style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px' }}>
                       <button onClick={(e) => handleDeleteClient(e, c)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-3)' }} title="Supprimer" onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -314,7 +473,7 @@ export default function Clients() {
                      </div>
                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px' }}>
                        <span style={{ color: 'var(--text-2)' }}>{c.email}</span>
-                       <span style={{ fontFamily: 'var(--font-jetbrains)', fontWeight: 700 }}>{fmtUsd(c.ca)}</span>
+                       <span style={{ fontFamily: 'var(--font-jetbrains)', fontWeight: 700 }}>{fmtUsd(clientCA(c.id))}</span>
                      </div>
                   </div>
                 </div>
@@ -329,7 +488,7 @@ export default function Clients() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         title="Créer un compte client"
-        width="460px"
+        width="480px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
@@ -337,36 +496,37 @@ export default function Clients() {
           </>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Nom du client / entité <span style={{ color: 'var(--red)' }}>*</span></span>
-            <input type="text" value={fNom} onChange={e=>setFNom(e.target.value)} placeholder="Ex. Mazembe Corp" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-          </label>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Type</span>
-              <select value={fType} onChange={e=>setFType(e.target.value)} style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 10px', fontSize: '13px', background: 'var(--white)' }}>
-                {Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => <option key={t} value={t}>{TYPE_QUALITE[t]}</option>)}
-              </select>
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Ville</span>
-              <input type="text" value={fVille} onChange={e=>setFVille(e.target.value)} placeholder="Kinshasa" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Email <span style={{ color: 'var(--red)' }}>*</span></span>
-              <input type="email" value={fEmail} onChange={e=>setFEmail(e.target.value)} placeholder="contact@exemple.cd" style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Téléphone</span>
-              <input type="text" value={fTel} onChange={e=>setFTel(e.target.value)} placeholder="+243 ..." style={{ height: '40px', border: '1px solid var(--border-input)', borderRadius: '6px', padding: '0 12px', fontSize: '13px' }} />
-            </label>
-          </div>
-        </div>
+        <ValidationSummary errors={createErrors} />
+        <FormSection title="Identification" subtitle="Raison sociale et localisation">
+          <TextField
+            label="Nom du client / entité" value={fNom} onChange={setFNom} required
+            placeholder="Ex. Mazembe Corp" maxLength={80}
+            error={createErrors.nom}
+          />
+          <FormRow>
+            <SelectField
+              label="Type" value={fType} onChange={setFType}
+              options={Object.keys(TYPE_QUALITE).filter(t => t !== 'Athlète').map(t => ({ value: t, label: TYPE_QUALITE[t] }))}
+            />
+            <TextField
+              label="Ville" value={fVille} onChange={setFVille}
+              placeholder="Ex. Kinshasa"
+            />
+          </FormRow>
+        </FormSection>
+        <FormSection title="Contact" subtitle="Coordonnées du compte">
+          <FormRow>
+            <TextField
+              label="Email" value={fEmail} onChange={setFEmail} required
+              type="email" placeholder="contact@exemple.cd"
+              error={createErrors.email}
+            />
+            <TextField
+              label="Téléphone" value={fTel} onChange={setFTel}
+              placeholder="+243 ..."
+            />
+          </FormRow>
+        </FormSection>
       </Drawer>
     </div>
   );

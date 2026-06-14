@@ -1,32 +1,20 @@
-import { Outlet, useLocation, Link } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useState } from 'react';
-import Drawer from './ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
 
-const PAGE_TITLES = {
-  '/dashboard': { kicker: 'Pilotage', title: 'Tableau de bord' },
-  '/devis': { kicker: 'Commercial', title: 'Devis' },
-  '/factures': { kicker: 'Commercial', title: 'Factures' },
-  '/contrats': { kicker: 'Commercial', title: 'Contrats' },
-  '/projets': { kicker: 'Commercial', title: 'Projets' },
-  '/evenements': { kicker: 'Opérations', title: 'Événements' },
-  '/clients': { kicker: 'Relations', title: 'Clients' },
-  '/vip': { kicker: 'Relations', title: 'Membres VIP' },
-  '/parametres': { kicker: 'Système', title: 'Paramètres' },
-};
-
 function Topbar({ onOpenSidebar }) {
-  const location = useLocation();
-  const page = PAGE_TITLES[location.pathname] || { kicker: '', title: 'CRM' };
   const [search, setSearch] = useState('');
   const addToast = useToast();
 
   const QUICK_CREATE = [
-    { label: 'Nouveau devis', to: '/devis' },
-    { label: 'Nouvelle facture', to: '/factures' },
-    { label: 'Nouveau contrat', to: '/contrats' },
-    { label: 'Nouveau client', to: '/clients' },
+    { label: 'Nouveau devis',         to: '/devis',       color: 'var(--cyan)' },
+    { label: 'Nouvelle facture',      to: '/factures',    color: 'var(--red)' },
+    { label: 'Nouveau contrat',       to: '/contrats',    color: 'var(--navy-mid)' },
+    { label: 'Nouveau projet',        to: '/projets',     color: 'var(--gold)' },
+    { label: 'Nouvel événement',      to: '/evenements',  color: 'var(--success)' },
+    { label: 'Nouveau client',        to: '/clients',     color: 'var(--cyan)' },
+    { label: 'Ajouter un membre VIP', to: '/vip',         color: '#C9A227' },
   ];
   const [showMenu, setShowMenu] = useState(false);
 
@@ -84,13 +72,14 @@ function Topbar({ onOpenSidebar }) {
           {showMenu && (
             <>
               <div onClick={() => setShowMenu(false)} style={{ position: 'fixed', inset: 0, zIndex: 70 }}></div>
-              <div style={{ position: 'absolute', top: '42px', right: 0, background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 8px 24px rgba(9,29,46,0.12)', zIndex: 80, minWidth: '180px', padding: '6px' }}>
+              <div style={{ position: 'absolute', top: '42px', right: 0, background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: '0 8px 24px rgba(9,29,46,0.14)', zIndex: 80, minWidth: '210px', padding: '6px' }}>
                 {QUICK_CREATE.map(item => (
                   <Link key={item.to} to={item.to} onClick={() => setShowMenu(false)}
-                    style={{ display: 'block', padding: '9px 12px', borderRadius: '5px', fontSize: '13px', fontWeight: 600, color: 'var(--text-1)', textDecoration: 'none' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '5px', fontSize: '13px', fontWeight: 600, color: 'var(--text-1)', textDecoration: 'none' }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-page)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
+                    <span style={{ width: '7px', height: '7px', borderRadius: '99px', background: item.color, flexShrink: 0 }}></span>
                     {item.label}
                   </Link>
                 ))}
