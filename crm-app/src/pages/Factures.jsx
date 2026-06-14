@@ -7,12 +7,13 @@ import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/ui/EmptyState';
 import { useSearchParams } from 'react-router-dom';
 import { FormSection, FormRow, TextField, TextareaField, AmountField, DateField, TypeCards, EntitySelector, ValidationSummary } from '../components/ui/FormControls';
+import { printDocument } from '../utils/documentBuilder';
 
 
 const STATUTS = ['Tous', 'En attente', 'En retard', 'Payée'];
 
 export default function Factures() {
-  const { state: { factures, clients }, dispatch, confirmAction } = useCRM();
+  const { state: { factures, clients, company }, dispatch, confirmAction } = useCRM();
 
   const clientNom = (id) => { const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
   const [filter, setFilter] = useState('Tous');
@@ -33,6 +34,8 @@ export default function Factures() {
   const [fStatut, setFStatut] = useState('En attente');
   const [errors, setErrors] = useState({});
   const [isDrawerOpen, setIsDrawerOpen] = useState(() => searchParams.get('action') === 'new');
+  const [previewTarget, setPreviewTarget] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const openCreate = () => {
     setEditTarget(null); setFClient(''); setFObjet(''); setFNotes(''); setFMontant('');
@@ -137,8 +140,8 @@ export default function Factures() {
             style={{ border: '1px solid var(--border-input)', borderRadius: '6px', padding: '7px 12px', fontSize: '12.5px', outline: 'none' }} />
         </div>
 
-        <div className="responsive-table-header" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 120px 130px 110px', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-          <span>Référence</span><span>Client</span><span>Objet</span><span style={{ textAlign: 'right' }}>Montant</span><span style={{ textAlign: 'right' }}>Échéance</span><span style={{ textAlign: 'right' }}>Statut</span>
+        <div className="responsive-table-header" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 120px 130px minmax(180px, auto)', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          <span>Référence</span><span>Client</span><span>Objet</span><span style={{ textAlign: 'right' }}>Montant</span><span style={{ textAlign: 'right' }}>Échéance</span><span style={{ textAlign: 'right' }}>Actions</span>
         </div>
 
         {filtered.length === 0 ? (
@@ -153,7 +156,7 @@ export default function Factures() {
         ) : (
           <div className="responsive-table">
             {filtered.map((f) => (
-          <div key={f.ref} className="responsive-table-row" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 120px 130px 110px', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)', cursor: 'pointer' }}
+          <div key={f.ref} className="responsive-table-row" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 120px 130px minmax(180px, auto)', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)', cursor: 'pointer' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-subtle)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--white)'}
           >
@@ -162,13 +165,16 @@ export default function Factures() {
             <span className="responsive-table-cell" data-label="Objet" style={{ fontSize: '12.5px', color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>{f.objet}</span>
             <span className="responsive-table-cell" data-label="Montant" style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(f.montant)}</span>
             <span className="responsive-table-cell" data-label="Échéance" style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '11.5px', color: f.statut === 'En retard' ? 'var(--red)' : 'var(--text-2)', textAlign: 'right' }}>{dateFr(f.echeance)}</span>
-            <span className="responsive-table-cell" data-label="Statut" style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px' }}>
+            <span className="responsive-table-cell" data-label="Actions" style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px' }}>
               <StatusBadge status={f.statut} />
               {['En attente', 'En retard'].includes(f.statut) && (
                 <button onClick={(e) => handleMarkPaid(e, f)} style={{ background: 'rgba(23,126,84,0.1)', border: '1px solid rgba(23,126,84,0.3)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--success)', display: 'flex', alignItems: 'center' }} title="Marquer payée">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
               )}
+              <button onClick={(e) => { e.stopPropagation(); setPreviewTarget(f); setIsPreviewOpen(true); }} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Aperçu / PDF" onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
               <button onClick={(e) => { e.stopPropagation(); openEdit(f); }} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Modifier" onMouseEnter={e => e.currentTarget.style.color = 'var(--cyan)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
@@ -185,6 +191,80 @@ export default function Factures() {
           {filtered.length} facture{filtered.length > 1 ? 's' : ''} affichée{filtered.length > 1 ? 's' : ''}
         </div>
       </div>
+
+      <Drawer
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        title={previewTarget ? `Facture ${previewTarget.ref}` : 'Aperçu facture'}
+        width="560px"
+        footer={
+          <>
+            <button onClick={() => setIsPreviewOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Fermer</button>
+            {previewTarget && (
+              <button
+                onClick={() => {
+                  const lignes = [{ description: previewTarget.objet, quantite: 1, prixUnitaire: previewTarget.montant }];
+                  printDocument({ type: 'facture', doc: previewTarget, lignes, client: clients.find(c => c.id === previewTarget.clientId) || null, company });
+                }}
+                style={{ padding: '10px 18px', background: 'var(--gold)', color: 'var(--navy-deep)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Télécharger PDF
+              </button>
+            )}
+            {previewTarget && (
+              <button onClick={() => { setIsPreviewOpen(false); openEdit(previewTarget); }} style={{ padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Modifier</button>
+            )}
+          </>
+        }
+      >
+        {previewTarget && (() => {
+          const client = clients.find(c => c.id === previewTarget.clientId);
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {[
+                  { label: 'Référence', value: previewTarget.ref, mono: true },
+                  { label: 'Statut', value: <StatusBadge status={previewTarget.statut} /> },
+                  { label: 'Client', value: client?.nom || previewTarget.clientNom || '—' },
+                  { label: 'Montant', value: fmtUsd(previewTarget.montant), mono: true },
+                  { label: "Date d'émission", value: dateFr(previewTarget.date) },
+                  { label: 'Échéance', value: dateFr(previewTarget.echeance) },
+                ].map(({ label, value, mono }) => (
+                  <div key={label} style={{ background: 'var(--bg-page)', borderRadius: '8px', padding: '12px 14px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '4px' }}>{label}</div>
+                    <div style={{ fontFamily: mono ? 'var(--font-jetbrains)' : undefined, fontWeight: 600, fontSize: '14px' }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ background: 'var(--bg-page)', borderRadius: '8px', padding: '14px 16px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '6px' }}>Objet</div>
+                <div style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--navy-deep)' }}>{previewTarget.objet}</div>
+              </div>
+
+              {previewTarget.notes && (
+                <div style={{ background: 'var(--bg-page)', borderRadius: '8px', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '6px' }}>Notes</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.6 }}>{previewTarget.notes}</div>
+                </div>
+              )}
+
+              {client && (
+                <div style={{ background: 'var(--bg-page)', borderRadius: '8px', padding: '14px 16px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '8px' }}>Destinataire</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--navy-deep)' }}>{client.nom}</div>
+                  {client.adresse && <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '2px' }}>{client.adresse}</div>}
+                  {[client.ville, client.pays].filter(Boolean).length > 0 && (
+                    <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>{[client.ville, client.pays].filter(Boolean).join(', ')}</div>
+                  )}
+                  {client.email && <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>{client.email}</div>}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </Drawer>
 
       <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editTarget ? 'Modifier la facture' : 'Nouvelle facture'} width="520px"
         footer={

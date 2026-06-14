@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { fmtUsd, dateFr, nextNumero, TYPE_QUALITE } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
+import { printDocument } from '../utils/documentBuilder';
 import StatusBadge from '../components/ui/StatusBadge';
 import Drawer from '../components/ui/Drawer';
 import { useToast } from '../contexts/ToastContext';
@@ -93,7 +94,7 @@ const SERVICES_NDEMBO = [
 const newLigne = () => ({ _id: Math.random().toString(36).slice(2), description: '', quantite: 1, prixUnitaire: '' });
 
 export default function Devis() {
-  const { state: { devis, clients, factures }, dispatch, confirmAction } = useCRM();
+  const { state: { devis, clients, factures, company }, dispatch, confirmAction } = useCRM();
   const [filter, setFilter] = useState('Tous');
   const [search, setSearch] = useState('');
   const addToast = useToast();
@@ -534,6 +535,20 @@ export default function Devis() {
         footer={
           <>
             <button onClick={() => setIsPreviewOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Fermer</button>
+            {previewTarget && (
+              <button
+                onClick={() => {
+                  const lignes = previewTarget.lignes?.length
+                    ? previewTarget.lignes
+                    : [{ description: previewTarget.objet, quantite: 1, prixUnitaire: previewTarget.montant }];
+                  printDocument({ type: 'devis', doc: previewTarget, lignes, client: clients.find(c => c.id === previewTarget.clientId) || null, company });
+                }}
+                style={{ padding: '10px 18px', background: 'var(--gold)', color: 'var(--navy-deep)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Télécharger PDF
+              </button>
+            )}
             {previewTarget && previewTarget.statut !== 'Converti' && (
               <button onClick={() => { setIsPreviewOpen(false); openEdit(previewTarget); }} style={{ padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Modifier</button>
             )}
