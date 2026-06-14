@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { STATUT_BADGE, fmtUsd, dateFr } from '../crm-data';
+import { STATUT_BADGE, fmtUsd, dateFr, nextNumero } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
 import StatusBadge from '../components/ui/StatusBadge';
 import Drawer from '../components/ui/Drawer';
@@ -19,9 +19,13 @@ export default function Devis() {
 
   const clientNom = (id) => { const c = clients.find(c => c.id === id); return c ? c.nom : '—'; };
 
+  const [editTarget, setEditTarget] = useState(null);
   const [fClient, setFClient] = useState('');
   const [fObjet, setFObjet] = useState('');
   const [fMontant, setFMontant] = useState('');
+
+  const openCreate = () => { setEditTarget(null); setFClient(''); setFObjet(''); setFMontant(''); setIsDrawerOpen(true); };
+  const openEdit = (d) => { setEditTarget(d); setFClient(String(d.clientId)); setFObjet(d.objet); setFMontant(String(d.montant)); setIsDrawerOpen(true); };
 
   const filtered = devis.filter(d => {
     const matchFilter = filter === 'Tous' || d.statut === filter;
@@ -34,20 +38,22 @@ export default function Devis() {
 
   const handleSave = () => {
     if (!fObjet.trim() || !fMontant) { addToast('Remplissez tous les champs requis', 'error'); return; }
-    const now = new Date().toISOString().slice(0,10);
-    const nextRef = 'DEV-2026-' + String(devis.length + 43).padStart(3,'0');
-    dispatch({ 
-      type: 'ADD_DEVIS', 
-      payload: { ref: nextRef, clientId: Number(fClient) || 1, objet: fObjet, montant: Number(fMontant), statut: 'Brouillon', date: now } 
-    });
+    if (editTarget) {
+      dispatch({ type: 'UPDATE_DEVIS', payload: { ...editTarget, clientId: Number(fClient) || editTarget.clientId, objet: fObjet, montant: Number(fMontant) } });
+      addToast('Devis mis à jour.');
+    } else {
+      const now = new Date().toISOString().slice(0,10);
+      const nextRef = nextNumero('DEV-', new Date().getFullYear(), devis.map(d => d.ref));
+      dispatch({ type: 'ADD_DEVIS', payload: { ref: nextRef, clientId: Number(fClient) || 1, objet: fObjet, montant: Number(fMontant), statut: 'Brouillon', date: now } });
+      addToast('Devis créé avec succès !');
+    }
     setIsDrawerOpen(false);
-    addToast('Devis créé avec succès !');
     setFObjet(''); setFMontant(''); setFClient('');
   };
 
   const handleConvert = (e, devisToConvert) => {
     e.stopPropagation();
-    const nextRef = 'FAC-2026-' + String(factures.length + 19).padStart(3,'0');
+    const nextRef = nextNumero('FAC-', new Date().getFullYear(), factures.map(f => f.ref));
     const now = new Date().toISOString().slice(0,10);
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -87,7 +93,7 @@ export default function Devis() {
           <h1 style={{ fontSize: '30px', margin: 0 }}>Devis</h1>
           <p style={{ margin: '6px 0 0 0', color: 'var(--text-2)' }}>Gestion des propositions commerciales et suivi des conversions.</p>
         </div>
-        <button onClick={() => setIsDrawerOpen(true)} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={openCreate} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
           + Nouveau devis
         </button>
       </div>
@@ -135,7 +141,7 @@ export default function Devis() {
               title="Aucun devis trouvé" 
               description="Modifiez vos filtres ou créez une nouvelle proposition commerciale."
               actionLabel="+ Nouveau devis"
-              onAction={() => setIsDrawerOpen(true)}
+              onAction={openCreate}
             />
           </div>
         ) : filtered.map((d, i) => (
@@ -156,6 +162,9 @@ export default function Devis() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
                   </button>
                 )}
+                <button onClick={(e) => { e.stopPropagation(); openEdit(d); }} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Modifier" onMouseEnter={e => e.currentTarget.style.color = 'var(--cyan)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
                 <button onClick={(e) => handleDelete(e, d)} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Supprimer" onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
@@ -193,11 +202,11 @@ export default function Devis() {
       </div>
 
       {/* Drawer */}
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title="Créer un devis" width="460px"
+      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editTarget ? 'Modifier le devis' : 'Créer un devis'} width="460px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
-            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>Créer le devis</button>
+            <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>{editTarget ? 'Enregistrer' : 'Créer le devis'}</button>
           </>
         }
       >

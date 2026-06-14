@@ -104,7 +104,7 @@ function FillBar({ value, max }) {
   );
 }
 
-function EventCard({ item, kind, athletes, onDelete, onViewParticipants }) {
+function EventCard({ item, kind, athletes, onDelete, onEdit, onViewParticipants }) {
   const [hovered, setHovered] = useState(false);
   const tc = getTypeConfig(kind === 'camp' ? 'Camp' : item.type);
   const participants = kind === 'camp' ? (item.participants || []) : [];
@@ -188,21 +188,28 @@ function EventCard({ item, kind, athletes, onDelete, onViewParticipants }) {
         {kind === 'camp' && item.categorie && (
           <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>Catégorie : <strong>{item.categorie}</strong></span>
         )}
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(e, item, kind); }}
-          style={{
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            padding: '4px', color: 'var(--text-3)', marginLeft: 'auto',
-            opacity: hovered ? 1 : 0, transition: 'opacity 0.15s',
-          }}
-          title="Supprimer"
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
+        <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto', opacity: hovered ? 1 : 0.35, transition: 'opacity 0.2s' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(item, kind); }}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-3)' }}
+            title="Modifier"
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--cyan)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(e, item, kind); }}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-3)' }}
+            title="Supprimer"
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -218,6 +225,7 @@ export default function Evenements() {
   const [selectedCamp, setSelectedCamp] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerKind, setDrawerKind] = useState('evenement');
+  const [editTarget, setEditTarget] = useState(null);
   const addToast = useToast();
 
   const [fNom, setFNom] = useState('');
@@ -256,10 +264,29 @@ export default function Evenements() {
   };
 
   const openDrawer = (kind) => {
+    setEditTarget(null);
     setDrawerKind(kind);
     setFNom(''); setFType('Tournoi'); setFLieu('');
     setFDateDebut(''); setFDateFin(''); setFCapacite(''); setFBudget('');
     setFCategorie('U17');
+    setIsDrawerOpen(true);
+  };
+
+  const openEdit = (item, kind) => {
+    setEditTarget({ item, kind });
+    setDrawerKind(kind);
+    setFNom(item.nom);
+    setFLieu(item.lieu);
+    setFDateDebut(item.dateDebut || '');
+    setFDateFin(item.dateFin || '');
+    if (kind === 'evenement') {
+      setFType(item.type || 'Tournoi');
+      setFBudget(String(item.budget || ''));
+      setFCapacite(String(item.capacite || ''));
+    } else {
+      setFCategorie(item.categorie || 'U17');
+      setFCapacite(String(item.places || ''));
+    }
     setIsDrawerOpen(true);
   };
 
@@ -268,29 +295,21 @@ export default function Evenements() {
       addToast('Nom, lieu et date de début sont obligatoires', 'error');
       return;
     }
-    if (drawerKind === 'evenement') {
+    if (editTarget) {
+      const { item, kind } = editTarget;
+      if (kind === 'evenement') {
+        dispatch({ type: 'UPDATE_EVENEMENT', payload: { ...item, nom: fNom, type: fType, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, budget: Number(fBudget) || 0, capacite: Number(fCapacite) || 0 } });
+      } else {
+        dispatch({ type: 'UPDATE_CAMP', payload: { ...item, nom: fNom, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, categorie: fCategorie, places: Number(fCapacite) || 0 } });
+      }
+      addToast(`"${fNom}" mis à jour.`);
+    } else if (drawerKind === 'evenement') {
       const nextId = 'EVT-' + String(evenements.length + 5).padStart(2, '0');
-      dispatch({
-        type: 'ADD_EVENEMENT',
-        payload: {
-          id: nextId, nom: fNom, type: fType, lieu: fLieu,
-          dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut,
-          budget: Number(fBudget) || 0, statut: 'Planification',
-          inscrits: 0, capacite: Number(fCapacite) || 0, clientId: null
-        }
-      });
+      dispatch({ type: 'ADD_EVENEMENT', payload: { id: nextId, nom: fNom, type: fType, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, budget: Number(fBudget) || 0, statut: 'Planification', inscrits: 0, capacite: Number(fCapacite) || 0, clientId: null } });
       addToast(`Événement "${fNom}" créé !`);
     } else {
       const nextId = 'CMP-' + String(camps.length + 4).padStart(2, '0');
-      dispatch({
-        type: 'ADD_CAMP',
-        payload: {
-          id: nextId, nom: fNom, lieu: fLieu,
-          dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut,
-          categorie: fCategorie, places: Number(fCapacite) || 0,
-          inscrits: 0, statut: 'Planifié', clientId: null, participants: []
-        }
-      });
+      dispatch({ type: 'ADD_CAMP', payload: { id: nextId, nom: fNom, lieu: fLieu, dateDebut: fDateDebut, dateFin: fDateFin || fDateDebut, categorie: fCategorie, places: Number(fCapacite) || 0, inscrits: 0, statut: 'Planifié', clientId: null, participants: [] } });
       addToast(`Camp "${fNom}" créé !`);
     }
     setIsDrawerOpen(false);
@@ -374,6 +393,7 @@ export default function Evenements() {
               kind={item._kind}
               athletes={athletes}
               onDelete={handleDelete}
+              onEdit={openEdit}
               onViewParticipants={setSelectedCamp}
             />
           ))}
@@ -428,13 +448,13 @@ export default function Evenements() {
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        title={drawerKind === 'evenement' ? 'Créer un événement' : 'Planifier un camp'}
+        title={editTarget ? `Modifier ${drawerKind === 'evenement' ? "l'événement" : 'le camp'}` : drawerKind === 'evenement' ? 'Créer un événement' : 'Planifier un camp'}
         width="460px"
         footer={
           <>
             <button onClick={() => setIsDrawerOpen(false)} style={{ padding: '10px 18px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}>Annuler</button>
             <button onClick={handleSave} style={{ padding: '10px 22px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
-              {drawerKind === 'evenement' ? 'Créer l\'événement' : 'Planifier le camp'}
+              {editTarget ? 'Enregistrer' : drawerKind === 'evenement' ? "Créer l'événement" : 'Planifier le camp'}
             </button>
           </>
         }
