@@ -12,6 +12,7 @@ const initialState = {
   vipMembers: VIP_MEMBERS,
   athletes: ATHLETES,
   company: COMPANY,
+  activites: [],
   confirmModal: { isOpen: false, title: '', message: '', onConfirm: null }
 };
 
@@ -47,16 +48,24 @@ function crmReducer(state, action) {
       return { ...state, athletes: state.athletes.map(a => a.id === action.payload.id ? { ...a, ...action.payload } : a) };
     case 'DELETE_ATHLETE':
       return { ...state, athletes: state.athletes.filter(a => a.id !== action.payload) };
-    case 'DELETE_CLIENT':
+    case 'DELETE_CLIENT': {
+      const deletedId = action.payload;
+      // Devis and factures are kept with clientId = null so accounting history is preserved.
+      // Camps and evenements linked to this client are also detached (not deleted) to avoid
+      // losing operational records; they become "orphan" events.
       return {
         ...state,
-        clients: state.clients.filter(c => c.id !== action.payload),
-        devis: state.devis.filter(d => d.clientId !== action.payload),
-        factures: state.factures.filter(f => f.clientId !== action.payload),
-        contrats: state.contrats.filter(c => c.clientId !== action.payload),
-        projets: state.projets.filter(p => p.clientId !== action.payload),
-        vipMembers: state.vipMembers.filter(v => v.clientId !== action.payload),
+        clients:    state.clients.filter(c => c.id !== deletedId),
+        devis:      state.devis.map(d => d.clientId === deletedId ? { ...d, clientId: null, clientNom: 'Client supprimé' } : d),
+        factures:   state.factures.map(f => f.clientId === deletedId ? { ...f, clientId: null, clientNom: 'Client supprimé' } : f),
+        contrats:   state.contrats.filter(c => c.clientId !== deletedId),
+        projets:    state.projets.filter(p => p.clientId !== deletedId),
+        vipMembers: state.vipMembers.filter(v => v.clientId !== deletedId),
+        evenements: state.evenements.map(e => e.clientId === deletedId ? { ...e, clientId: null } : e),
+        camps:      state.camps.map(c => c.clientId === deletedId ? { ...c, clientId: null } : c),
+        activites:  state.activites.filter(a => !(a.entityType === 'client' && a.entityId === deletedId)),
       };
+    }
     case 'DELETE_CONTRAT':
       return {
         ...state,
@@ -91,6 +100,12 @@ function crmReducer(state, action) {
       return { ...state, factures: state.factures.map(f => f.ref === action.payload.ref ? { ...f, statut: action.payload.statut } : f) };
     case 'UPDATE_COMPANY':
       return { ...state, company: { ...state.company, ...action.payload } };
+    case 'ADD_ACTIVITE':
+      return { ...state, activites: [action.payload, ...state.activites] };
+    case 'UPDATE_ACTIVITE':
+      return { ...state, activites: state.activites.map(a => a.id === action.payload.id ? { ...a, ...action.payload } : a) };
+    case 'DELETE_ACTIVITE':
+      return { ...state, activites: state.activites.filter(a => a.id !== action.payload) };
     case 'OPEN_CONFIRM':
       return { ...state, confirmModal: { isOpen: true, ...action.payload } };
     case 'CLOSE_CONFIRM':
