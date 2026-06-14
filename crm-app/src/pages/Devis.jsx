@@ -10,6 +10,71 @@ import { FormSection, FormRow, TextField, TextareaField, DateField, TypeCards, E
 
 const STATUTS = ['Tous', 'Brouillon', 'Envoyé', 'Accepté', 'Converti', 'Expiré'];
 
+const KANBAN_COLS = [
+  { id: 'Brouillon', color: '#5B6B77', bg: 'rgba(91,107,119,0.07)' },
+  { id: 'Envoyé',    color: '#1E78A8', bg: 'rgba(30,159,216,0.07)' },
+  { id: 'Accepté',   color: '#177E54', bg: 'rgba(23,126,84,0.08)'  },
+  { id: 'Converti',  color: '#254354', bg: 'rgba(37,67,84,0.07)'   },
+  { id: 'Expiré',    color: '#BC000D', bg: 'rgba(188,0,13,0.06)'   },
+];
+
+function KanbanCard({ d, col, clientNom, openEdit, handleDelete, handleConvert, onMove }) {
+  const FLOW = ['Brouillon', 'Envoyé', 'Accepté'];
+  const nextSt = FLOW[FLOW.indexOf(d.statut) + 1];
+  const bs = { background: 'none', border: '1px solid ' + col.color + '33', borderRadius: '5px', padding: '3px 7px', cursor: 'pointer', fontSize: '11px', fontWeight: 700, color: col.color, display: 'inline-flex', alignItems: 'center', gap: '4px' };
+  return (
+    <div style={{ background: 'var(--white)', borderRadius: '8px', padding: '12px 14px', border: '1px solid ' + col.color + '22', boxShadow: '0 1px 5px rgba(0,0,0,0.06)', transition: 'box-shadow 0.15s' }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.12)'}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 5px rgba(0,0,0,0.06)'}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+        <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '10.5px', fontWeight: 700, color: 'var(--text-3)' }}>{d.ref}</span>
+        <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, color: col.color }}>{fmtUsd(d.montant)}</span>
+      </div>
+      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--navy-deep)', marginBottom: '2px', lineHeight: 1.25 }}>{clientNom(d.clientId)}</div>
+      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginBottom: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.objet}</div>
+      {d.date && <div style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '10px', color: 'var(--text-3)', marginBottom: '10px' }}>{dateFr(d.date)}</div>}
+      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+        {nextSt && <button style={{ ...bs, color: '#177E54', borderColor: '#177E5440' }} onClick={() => onMove(d.ref, nextSt)}>→ {nextSt}</button>}
+        {d.statut === 'Accepté' && <button style={{ ...bs, color: '#254354', borderColor: '#25435440' }} onClick={(e) => handleConvert(e, d)}>💰 Facturer</button>}
+        {d.statut !== 'Converti' && <button style={bs} onClick={() => openEdit(d)}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>}
+        <button style={{ ...bs, color: '#BC000D', borderColor: '#BC000D33' }} onClick={(e) => handleDelete(e, d)}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+    </div>
+  );
+}
+
+function KanbanView({ devis, clientNom, openEdit, handleDelete, handleConvert, onMove, openCreate }) {
+  return (
+    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '12px', alignItems: 'flex-start' }}>
+      {KANBAN_COLS.map(col => {
+        const cards = devis.filter(d => d.statut === col.id);
+        const total = cards.reduce((s, d) => s + (d.montant || 0), 0);
+        return (
+          <div key={col.id} style={{ minWidth: '220px', flex: '1', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '10px 14px', borderRadius: '8px 8px 0 0', background: col.bg, borderBottom: `3px solid ${col.color}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: col.color }}>{col.id}</div>
+                {total > 0 && <div style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '10.5px', color: col.color, opacity: 0.75, marginTop: '2px' }}>{fmtUsd(total)}</div>}
+              </div>
+              <span style={{ background: col.color, color: '#fff', borderRadius: '99px', padding: '1px 8px', fontSize: '11px', fontWeight: 700 }}>{cards.length}</span>
+            </div>
+            <div style={{ background: col.bg, flex: 1, minHeight: '180px', padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px', borderRadius: '0 0 8px 8px' }}>
+              {cards.map(d => <KanbanCard key={d.ref} d={d} col={col} clientNom={clientNom} openEdit={openEdit} handleDelete={handleDelete} handleConvert={handleConvert} onMove={onMove} />)}
+              {col.id === 'Brouillon' && (
+                <button onClick={openCreate} style={{ border: '1px dashed ' + col.color + '55', borderRadius: '6px', padding: '8px', background: 'none', cursor: 'pointer', color: col.color, fontSize: '12px', fontWeight: 700, opacity: 0.7, marginTop: 'auto' }}>
+                  + Nouveau devis
+                </button>
+              )}
+              {cards.length === 0 && col.id !== 'Brouillon' && <div style={{ textAlign: 'center', padding: '20px 10px', fontSize: '11.5px', color: col.color, opacity: 0.4, fontStyle: 'italic' }}>Vide</div>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const SERVICES_NDEMBO = [
   { label: 'Organisation de tournoi', prix: 5000 },
   { label: "Camp d'entraînement", prix: 3500 },
@@ -56,6 +121,7 @@ export default function Devis() {
   const [ncNom, setNcNom] = useState('');
   const [ncType, setNcType] = useState('Sponsor');
   const [ncEmail, setNcEmail] = useState('');
+  const [viewMode, setViewMode] = useState('list');
 
   const totalLignes = fLignes.reduce((s, l) => s + (Number(l.quantite) || 0) * (Number(l.prixUnitaire) || 0), 0);
 
@@ -107,7 +173,7 @@ export default function Devis() {
     if (montantCalc <= 0) errs.montant = 'Le total doit être supérieur à 0 — renseignez les prix unitaires';
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-    const lignesPayload = lignesValides.map(({ _id, ...l }) => ({ ...l, quantite: Number(l.quantite) || 1, prixUnitaire: Number(l.prixUnitaire) || 0 }));
+    const lignesPayload = lignesValides.map(l => ({ description: l.description, quantite: Number(l.quantite) || 1, prixUnitaire: Number(l.prixUnitaire) || 0 }));
 
     if (editTarget) {
       dispatch({ type: 'UPDATE_DEVIS', payload: { ...editTarget, clientId: Number(fClient), objet: fObjet, description: fDescription, lignes: lignesPayload, montant: montantCalc, date: fDateEmission, expiration: fExpiration, statut: fStatut } });
@@ -139,6 +205,11 @@ export default function Devis() {
     
     addToast(`Facture ${nextRef} générée !`);
     navigate('/factures');
+  };
+
+  const handleMoveStatus = (ref, newStatut) => {
+    dispatch({ type: 'UPDATE_DEVIS_STATUT', payload: { ref, statut: newStatut } });
+    addToast(`Devis ${ref} → ${newStatut}`);
   };
 
   const handleDelete = (e, d) => {
@@ -187,27 +258,59 @@ export default function Devis() {
       <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
         {/* Toolbar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-page)', padding: '4px', borderRadius: '6px', overflowX: 'auto' }}>
-            {STATUTS.map(s => (
-              <button key={s} onClick={() => setFilter(s)} style={{ whiteSpace: 'nowrap', background: filter === s ? 'var(--white)' : 'transparent', color: filter === s ? 'var(--navy-deep)' : 'var(--text-2)', border: 'none', padding: '5px 12px', borderRadius: '4px', fontWeight: filter === s ? 700 : 600, fontSize: '12px', cursor: 'pointer' }}>
-                {s}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {viewMode === 'list' && (
+              <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-page)', padding: '4px', borderRadius: '6px', overflowX: 'auto' }}>
+                {STATUTS.map(s => (
+                  <button key={s} onClick={() => setFilter(s)} style={{ whiteSpace: 'nowrap', background: filter === s ? 'var(--white)' : 'transparent', color: filter === s ? 'var(--navy-deep)' : 'var(--text-2)', border: 'none', padding: '5px 12px', borderRadius: '4px', fontWeight: filter === s ? 700 : 600, fontSize: '12px', cursor: 'pointer' }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            {viewMode === 'kanban' && <span style={{ fontSize: '12px', color: 'var(--text-3)', fontStyle: 'italic' }}>Vue pipeline — tous les devis</span>}
           </div>
-          <input type="text" placeholder="Rechercher…" value={search} onChange={e => setSearch(e.target.value)}
-            style={{ border: '1px solid var(--border-input)', borderRadius: '6px', padding: '7px 12px', fontSize: '12.5px', outline: 'none' }} />
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input type="text" placeholder="Rechercher…" value={search} onChange={e => setSearch(e.target.value)}
+              style={{ border: '1px solid var(--border-input)', borderRadius: '6px', padding: '7px 12px', fontSize: '12.5px', outline: 'none' }} />
+            <div style={{ display: 'flex', background: 'var(--bg-page)', padding: '3px', borderRadius: '6px', gap: '2px' }}>
+              {[
+                { mode: 'list', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/></svg>, title: 'Liste' },
+                { mode: 'kanban', icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="2" y="3" width="5" height="18" rx="2"/><rect x="9.5" y="3" width="5" height="13" rx="2"/><rect x="17" y="3" width="5" height="15" rx="2"/></svg>, title: 'Kanban' },
+              ].map(v => (
+                <button key={v.mode} title={v.title} onClick={() => setViewMode(v.mode)} style={{ background: viewMode === v.mode ? 'var(--white)' : 'transparent', border: 'none', cursor: 'pointer', borderRadius: '4px', padding: '5px 8px', color: viewMode === v.mode ? 'var(--navy-deep)' : 'var(--text-3)', display: 'flex', alignItems: 'center', transition: 'all 0.15s' }}>
+                  {v.icon}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Header Row */}
-        <div className="desktop-only" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 120px 120px 120px', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+        {/* Kanban view */}
+        {viewMode === 'kanban' && (
+          <div style={{ padding: '16px' }}>
+            <KanbanView
+              devis={devis.filter(d => search ? (d.ref.toLowerCase().includes(search.toLowerCase()) || clientNom(d.clientId).toLowerCase().includes(search.toLowerCase())) : true)}
+              clientNom={clientNom}
+              openEdit={openEdit}
+              handleDelete={handleDelete}
+              handleConvert={handleConvert}
+              onMove={handleMoveStatus}
+              openCreate={openCreate}
+            />
+          </div>
+        )}
+
+        {/* Header Row — list only */}
+        {viewMode === 'list' && <div className="desktop-only" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 110px 110px minmax(200px, auto)', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
           <span>Référence</span><span>Client</span><span>Objet</span><span style={{ textAlign: 'right' }}>Montant</span><span style={{ textAlign: 'right' }}>Date</span><span style={{ textAlign: 'right' }}>Statut</span>
-        </div>
+        </div>}
 
-        {/* Rows */}
-        {filtered.length === 0 ? (
+        {/* Rows — list only */}
+        {viewMode === 'list' && (filtered.length === 0 ? (
           <div style={{ padding: '40px 20px' }}>
-            <EmptyState 
-              title="Aucun devis trouvé" 
+            <EmptyState
+              title="Aucun devis trouvé"
               description="Modifiez vos filtres ou créez une nouvelle proposition commerciale."
               actionLabel="+ Nouveau devis"
               onAction={openCreate}
@@ -218,7 +321,7 @@ export default function Devis() {
             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-subtle)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--white)'}
           >
-            <div className="desktop-only" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 120px 120px 120px', alignItems: 'center' }}>
+            <div className="desktop-only" style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1.2fr 110px 110px minmax(200px, auto)', alignItems: 'center' }}>
               <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: 700, color: 'var(--navy-deep)' }}>{d.ref}</span>
               <span style={{ fontSize: '13px', fontWeight: 600 }}>{clientNom(d.clientId)}</span>
               <span style={{ fontSize: '12.5px', color: 'var(--text-2)', paddingRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.objet}</span>
@@ -271,10 +374,10 @@ export default function Devis() {
               </div>
             </div>
           </div>
-        ))}
+        )))}
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-3)' }}>
-          {filtered.length} devis affiché{filtered.length > 1 ? 's' : ''}
+          {viewMode === 'list' ? `${filtered.length} devis affiché${filtered.length > 1 ? 's' : ''}` : `${devis.length} devis au total`}
         </div>
       </div>
 
