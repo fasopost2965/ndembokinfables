@@ -153,7 +153,14 @@ export default function Parametres() {
                   <InputField label="Téléphone & WhatsApp" value={form.tel} onChange={set('tel')} mono placeholder="+243 810 188 880" />
                 </div>
                 <InputField label="Adresse du siège" value={form.adresse} onChange={set('adresse')} placeholder="Av. Citroniers, Q/ Golf…" />
-                <InputField label="Email de facturation" value={form.email} onChange={set('email')} type="email" placeholder="contact@ndembokin.com" />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <InputField label="Ville" value={form.ville || ''} onChange={set('ville')} placeholder="Kinshasa" />
+                  <InputField label="Pays" value={form.pays || ''} onChange={set('pays')} placeholder="RDC" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <InputField label="Email de facturation" value={form.email} onChange={set('email')} type="email" placeholder="contact@ndembokin.com" />
+                  <InputField label="Site web" value={form.siteWeb || ''} onChange={set('siteWeb')} placeholder="https://ndembokin.com" />
+                </div>
               </div>
             </div>
           )}
@@ -181,7 +188,16 @@ export default function Parametres() {
               {/* Taux */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <InputField label="1 USD = ? CDF" value={String(form.tauxUSD)} onChange={v => set('tauxUSD')(Number(v))} mono type="number" placeholder="2850" />
-                <InputField label="TVA (%)" value={String(form.tauxCDF)} onChange={v => set('tauxCDF')(Number(v))} mono type="number" placeholder="16" />
+                <InputField label="Taux CDF/USD" value={String(form.tauxCDF)} onChange={v => set('tauxCDF')(Number(v))} mono type="number" placeholder="2850" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <InputField label="TVA applicaple (%)" value={String(form.tva ?? 0)} onChange={v => set('tva')(Number(v))} mono type="number" placeholder="0" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)' }}>Aperçu</span>
+                  <div style={{ height: '38px', display: 'flex', alignItems: 'center', fontSize: '13px', color: 'var(--text-2)', paddingLeft: '4px' }}>
+                    {form.tva > 0 ? `TVA ${form.tva}% appliquée sur les documents` : 'Aucune TVA — montants HT uniquement'}
+                  </div>
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-3)' }}>
