@@ -65,7 +65,7 @@ export default function Projets() {
 
   const addTask = () => {
     if (!newTaskText.trim() || !selectedProjet) return;
-    const taches = [...(selectedProjet.taches || []), { id: Date.now().toString(), texte: newTaskText.trim(), fait: false }];
+    const taches = [...(selectedProjet.taches || []), { id: genId(), texte: newTaskText.trim(), fait: false }];
     const avancement = Math.round(taches.filter(t => t.fait).length / taches.length * 100);
     dispatch({ type: 'UPDATE_PROJET', payload: { ...selectedProjet, taches, avancement, statut: avancement === 100 ? 'Terminé' : (selectedProjet.statut === 'Terminé' ? 'En cours' : selectedProjet.statut) } });
     setNewTaskText('');
