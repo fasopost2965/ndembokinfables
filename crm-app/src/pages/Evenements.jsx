@@ -224,6 +224,8 @@ export default function Evenements() {
   const [filterType, setFilterType] = useState('Tous');
   const [search, setSearch] = useState('');
   const [selectedCamp, setSelectedCamp] = useState(null);
+  const [viewMode, setViewMode] = useState('list');
+  const [calDate, setCalDate] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerKind, setDrawerKind] = useState('evenement');
   const [editTarget, setEditTarget] = useState(null);
@@ -381,29 +383,94 @@ export default function Evenements() {
           style={{ width: '100%', height: '38px', padding: '0 14px', border: '1px solid var(--border-input)', borderRadius: '8px', fontSize: '13px', background: 'var(--white)', color: 'var(--text-1)', boxSizing: 'border-box', outline: 'none' }}
         />
       </div>
-      <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-page)', padding: '4px', borderRadius: '8px', marginBottom: '20px', overflowX: 'auto' }}>
-        {ALL_TYPES.map(t => (
-          <button
-            key={t}
-            onClick={() => setFilterType(t)}
-            style={{
-              whiteSpace: 'nowrap',
-              background: filterType === t ? 'var(--white)' : 'transparent',
-              color: filterType === t ? 'var(--navy-deep)' : 'var(--text-3)',
-              border: 'none', padding: '7px 14px', borderRadius: '6px',
-              fontWeight: filterType === t ? 700 : 500, fontSize: '12px',
-              cursor: 'pointer',
-              boxShadow: filterType === t ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.15s',
-            }}
-          >
-            {t !== 'Tous' && TYPE_CONFIG[t] ? TYPE_CONFIG[t].icon + ' ' : ''}{t}
-          </button>
-        ))}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-page)', padding: '4px', borderRadius: '8px', overflowX: 'auto' }}>
+          {ALL_TYPES.map(t => (
+            <button key={t} onClick={() => setFilterType(t)}
+              style={{ whiteSpace: 'nowrap', background: filterType === t ? 'var(--white)' : 'transparent', color: filterType === t ? 'var(--navy-deep)' : 'var(--text-3)', border: 'none', padding: '7px 14px', borderRadius: '6px', fontWeight: filterType === t ? 700 : 500, fontSize: '12px', cursor: 'pointer', boxShadow: filterType === t ? '0 1px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.15s' }}>
+              {t !== 'Tous' && TYPE_CONFIG[t] ? TYPE_CONFIG[t].icon + ' ' : ''}{t}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', background: 'var(--bg-page)', padding: '3px', borderRadius: '6px', gap: '2px' }}>
+          {[
+            { mode: 'list', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/></svg>, title: 'Liste' },
+            { mode: 'calendar', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, title: 'Calendrier' },
+          ].map(v => (
+            <button key={v.mode} title={v.title} onClick={() => setViewMode(v.mode)}
+              style={{ background: viewMode === v.mode ? 'var(--white)' : 'transparent', border: 'none', cursor: 'pointer', borderRadius: '4px', padding: '5px 8px', color: viewMode === v.mode ? 'var(--navy-deep)' : 'var(--text-3)', display: 'flex', alignItems: 'center', transition: 'all 0.15s' }}>
+              {v.icon}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Calendar view */}
+      {viewMode === 'calendar' && (() => {
+        const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+        const MOIS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+        const { year, month } = calDate;
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startOffset = (firstDay.getDay() + 6) % 7;
+        const totalCells = startOffset + lastDay.getDate();
+        const cells = Array.from({ length: Math.ceil(totalCells / 7) * 7 }, (_, i) => {
+          const dayNum = i - startOffset + 1;
+          return dayNum >= 1 && dayNum <= lastDay.getDate() ? dayNum : null;
+        });
+        const prevMonth = () => setCalDate(d => d.month === 0 ? { year: d.year - 1, month: 11 } : { year: d.year, month: d.month - 1 });
+        const nextMonth = () => setCalDate(d => d.month === 11 ? { year: d.year + 1, month: 0 } : { year: d.year, month: d.month + 1 });
+        const eventsOnDay = (day) => allItems.filter(item => {
+          if (!item.dateDebut) return false;
+          const d = new Date(item.dateDebut);
+          return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+        });
+        const todayDate = new Date();
+        return (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <button onClick={prevMonth} style={{ background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span style={{ fontFamily: 'var(--font-oswald)', fontSize: '18px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--navy-deep)' }}>{MOIS_FR[month]} {year}</span>
+              <button onClick={nextMonth} style={{ background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '6px', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', background: 'var(--border)', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+              {JOURS.map(j => (
+                <div key={j} style={{ background: 'var(--navy-deep)', color: 'rgba(255,255,255,0.6)', textAlign: 'center', padding: '8px 4px', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{j}</div>
+              ))}
+              {cells.map((day, i) => {
+                const isToday = day && todayDate.getFullYear() === year && todayDate.getMonth() === month && todayDate.getDate() === day;
+                const dayEvents = day ? eventsOnDay(day) : [];
+                return (
+                  <div key={i} style={{ background: 'var(--white)', minHeight: '80px', padding: '6px', opacity: day ? 1 : 0.3 }}>
+                    {day && (
+                      <>
+                        <div style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12px', fontWeight: isToday ? 700 : 500, color: isToday ? 'var(--white)' : 'var(--text-2)', background: isToday ? 'var(--red)' : 'transparent', borderRadius: '99px', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>{day}</div>
+                        {dayEvents.slice(0, 3).map(item => {
+                          const tc = getTypeConfig(item._kind === 'camp' ? 'Camp' : item.type);
+                          return (
+                            <button key={item.id} onClick={() => openEdit(item, item._kind)}
+                              style={{ display: 'block', width: '100%', textAlign: 'left', background: tc.bg, border: 'none', borderRadius: '4px', padding: '2px 5px', fontSize: '10px', fontWeight: 700, color: tc.color, cursor: 'pointer', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {tc.icon} {item.nom}
+                            </button>
+                          );
+                        })}
+                        {dayEvents.length > 3 && <div style={{ fontSize: '9.5px', color: 'var(--text-3)', fontWeight: 700, paddingLeft: '3px' }}>+{dayEvents.length - 3} autres</div>}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Cards grid */}
-      {filtered.length === 0 ? (
+      {viewMode === 'list' && (filtered.length === 0 ? (
         <EmptyState
           title="Aucun événement trouvé"
           description={filterType !== 'Tous' ? `Aucun élément de type "${filterType}".` : 'Créez votre premier événement ou camp.'}
@@ -424,7 +491,7 @@ export default function Evenements() {
             />
           ))}
         </div>
-      )}
+      ))}
 
       {/* Drawer Participants */}
       <Drawer

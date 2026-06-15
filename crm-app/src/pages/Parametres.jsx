@@ -2,6 +2,22 @@ import { useState, useRef } from 'react';
 import { useCRM } from '../contexts/CRMContext';
 import { useToast } from '../contexts/ToastContext';
 
+function stripTags(s) {
+  if (typeof s !== 'string') return s;
+  return s.replace(/<[^>]*>/g, '');
+}
+
+function sanitizeImported(value) {
+  if (typeof value === 'string') return stripTags(value);
+  if (Array.isArray(value)) return value.map(sanitizeImported);
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const k of Object.keys(value)) out[k] = sanitizeImported(value[k]);
+    return out;
+  }
+  return value;
+}
+
 const NAV = [
   { id: 'identite',   label: 'Logo & Identité' },
   { id: 'legal',      label: 'Informations légales' },
@@ -107,7 +123,7 @@ export default function Parametres() {
           addToast('Fichier de sauvegarde invalide.', 'error');
           return;
         }
-        dispatch({ type: 'RESTORE_STATE', payload: parsed });
+        dispatch({ type: 'RESTORE_STATE', payload: sanitizeImported(parsed) });
         setRestoreError('');
         addToast('Données restaurées avec succès !', 'success');
       } catch {

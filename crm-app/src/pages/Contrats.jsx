@@ -85,6 +85,19 @@ export default function Contrats() {
     );
   };
 
+  const handleRenouveler = (e, c) => {
+    e.stopPropagation();
+    const nextRef = nextNumero('CTR-', new Date().getFullYear(), items.map(x => x.ref));
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const dureeJours = c.expire && c.dateDebut
+      ? Math.max(30, Math.round((new Date(c.expire) - new Date(c.dateDebut)) / 86400000))
+      : 365;
+    const newExpire = new Date();
+    newExpire.setDate(newExpire.getDate() + dureeJours);
+    dispatch({ type: 'ADD_CONTRAT', payload: { ref: nextRef, clientId: c.clientId, type: c.type, valeur: c.valeur, statut: 'Brouillon', dateDebut: todayStr, expire: newExpire.toISOString().slice(0, 10) } });
+    addToast(`Contrat ${nextRef} créé par renouvellement de ${c.ref}.`);
+  };
+
   const totalValeur = items.filter(c => c.statut === 'Signé').reduce((s,c) => s+c.valeur, 0);
 
   return (
@@ -158,8 +171,13 @@ export default function Contrats() {
             <span className="responsive-table-cell" data-label="Type" style={{ fontSize: '12.5px', color: 'var(--text-2)' }}>{c.type}</span>
             <span className="responsive-table-cell" data-label="Valeur" style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(c.valeur)}</span>
             <span className="responsive-table-cell" data-label="Expiration" style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '11.5px', color: 'var(--text-2)', textAlign: 'right' }}>{c.expire ? dateFr(c.expire) : '—'}</span>
-            <span className="responsive-table-cell" data-label="Statut" style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px' }}>
+            <span className="responsive-table-cell" data-label="Statut" style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <StatusBadge status={c.statut} />
+              {['Signé', 'Expire bientôt', 'Expiré'].includes(c.statut) && (
+                <button onClick={(e) => handleRenouveler(e, c)} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Renouveler le contrat" onMouseEnter={e => e.currentTarget.style.color = 'var(--success)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </button>
+              )}
               <button onClick={(e) => { e.stopPropagation(); openEdit(c); }} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Modifier" onMouseEnter={e => e.currentTarget.style.color = 'var(--cyan)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>

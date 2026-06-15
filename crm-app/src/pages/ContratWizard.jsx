@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCRM } from '../contexts/CRMContext';
 import { useToast } from '../contexts/ToastContext';
-import { nextNumero, fmtUsd } from '../crm-data';
+import { nextNumero, fmtUsd, escHtml } from '../crm-data';
 import { FormSection, TextField, TextareaField, AmountField, DateField, TypeCards, EntitySelector, SliderField } from '../components/ui/FormControls';
 
 /* ─── helpers ──────────────────────────────────────────────────────────── */
@@ -19,7 +19,7 @@ const dateFr = (iso) => {
   return `${parseInt(d)} ${MOIS[parseInt(m) - 1]} ${y}`;
 };
 
-const nl2br = (s) => (s || '').split('\n').join('<br/>');
+const nl2br = (s) => escHtml(s).split('\n').join('<br/>');
 
 const STEPS = [
   { id: 1, label: 'Parties', icon: '👥' },
@@ -37,7 +37,7 @@ function buildContractHTML(form, partyName, company) {
   const articlesSuppl = (form.articlesAdditionnels || []).filter(a => a.titre || a.contenu);
   const articleSupplHTML = articlesSuppl.map((art, i) => `
 <h2 style="font-size:12px;font-weight:700;color:#254354;text-transform:uppercase;border-left:3px solid #F4A800;padding-left:10px;margin:20px 0 8px">
-  Disposition ${CHIFFRES_ROMAINS[i] || (i+1)} — ${art.titre || 'Disposition additionnelle'}
+  Disposition ${CHIFFRES_ROMAINS[i] || (i+1)} — ${escHtml(art.titre || 'Disposition additionnelle')}
 </h2>
 <p style="font-size:11px;color:#42474c;line-height:1.7;">${nl2br(art.contenu || '')}</p>
 `).join('');
@@ -49,9 +49,9 @@ function buildContractHTML(form, partyName, company) {
 </h1>
 <p style="font-size:11px;color:#42474c;line-height:1.7;">
   Entre les soussignés :<br/><br/>
-  <strong style="color:#254354">${agencyName}</strong>, agence de management sportif, dont le siège est établi à ${agencyAddress}, ci-après dénommée <em>« l'Agence »</em>
+  <strong style="color:#254354">${escHtml(agencyName)}</strong>, agence de management sportif, dont le siège est établi à ${escHtml(agencyAddress)}, ci-après dénommée <em>« l'Agence »</em>
   <br/><br/>
-  et <strong style="color:#254354">${partyName || '___________'}</strong>, ci-après dénommé(e) <em>« l'Athlète »</em>.
+  et <strong style="color:#254354">${escHtml(partyName) || '___________'}</strong>, ci-après dénommé(e) <em>« l'Athlète »</em>.
 </p>
 
 <div style="background:#f0f4f8;border-left:4px solid #254354;padding:12px 16px;border-radius:4px;margin:16px 0;">
@@ -72,7 +72,7 @@ function buildContractHTML(form, partyName, company) {
   La valeur contractuelle de référence est estimée à <strong style="color:#254354;font-family:monospace">${fmtUsd(Number(form.valeur) || 0)}</strong>.
   ${form.clauseType === 'fixe'
     ? `En cas de résiliation anticipée, une indemnité fixe de <strong style="background:#ffdad5;padding:1px 4px;border-radius:2px;font-family:monospace">${fmtUsd(Number(form.clauseValeur) || 0)}</strong> est due à l'Agence.`
-    : `En cas de transfert ou résiliation, une indemnité correspondant à <strong style="background:#ffdad5;padding:1px 4px;border-radius:2px">${form.clauseValeur || '__'}%</strong> de la valeur du transfert est due à l'Agence.`
+    : `En cas de transfert ou résiliation, une indemnité correspondant à <strong style="background:#ffdad5;padding:1px 4px;border-radius:2px">${escHtml(form.clauseValeur || '__')}%</strong> de la valeur du transfert est due à l'Agence.`
   }
 </p>
 
@@ -93,9 +93,9 @@ ${articleSupplHTML}
 </h1>
 <p style="font-size:11px;color:#42474c;line-height:1.7;">
   Entre les soussignés :<br/><br/>
-  <strong style="color:#254354">${agencyName}</strong>, représentant ses athlètes, ci-après <em>« l'Agence »</em>
+  <strong style="color:#254354">${escHtml(agencyName)}</strong>, représentant ses athlètes, ci-après <em>« l'Agence »</em>
   <br/><br/>
-  et <strong style="color:#254354">${partyName || '___________'}</strong>, ci-après dénommé(e) <em>« le Partenaire »</em>.
+  et <strong style="color:#254354">${escHtml(partyName) || '___________'}</strong>, ci-après dénommé(e) <em>« le Partenaire »</em>.
 </p>
 
 <div style="background:#f0f4f8;border-left:4px solid #F4A800;padding:12px 16px;border-radius:4px;margin:16px 0;">
@@ -125,9 +125,9 @@ ${articleSupplHTML}
 </h1>
 <p style="font-size:11px;color:#42474c;line-height:1.7;">
   Entre les soussignés :<br/><br/>
-  <strong style="color:#254354">${agencyName}</strong>, prestataire de services sportifs, ci-après <em>« le Prestataire »</em>
+  <strong style="color:#254354">${escHtml(agencyName)}</strong>, prestataire de services sportifs, ci-après <em>« le Prestataire »</em>
   <br/><br/>
-  et <strong style="color:#254354">${partyName || '___________'}</strong>, ci-après dénommé(e) <em>« le Client »</em>.
+  et <strong style="color:#254354">${escHtml(partyName) || '___________'}</strong>, ci-après dénommé(e) <em>« le Client »</em>.
 </p>
 
 <div style="background:#f0f4f8;border-left:4px solid #254354;padding:12px 16px;border-radius:4px;margin:16px 0;">

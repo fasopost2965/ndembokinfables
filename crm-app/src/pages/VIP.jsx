@@ -51,6 +51,8 @@ export default function VIP() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
 
+  const [filterTier, setFilterTier] = useState('Tous');
+
   const tierColors = {
     'Or': { bg: 'rgba(244,168,0,0.16)', color: '#9A6B00' },
     'Argent': { bg: 'rgba(37,67,84,0.10)', color: '#5B6B77' },
@@ -58,6 +60,24 @@ export default function VIP() {
   };
 
   const enrolledIds = new Set(vipMembers.map(m => m.clientId));
+  const filteredMembers = filterTier === 'Tous' ? vipMembers : vipMembers.filter(m => m.tier === filterTier);
+
+  const exportCSV = () => {
+    const headers = ['Carte NFC', 'Client', 'Tier', 'Depuis', 'Expire', 'Statut'];
+    const rows = vipMembers.map(m => [
+      m.carte,
+      clientNom(clients, m.clientId),
+      m.tier,
+      m.depuis,
+      m.expire,
+      m.statut,
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'membres-vip.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const openCreate = () => {
     setEditTarget(null);
@@ -111,9 +131,24 @@ export default function VIP() {
           <h1 style={{ fontSize: '30px', margin: 0 }}>Membres VIP</h1>
           <p style={{ margin: '6px 0 0 0', color: 'var(--text-2)' }}>Programme de fidélité — cartes NFC Or, Argent et Bronze.</p>
         </div>
-        <button onClick={openCreate} style={{ background: 'var(--gold)', color: 'var(--on-dark)', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
-          + Affilier au programme
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={exportCSV} style={{ background: 'var(--white)', border: '1px solid var(--border-input)', padding: '8px 14px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-2)' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button onClick={openCreate} style={{ background: 'var(--gold)', color: 'var(--on-dark)', border: 'none', padding: '10px 18px', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
+            + Affilier au programme
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '4px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', padding: '6px 10px', marginBottom: '20px', alignSelf: 'flex-start' }}>
+        {['Tous', 'Or', 'Argent', 'Bronze'].map(t => (
+          <button key={t} onClick={() => setFilterTier(t)} style={{ background: filterTier === t ? 'var(--navy-deep)' : 'transparent', color: filterTier === t ? 'var(--white)' : 'var(--text-2)', border: 'none', padding: '5px 14px', borderRadius: '5px', fontWeight: filterTier === t ? 700 : 600, fontSize: '12px', cursor: 'pointer', transition: 'all 0.15s' }}>
+            {t}
+            {t !== 'Tous' && <span style={{ marginLeft: '5px', opacity: 0.7, fontSize: '10.5px' }}>({vipMembers.filter(m => m.tier === t).length})</span>}
+          </button>
+        ))}
       </div>
 
       {/* Stats */}
@@ -138,10 +173,10 @@ export default function VIP() {
       {/* Cards grid */}
       <div style={{ marginBottom: '28px' }}>
         <div style={{ fontFamily: 'var(--font-oswald)', fontSize: '15px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--navy-deep)', letterSpacing: '0.04em', marginBottom: '14px' }}>Cartes NFC émises</div>
-        {vipMembers.length === 0 ? (
+        {filteredMembers.length === 0 ? (
           <div style={{ padding: '20px' }}>
             <EmptyState
-              title="Aucun membre VIP"
+              title={filterTier === 'Tous' ? 'Aucun membre VIP' : `Aucun membre ${filterTier}`}
               description="Affiliez vos clients pour générer des cartes NFC."
               actionLabel="+ Affilier au programme"
               onAction={openCreate}
@@ -149,18 +184,18 @@ export default function VIP() {
           </div>
         ) : (
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            {vipMembers.map(m => <NFCCard key={m.carte} member={m} clients={clients} />)}
+            {filteredMembers.map(m => <NFCCard key={m.carte} member={m} clients={clients} />)}
           </div>
         )}
       </div>
 
       {/* Table */}
-      {vipMembers.length > 0 && (
+      {filteredMembers.length > 0 && (
         <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 160px 100px 100px 110px 72px', padding: '10px 20px', background: 'var(--navy-deep)', color: 'var(--white)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             <span>Client</span><span>Tier</span><span style={{ fontFamily: 'var(--font-jetbrains)' }}>Carte NFC</span><span>Depuis</span><span>Expire</span><span style={{ textAlign: 'right' }}>Statut</span><span></span>
           </div>
-          {vipMembers.map((m) => {
+          {filteredMembers.map((m) => {
             const tc = tierColors[m.tier] || tierColors['Bronze'];
             return (
               <div key={m.carte} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 160px 100px 100px 110px 72px', alignItems: 'center', padding: '13px 20px', borderTop: '1px solid var(--border)', cursor: 'pointer' }}

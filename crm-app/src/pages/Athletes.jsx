@@ -202,6 +202,42 @@ export default function Athletes() {
           <button onClick={() => { setSelectedId(null); setDetailTab('Profil'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', fontSize: '13px', color: 'var(--text-2)' }}>
             ← Portfolio Athlètes
           </button>
+          <button
+            onClick={() => {
+              const w = window.open('', '_blank', 'width=860,height=700');
+              if (!w) return;
+              w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Fiche — ${athlete.nom}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#1a1a1a;background:#fff;padding:28px;max-width:720px;margin:0 auto}.btn{display:block;text-align:center;padding:14px;background:#f0f4f7;border-radius:8px;margin-bottom:24px}.btn button{padding:9px 24px;background:#254354;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer}h1{font-size:24px;color:#254354;text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px}.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e8eb;font-size:13px}.kv span:first-child{color:#5b6b77}.kv span:last-child{font-weight:600}@media print{.btn{display:none!important}body{padding:0}@page{margin:12mm 10mm;size:A4}}</style>
+</head><body>
+<div class="btn"><button onclick="window.print()">Imprimer / Enregistrer en PDF</button></div>
+<div style="background:#254354;color:#fff;border-radius:10px;padding:22px;margin-bottom:24px">
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.45);margin-bottom:6px">FICHE ATHLÈTE — NDEMBO KIN CONNECT</div>
+  <h1>${athlete.nom}</h1>
+  <div style="margin-top:6px;font-size:13px;color:rgba(255,255,255,.6)">${athlete.poste} · ${athlete.club} · ${athlete.nationalite}</div>
+</div>
+<h2 style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#9aabb6;margin-bottom:12px">Identité sportive</h2>
+<div class="kv"><span>Poste</span><span>${athlete.poste || '—'}</span></div>
+<div class="kv"><span>Nationalité</span><span>${athlete.nationalite || '—'}</span></div>
+<div class="kv"><span>Âge</span><span>${athlete.age} ans</span></div>
+<div class="kv"><span>Pied fort</span><span>${athlete.pied || '—'}</span></div>
+<div class="kv"><span>Club actuel</span><span>${athlete.club || '—'}</span></div>
+<div class="kv"><span>Valeur marchande</span><span style="font-weight:700;color:#254354">${fmtUsd(athlete.valeur)}</span></div>
+${athlete.commissionPct ? `<div class="kv"><span>Commission agence</span><span>${athlete.commissionPct}%</span></div>` : ''}
+${athlete.contractRef ? `<div class="kv"><span>Contrat actif</span><span style="font-family:monospace">${athlete.contractRef}</span></div>` : ''}
+<h2 style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#9aabb6;margin:20px 0 12px">Contact</h2>
+<div class="kv"><span>Email</span><span>${athlete.email || '—'}</span></div>
+<div class="kv"><span>Téléphone</span><span>${athlete.tel || '—'}</span></div>
+<div class="kv"><span>Adresse</span><span>${athlete.adresse || '—'}</span></div>
+${athlete.bio ? `<div style="margin-top:20px;padding:14px;background:#f0f4f7;border-radius:8px;font-size:12.5px;color:#5b6b77;line-height:1.6"><strong>Biographie :</strong> ${athlete.bio}</div>` : ''}
+<div style="margin-top:32px;padding-top:12px;border-top:1px solid #e5e8eb;font-size:11px;color:#9aabb6;text-align:right">Généré le ${new Date().toLocaleDateString('fr-FR')} — Ndembo Kin Connect</div>
+</body></html>`);
+              w.document.close(); w.focus(); setTimeout(() => w.print(), 400);
+            }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px', color: 'var(--text-2)' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Fiche PDF
+          </button>
           <button onClick={() => openEdit(athlete)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 16px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Modifier la fiche
