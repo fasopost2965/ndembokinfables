@@ -18,13 +18,7 @@ export default function Login() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      // Fallback: allow legacy dev credentials when API is not running
-      if (email === 'admin@ndembokin.com' && password === 'admin') {
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/dashboard');
-      } else {
-        setError(err.message || 'Connexion échouée. Vérifiez vos identifiants.');
-      }
+      setError(err.message || 'Connexion échouée. Vérifiez vos identifiants.');
     } finally {
       setLoading(false);
     }

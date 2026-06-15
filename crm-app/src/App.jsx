@@ -13,15 +13,16 @@ import Parametres from './pages/Parametres';
 import Login from './pages/Login';
 import Athletes from './pages/Athletes';
 import ConfirmModal from './components/ui/ConfirmModal';
+import { getToken } from './hooks/useAuth';
 
 function RequireAuth({ children }) {
-  const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+  const token = getToken();
   const location = useLocation();
-  
-  if (!isAuth) {
+
+  if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   return children;
 }
 
