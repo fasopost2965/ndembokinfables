@@ -1,13 +1,15 @@
 import { Outlet, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useState } from 'react';
-import { useToast } from '../contexts/ToastContext';
 import GlobalSearch from './GlobalSearch';
+import NotificationsPanel from './NotificationsPanel';
+import { useNotifications } from './useNotifications';
 
 function Topbar({ onOpenSidebar }) {
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const addToast = useToast();
+  const [notifOpen, setNotifOpen] = useState(false);
+  const { nonLues } = useNotifications();
 
   const QUICK_CREATE = [
     { label: 'Nouveau devis',         to: '/devis',       color: 'var(--cyan)' },
@@ -63,13 +65,25 @@ function Topbar({ onOpenSidebar }) {
       {/* Right actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {/* Notifications */}
-        <button style={{ width: '36px', height: '36px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--white)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', color: 'var(--text-2)' }}
-          onClick={() => addToast('Aucune nouvelle notification')}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          {/* Dot */}
-          <span style={{ position: 'absolute', top: '8px', right: '8px', width: '6px', height: '6px', borderRadius: '99px', background: 'var(--red)', border: '1.5px solid var(--white)' }}></span>
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setNotifOpen(o => !o)}
+            style={{ width: '36px', height: '36px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--white)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', color: 'var(--text-2)' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            {nonLues.length > 0 && (
+              <span style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', borderRadius: '99px', background: 'var(--red)', border: '1.5px solid var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {nonLues.length > 9 ? null : <span style={{ fontSize: '6px', color: 'var(--white)', fontWeight: 800, lineHeight: 1 }}>{nonLues.length}</span>}
+              </span>
+            )}
+          </button>
+          {notifOpen && (
+            <>
+              <div onClick={() => setNotifOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 190 }} />
+              <NotificationsPanel onClose={() => setNotifOpen(false)} />
+            </>
+          )}
+        </div>
 
         {/* Create button */}
         <div style={{ position: 'relative' }}>

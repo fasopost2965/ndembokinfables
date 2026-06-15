@@ -13,6 +13,7 @@ const initialState = {
   athletes: ATHLETES,
   company: COMPANY,
   activites: [],
+  notificationsLues: [],
   confirmModal: { isOpen: false, title: '', message: '', onConfirm: null }
 };
 
@@ -106,6 +107,10 @@ function crmReducer(state, action) {
       return { ...state, activites: state.activites.map(a => a.id === action.payload.id ? { ...a, ...action.payload } : a) };
     case 'DELETE_ACTIVITE':
       return { ...state, activites: state.activites.filter(a => a.id !== action.payload) };
+    case 'MARK_NOTIFICATION_LUE':
+      return { ...state, notificationsLues: [...new Set([...state.notificationsLues, action.payload])] };
+    case 'MARK_ALL_NOTIFICATIONS_LUES':
+      return { ...state, notificationsLues: action.payload };
     case 'OPEN_CONFIRM':
       return { ...state, confirmModal: { isOpen: true, ...action.payload } };
     case 'CLOSE_CONFIRM':
