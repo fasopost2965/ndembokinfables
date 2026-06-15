@@ -1,7 +1,7 @@
 // Moteur générique de génération PDF partagé par devis, factures et contrats.
 // Utilise window.print() dans une nouvelle fenêtre — aucune dépendance externe.
 
-import { dateFr } from '../crm-data';
+import { dateFr, escHtml } from '../crm-data';
 
 function fmt(n) {
   return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0) + ' $';
@@ -21,13 +21,13 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
   const totalTTC = totalHT + totalTVA;
 
   const logoHtml = company.logoUrl
-    ? `<img src="${company.logoUrl}" alt="Logo" style="height:52px;max-width:200px;object-fit:contain"/>`
-    : `<div style="font-size:20px;font-weight:700;letter-spacing:.02em;color:#254354">${company.nom || 'Ndembo Kin Connect'}</div>`;
+    ? `<img src="${escHtml(company.logoUrl)}" alt="Logo" style="height:52px;max-width:200px;object-fit:contain"/>`
+    : `<div style="font-size:20px;font-weight:700;letter-spacing:.02em;color:#254354">${escHtml(company.nom) || 'Ndembo Kin Connect'}</div>`;
 
   const lignesRows = lignes.map((l, i) => {
     const st = (Number(l.quantite) || 0) * (Number(l.prixUnitaire) || 0);
     return `<tr style="background:${i % 2 === 0 ? '#fff' : '#f8f9fa'}">
-      <td style="padding:10px 16px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #e5e8eb">${l.description || '—'}</td>
+      <td style="padding:10px 16px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #e5e8eb">${escHtml(l.description) || '—'}</td>
       <td style="padding:10px 16px;text-align:center;font-size:13px;color:#5b6b77;border-bottom:1px solid #e5e8eb">${l.quantite}</td>
       <td style="padding:10px 16px;text-align:right;font-family:monospace;font-size:13px;color:#5b6b77;border-bottom:1px solid #e5e8eb">${fmt(Number(l.prixUnitaire))}</td>
       <td style="padding:10px 16px;text-align:right;font-family:monospace;font-size:13px;font-weight:700;color:#254354;border-bottom:1px solid #e5e8eb">${fmt(st)}</td>
@@ -41,7 +41,7 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <title>${typeLabel} ${doc.ref}</title>
+  <title>${typeLabel} ${escHtml(doc.ref)}</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:32px;max-width:820px;margin:0 auto}
@@ -65,7 +65,7 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
     <div>${logoHtml}</div>
     <div style="text-align:right">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#BC000D;margin-bottom:4px">${typeLabel}</div>
-      <div style="font-size:24px;font-weight:700;font-family:monospace;color:#254354">${doc.ref}</div>
+      <div style="font-size:24px;font-weight:700;font-family:monospace;color:#254354">${escHtml(doc.ref)}</div>
       <div style="font-size:11px;color:#9aabb6;margin-top:4px">Émis le ${dateFr(doc.date)}</div>
       ${echeance ? `<div style="font-size:11px;color:#9aabb6">Échéance : ${dateFr(echeance)}</div>` : ''}
     </div>
@@ -74,27 +74,27 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px">
     <div>
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9aabb6;margin-bottom:8px">Émetteur</div>
-      <div style="font-weight:700;font-size:14px;color:#254354;margin-bottom:4px">${company.nom || ''}</div>
-      <div style="font-size:12px;color:#5b6b77;line-height:1.65">${company.adresseCourte || company.adresse || ''}</div>
-      <div style="font-size:12px;color:#5b6b77">${company.email || ''}</div>
-      <div style="font-size:12px;color:#5b6b77">${company.tel || ''}</div>
-      ${company.nif ? `<div style="font-size:11px;color:#9aabb6;margin-top:4px">NIF ${company.nif} — RCCM ${company.rccm || ''}</div>` : ''}
+      <div style="font-weight:700;font-size:14px;color:#254354;margin-bottom:4px">${escHtml(company.nom) || ''}</div>
+      <div style="font-size:12px;color:#5b6b77;line-height:1.65">${escHtml(company.adresseCourte || company.adresse || '')}</div>
+      <div style="font-size:12px;color:#5b6b77">${escHtml(company.email || '')}</div>
+      <div style="font-size:12px;color:#5b6b77">${escHtml(company.tel || '')}</div>
+      ${company.nif ? `<div style="font-size:11px;color:#9aabb6;margin-top:4px">NIF ${escHtml(company.nif)} — RCCM ${escHtml(company.rccm || '')}</div>` : ''}
     </div>
     <div>
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9aabb6;margin-bottom:8px">Destinataire</div>
-      <div style="font-weight:700;font-size:14px;color:#254354;margin-bottom:4px">${client?.nom || doc.clientNom || '—'}</div>
-      ${client?.adresse ? `<div style="font-size:12px;color:#5b6b77;line-height:1.65">${client.adresse}</div>` : ''}
-      ${clientVille ? `<div style="font-size:12px;color:#5b6b77">${clientVille}</div>` : ''}
-      ${client?.email ? `<div style="font-size:12px;color:#5b6b77">${client.email}</div>` : ''}
-      ${client?.tel ? `<div style="font-size:12px;color:#5b6b77">${client.tel}</div>` : ''}
+      <div style="font-weight:700;font-size:14px;color:#254354;margin-bottom:4px">${escHtml(client?.nom || doc.clientNom || '—')}</div>
+      ${client?.adresse ? `<div style="font-size:12px;color:#5b6b77;line-height:1.65">${escHtml(client.adresse)}</div>` : ''}
+      ${clientVille ? `<div style="font-size:12px;color:#5b6b77">${escHtml(clientVille)}</div>` : ''}
+      ${client?.email ? `<div style="font-size:12px;color:#5b6b77">${escHtml(client.email)}</div>` : ''}
+      ${client?.tel ? `<div style="font-size:12px;color:#5b6b77">${escHtml(client.tel)}</div>` : ''}
     </div>
   </div>
 
   <div style="background:#f0f4f7;border-radius:6px;padding:12px 16px;margin-bottom:${doc.description ? '12px' : '24px'};border-left:3px solid #254354">
     <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9aabb6">Objet — </span>
-    <span style="font-weight:600;color:#254354">${doc.objet}</span>
+    <span style="font-weight:600;color:#254354">${escHtml(doc.objet)}</span>
   </div>
-  ${doc.description ? `<div style="font-size:13px;color:#5b6b77;line-height:1.65;margin-bottom:24px;padding:12px 16px;border-left:2px solid #1E9FD8;background:#f4fbff;border-radius:0 6px 6px 0">${doc.description}</div>` : ''}
+  ${doc.description ? `<div style="font-size:13px;color:#5b6b77;line-height:1.65;margin-bottom:24px;padding:12px 16px;border-left:2px solid #1E9FD8;background:#f4fbff;border-radius:0 6px 6px 0">${escHtml(doc.description)}</div>` : ''}
 
   <table style="margin-bottom:24px;border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.08)">
     <thead>
@@ -127,21 +127,21 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
     </tfoot>
   </table>
 
-  ${doc.notes ? `<div style="background:#f8f9fa;border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:12.5px;color:#5b6b77;line-height:1.6;border:1px solid #e5e8eb"><strong>Notes :</strong> ${doc.notes}</div>` : ''}
+  ${doc.notes ? `<div style="background:#f8f9fa;border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:12.5px;color:#5b6b77;line-height:1.6;border:1px solid #e5e8eb"><strong>Notes :</strong> ${escHtml(doc.notes)}</div>` : ''}
 
   ${company.conditionsDefaut ? `
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e8eb">
     <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9aabb6;margin-bottom:8px">Conditions de règlement</div>
-    <div style="font-size:12px;color:#5b6b77;line-height:1.65">${company.conditionsDefaut}</div>
+    <div style="font-size:12px;color:#5b6b77;line-height:1.65">${escHtml(company.conditionsDefaut)}</div>
   </div>` : ''}
 
   ${company.banque ? `
   <div style="margin-top:20px;padding:14px 16px;background:#f0f4f7;border-radius:6px;font-size:12px;color:#5b6b77;line-height:1.6">
-    <strong style="color:#254354">Coordonnées bancaires : </strong>${company.banque}${company.swift ? ' — SWIFT : ' + company.swift : ''}
+    <strong style="color:#254354">Coordonnées bancaires : </strong>${escHtml(company.banque)}${company.swift ? ' — SWIFT : ' + escHtml(company.swift) : ''}
   </div>` : ''}
 
   <div style="margin-top:48px;padding-top:16px;border-top:1px solid #e5e8eb;display:flex;justify-content:space-between;font-size:11px;color:#9aabb6">
-    <div>${company.nom}${company.rccm ? ' — RCCM ' + company.rccm : ''}${company.nif ? ' — NIF ' + company.nif : ''}</div>
+    <div>${escHtml(company.nom)}${company.rccm ? ' — RCCM ' + escHtml(company.rccm) : ''}${company.nif ? ' — NIF ' + escHtml(company.nif) : ''}</div>
     <div>Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
   </div>
 </body>

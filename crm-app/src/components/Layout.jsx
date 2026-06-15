@@ -1,6 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import GlobalSearch from './GlobalSearch';
 import NotificationsPanel from './NotificationsPanel';
 import { useNotifications } from './useNotifications';
@@ -9,6 +9,20 @@ function Topbar({ onOpenSidebar }) {
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+        setSearch('');
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
   const { nonLues } = useNotifications();
 
   const QUICK_CREATE = [
@@ -46,8 +60,9 @@ function Topbar({ onOpenSidebar }) {
             <path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/>
           </svg>
           <input
+            ref={searchInputRef}
             type="text"
-            placeholder="Rechercher clients, devis, contrats…"
+            placeholder="Rechercher… (Ctrl+K)"
             value={search}
             onChange={e => { setSearch(e.target.value); setSearchOpen(true); }}
             onFocus={() => setSearchOpen(true)}

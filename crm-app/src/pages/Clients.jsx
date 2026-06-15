@@ -397,9 +397,26 @@ export default function Clients() {
           <h1 style={{ fontSize: '30px', margin: 0 }}>Clients &amp; comptes</h1>
           <p style={{ margin: '6px 0 0 0', color: 'var(--text-2)', fontSize: '13.5px' }}>Base centrale alimentant devis, factures et contrats.</p>
         </div>
-        <button onClick={openCreate} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '11px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center', boxShadow: '0 4px 14px rgba(188,0,13,0.2)', fontSize: '13px' }}>
-          <span>＋</span> Nouveau client
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            onClick={() => {
+              const headers = ['Nom', 'Type', 'Email', 'Téléphone', 'Ville', 'Pays', 'Contact principal', 'Site web'];
+              const rows = clients.map(c => [c.nom, c.type, c.email || '', c.tel || '', c.ville || '', c.pays || '', c.contactPrincipal || '', c.siteWeb || '']);
+              const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+              const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = 'clients-ndembo.csv'; a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{ background: 'var(--white)', border: '1px solid var(--border-input)', padding: '8px 14px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-2)' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button onClick={openCreate} style={{ background: 'var(--red)', color: 'var(--white)', border: 'none', padding: '11px 20px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center', boxShadow: '0 4px 14px rgba(188,0,13,0.2)', fontSize: '13px' }}>
+            <span>＋</span> Nouveau client
+          </button>
+        </div>
       </div>
 
       <KpiStrip clients={clients} factures={factures} />

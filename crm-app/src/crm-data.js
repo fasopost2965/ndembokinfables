@@ -216,6 +216,16 @@ export function dateFr(iso) {
   return d + ' ' + MOIS[parseInt(m, 10) - 1] + ' ' + y;
 }
 
+// Échappe les caractères HTML spéciaux pour une insertion sûre dans les templates HTML.
+export function escHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Styles de badge de statut canoniques (mapping statut → fond/texte).
 export const STATUT_BADGE = {
   'Brouillon': { bg: 'rgba(37,67,84,.10)', color: '#42474C' },

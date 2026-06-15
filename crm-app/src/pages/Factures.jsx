@@ -42,7 +42,7 @@ export default function Factures() {
     setFDateEmission(today()); setFEcheance(addDays(30)); setFStatut('En attente'); setErrors({}); setIsDrawerOpen(true);
   };
   const openEdit = (f) => {
-    setEditTarget(f); setFClient(String(f.clientId)); setFObjet(f.objet); setFNotes(f.notes || '');
+    setEditTarget(f); setFClient(f.clientId != null ? String(f.clientId) : ''); setFObjet(f.objet); setFNotes(f.notes || '');
     setFMontant(String(f.montant)); setFDateEmission(f.date || today()); setFEcheance(f.echeance || addDays(30));
     setFStatut(f.statut); setErrors({}); setIsDrawerOpen(true);
   };
@@ -97,6 +97,19 @@ export default function Factures() {
         addToast(`Facture ${f.ref} marquée comme payée.`, 'success');
       }
     );
+  };
+
+  const handleDuplicate = (e, f) => {
+    e.stopPropagation();
+    const nextRef = nextNumero('FAC-', new Date().getFullYear(), factures.map(x => x.ref));
+    dispatch({ type: 'ADD_FACTURE', payload: { ...f, ref: nextRef, statut: 'En attente', date: today(), dateRelance: null } });
+    addToast(`Facture ${nextRef} créée par duplication.`);
+  };
+
+  const handleRelance = (e, f) => {
+    e.stopPropagation();
+    dispatch({ type: 'UPDATE_FACTURE', payload: { ...f, dateRelance: today() } });
+    addToast(`Relance enregistrée pour la facture ${f.ref}.`, 'success');
   };
 
   return (
@@ -165,13 +178,21 @@ export default function Factures() {
             <span className="responsive-table-cell" data-label="Objet" style={{ fontSize: '12.5px', color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>{f.objet}</span>
             <span className="responsive-table-cell" data-label="Montant" style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '12.5px', fontWeight: 700, textAlign: 'right' }}>{fmtUsd(f.montant)}</span>
             <span className="responsive-table-cell" data-label="Échéance" style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '11.5px', color: f.statut === 'En retard' ? 'var(--red)' : 'var(--text-2)', textAlign: 'right' }}>{dateFr(f.echeance)}</span>
-            <span className="responsive-table-cell" data-label="Actions" style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px' }}>
+            <span className="responsive-table-cell" data-label="Actions" style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <StatusBadge status={f.statut} />
+              {f.statut === 'En retard' && (
+                <button onClick={(e) => handleRelance(e, f)} style={{ background: f.dateRelance ? 'rgba(244,168,0,0.1)' : 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: f.dateRelance ? 'var(--gold)' : 'var(--text-3)', display: 'flex', alignItems: 'center' }} title={f.dateRelance ? `Relancé le ${dateFr(f.dateRelance)}` : 'Enregistrer une relance'} onMouseEnter={e => { if (!f.dateRelance) e.currentTarget.style.color = 'var(--gold)'; }} onMouseLeave={e => { if (!f.dateRelance) e.currentTarget.style.color = 'var(--text-3)'; }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </button>
+              )}
               {['En attente', 'En retard'].includes(f.statut) && (
                 <button onClick={(e) => handleMarkPaid(e, f)} style={{ background: 'rgba(23,126,84,0.1)', border: '1px solid rgba(23,126,84,0.3)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--success)', display: 'flex', alignItems: 'center' }} title="Marquer payée">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
               )}
+              <button onClick={(e) => handleDuplicate(e, f)} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Dupliquer" onMouseEnter={e => e.currentTarget.style.color = 'var(--cyan)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
               <button onClick={(e) => { e.stopPropagation(); setPreviewTarget(f); setIsPreviewOpen(true); }} style={{ background: 'transparent', border: '1px solid var(--border-input)', borderRadius: '4px', cursor: 'pointer', padding: '4px 6px', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }} title="Aperçu / PDF" onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
