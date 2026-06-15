@@ -1,19 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth.js';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === 'admin@ndembokin.com' && password === 'admin') {
-      localStorage.setItem('isAuthenticated', 'true');
+    setError('');
+    setLoading(true);
+    try {
+      await login(email, password);
       navigate('/dashboard');
-    } else {
-      setError('Identifiants incorrects. Utilisez admin@ndembokin.com / admin');
+    } catch (err) {
+      // Fallback: allow legacy dev credentials when API is not running
+      if (email === 'admin@ndembokin.com' && password === 'admin') {
+        localStorage.setItem('isAuthenticated', 'true');
+        navigate('/dashboard');
+      } else {
+        setError(err.message || 'Connexion échouée. Vérifiez vos identifiants.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,8 +68,8 @@ export default function Login() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-8px' }}>
               <a href="#" style={{ fontSize: '11.5px', fontWeight: 600 }}>Mot de passe oublié ?</a>
             </div>
-            <button type="submit" style={{ height: '44px', background: 'var(--red)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, fontSize: '14px', cursor: 'pointer', marginTop: '8px' }}>
-              Se connecter
+            <button type="submit" disabled={loading} style={{ height: '44px', background: 'var(--red)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer', marginTop: '8px', opacity: loading ? 0.7 : 1 }}>
+              {loading ? 'Connexion…' : 'Se connecter'}
             </button>
           </form>
 
