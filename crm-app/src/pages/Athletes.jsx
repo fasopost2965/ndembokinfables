@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useCRM } from '../contexts/CRMContext';
 import { fmtUsd, dateFr } from '../crm-data';
 import Drawer from '../components/ui/Drawer';
@@ -116,6 +116,15 @@ export default function Athletes() {
   const [detailTab, setDetailTab] = useState('Profil');
   const [errors, setErrors] = useState({});
   const addToast = useToast();
+  const photoInputRef = useRef(null);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setForm(f => ({ ...f, photo: ev.target.result }));
+    reader.readAsDataURL(file);
+  };
 
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -591,7 +600,33 @@ ${athlete.bio ? `<div style="margin-top:20px;padding:14px;background:#f0f4f7;bor
         </FormSection>
 
         <FormSection title="Médias" subtitle="Photo et liens vidéo">
-          <TextField label="URL de la photo" value={form.photo} onChange={v => setForm(f => ({ ...f, photo: v }))} placeholder="https://… (laissez vide pour photo auto)" hint="URL directe d'une image JPG/PNG/WEBP" />
+          {/* Photo upload */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+            <div
+              onClick={() => photoInputRef.current?.click()}
+              style={{ width: '72px', height: '72px', borderRadius: '10px', border: '2px dashed var(--border-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, transition: 'border-color 0.15s', backgroundImage: form.photo ? `url(${form.photo})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center', background: form.photo ? undefined : 'rgba(37,67,84,0.06)' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--cyan)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-input)'}
+            >
+              {!form.photo && <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="1.6" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>}
+            </div>
+            <div>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '4px' }}>Photo de l'athlète</div>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginBottom: '8px' }}>JPG, PNG, WEBP — ou URL externe</div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => photoInputRef.current?.click()} style={{ height: '28px', padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '5px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', color: 'var(--text-2)' }}>
+                  {form.photo ? 'Changer' : 'Choisir un fichier'}
+                </button>
+                {form.photo && (
+                  <button type="button" onClick={() => setForm(f => ({ ...f, photo: '' }))} style={{ height: '28px', padding: '0 12px', background: 'none', border: '1px solid rgba(188,0,13,0.3)', borderRadius: '5px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', color: 'var(--red)' }}>
+                    Supprimer
+                  </button>
+                )}
+              </div>
+            </div>
+            <input ref={photoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+          </div>
+          <TextField label="URL externe (si pas de fichier)" value={form.photo?.startsWith('data:') ? '' : (form.photo || '')} onChange={v => setForm(f => ({ ...f, photo: v }))} placeholder="https://… (optionnel)" hint="Laissez vide pour photo auto-générée" />
           <TextareaField label="Liens vidéo (un par ligne)" value={form.videos} onChange={v => setForm(f => ({ ...f, videos: v }))} placeholder={"https://youtube.com/watch?v=…\nhttps://…"} rows={3} hint="Highlights, clips de match, scouting" />
         </FormSection>
 

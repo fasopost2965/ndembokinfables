@@ -76,6 +76,15 @@ export default function Parametres() {
   const [dirty, setDirty] = useState(false);
   const [restoreError, setRestoreError] = useState('');
   const fileInputRef = useRef(null);
+  const logoInputRef = useRef(null);
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { set('logoUrl')(ev.target.result); };
+    reader.readAsDataURL(file);
+  };
 
   const [form, setForm] = useState({ ...company });
   // When not dirty, read company from context directly so RESTORE_STATE is reflected immediately.
@@ -164,16 +173,37 @@ export default function Parametres() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', alignItems: 'start' }}>
                 {/* Logo upload */}
                 <div>
-                  <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '8px' }}>Logo officiel</div>
-                  {activeForm.logoUrl ? (
-                    <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                      <img src={activeForm.logoUrl} alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '6px', border: '1px solid var(--border)' }} onError={e => e.target.style.display = 'none'} />
-                      <div style={{ flex: 1, fontSize: '12px', color: 'var(--text-3)', wordBreak: 'break-all' }}>{activeForm.logoUrl.slice(0, 60)}{activeForm.logoUrl.length > 60 ? '…' : ''}</div>
-                      <button onClick={() => { set('logoUrl')(''); setDirty(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', fontWeight: 700, fontSize: '12px' }}>Supprimer</button>
+                  <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '12px' }}>Logo officiel</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
+                    <div
+                      onClick={() => logoInputRef.current?.click()}
+                      style={{ width: '72px', height: '72px', borderRadius: '10px', border: '2px dashed var(--border-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, transition: 'border-color 0.15s', background: activeForm.logoUrl ? 'var(--bg-page)' : 'rgba(37,67,84,0.04)' }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--cyan)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-input)'}
+                    >
+                      {activeForm.logoUrl
+                        ? <img src={activeForm.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} onError={e => e.target.style.display = 'none'} />
+                        : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="1.6" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      }
                     </div>
-                  ) : null}
-                  <InputField label="URL du logo (lien https:// ou base64)" value={activeForm.logoUrl || ''} onChange={v => { set('logoUrl')(v); setDirty(true); }} placeholder="https://votre-domaine.com/logo.png" />
-                  <p style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '8px', lineHeight: 1.5 }}>Coller l'URL externe ou une data URI base64. Apparaît dans l'en-tête des contrats générés.</p>
+                    <div>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '4px' }}>Logo de l'entreprise</div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginBottom: '8px' }}>PNG, SVG, JPG — apparaît dans les contrats et PDF</div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button type="button" onClick={() => logoInputRef.current?.click()} style={{ height: '28px', padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '5px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', color: 'var(--text-2)' }}>
+                          {activeForm.logoUrl ? 'Changer' : 'Choisir un fichier'}
+                        </button>
+                        {activeForm.logoUrl && (
+                          <button type="button" onClick={() => set('logoUrl')('')} style={{ height: '28px', padding: '0 12px', background: 'none', border: '1px solid rgba(188,0,13,0.3)', borderRadius: '5px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', color: 'var(--red)' }}>
+                            Supprimer
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <input ref={logoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoUpload} />
+                  </div>
+                  <InputField label="Ou coller une URL externe" value={activeForm.logoUrl?.startsWith('data:') ? '' : (activeForm.logoUrl || '')} onChange={v => { set('logoUrl')(v); }} placeholder="https://votre-domaine.com/logo.png" />
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '8px', lineHeight: 1.5 }}>Apparaît dans l'en-tête des contrats générés et PDFs.</p>
                 </div>
 
                 {/* Brand colors */}
