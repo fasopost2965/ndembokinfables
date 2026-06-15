@@ -1,17 +1,10 @@
 // Moteur générique de génération PDF partagé par devis, factures et contrats.
 // Utilise window.print() dans une nouvelle fenêtre — aucune dépendance externe.
 
-const MOIS = ['JAN','FÉV','MAR','AVR','MAI','JUN','JUL','AOÛ','SEP','OCT','NOV','DÉC'];
+import { dateFr } from '../crm-data';
 
 function fmt(n) {
-  return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0) + ' $';
-}
-
-function dateFr(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (isNaN(d)) return iso;
-  return `${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
+  return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0) + ' $';
 }
 
 /**
@@ -65,7 +58,7 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
 </head>
 <body>
   <div class="btn-print">
-    <button onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button>
+    <button onclick="window.print()">Imprimer / Enregistrer en PDF</button>
   </div>
 
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:24px;border-bottom:3px solid #254354">
@@ -144,7 +137,7 @@ export function buildDocumentHTML({ type, doc, lignes, client, company }) {
 
   ${company.banque ? `
   <div style="margin-top:20px;padding:14px 16px;background:#f0f4f7;border-radius:6px;font-size:12px;color:#5b6b77;line-height:1.6">
-    <strong style="color:#254354">Coordonnées bancaires : </strong>${company.banque}${company.swift ? ' — SWIFT : ' + company.swift : ''}
+    <strong style="color:#254354">Coordonnées bancaires : </strong>${company.banque}${company.swift ? ' — SWIFT : ' + company.swift : ''}
   </div>` : ''}
 
   <div style="margin-top:48px;padding-top:16px;border-top:1px solid #e5e8eb;display:flex;justify-content:space-between;font-size:11px;color:#9aabb6">
