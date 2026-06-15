@@ -503,7 +503,9 @@ export default function Clients() {
                 {/* Desktop grid */}
                 <div className="desktop-only" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1.3fr 110px 120px 36px', alignItems: 'center' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '11px', minWidth: 0 }}>
-                    <span style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--navy-deep)', color: 'var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '13px', flexShrink: 0 }}>{initiales}</span>
+                    <span style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--navy-deep)', color: 'var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '13px', flexShrink: 0, overflow: 'hidden' }}>
+                      {c.avatar ? <img src={c.avatar} alt={c.nom} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : initiales}
+                    </span>
                     <span style={{ minWidth: 0 }}>
                       <span style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-1)' }}>{c.nom}</span>
                       <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-3)' }}>{c.ville}</span>
@@ -534,7 +536,9 @@ export default function Clients() {
                 <div className="mobile-only" style={{ display: 'none', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '11px', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
-                      <span style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--navy-deep)', color: 'var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '13px', flexShrink: 0 }}>{initiales}</span>
+                      <span style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--navy-deep)', color: 'var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '13px', flexShrink: 0, overflow: 'hidden' }}>
+                        {c.avatar ? <img src={c.avatar} alt={c.nom} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : initiales}
+                      </span>
                       <div>
                         <span style={{ display: 'block', fontSize: '14px', fontWeight: 700 }}>{c.nom}</span>
                         <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: '99px', background: tStyle.bg, color: tStyle.color, display: 'inline-block', marginTop: '3px' }}>{c.type}</span>
