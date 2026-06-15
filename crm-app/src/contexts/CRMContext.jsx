@@ -111,6 +111,8 @@ function crmReducer(state, action) {
       return { ...state, notificationsLues: [...new Set([...state.notificationsLues, action.payload])] };
     case 'MARK_ALL_NOTIFICATIONS_LUES':
       return { ...state, notificationsLues: action.payload };
+    case 'RESTORE_STATE':
+      return { ...action.payload, confirmModal: { isOpen: false, title: '', message: '', onConfirm: null } };
     case 'OPEN_CONFIRM':
       return { ...state, confirmModal: { isOpen: true, ...action.payload } };
     case 'CLOSE_CONFIRM':
