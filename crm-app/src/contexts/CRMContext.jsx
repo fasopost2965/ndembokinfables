@@ -3,6 +3,44 @@ import { CLIENTS, DEVIS, FACTURES, CONTRATS, PROJETS, EVENEMENTS, CAMPS, VIP_MEM
 import { api } from '../lib/api';
 import { getToken } from '../hooks/useAuth';
 
+// Mapper : traduit les noms de champs API → noms de champs frontend.
+// Défensif : accepte les deux formes (avant et après renommage Bloc A).
+function mapApiEntities(key, items) {
+  if (!Array.isArray(items)) return items;
+  switch (key) {
+    case 'evenements':
+      return items.map(e => ({
+        ...e,
+        nom:      e.nom      ?? e.titre ?? '',
+        dateDebut: e.dateDebut ?? e.date  ?? '',
+      }));
+    case 'camps':
+      return items.map(c => ({
+        ...c,
+        nom:      c.nom      ?? c.titre ?? '',
+        dateDebut: c.dateDebut ?? c.date  ?? '',
+      }));
+    case 'vipMembers':
+      return items.map(v => ({
+        ...v,
+        carte:  v.carte  ?? v.carteNFC     ?? '',
+        depuis: v.depuis ?? v.dateAdhesion ?? '',
+        statut: v.statut ?? 'Actif',
+      }));
+    case 'athletes':
+      return items.map(a => ({
+        ...a,
+        club:         a.club         ?? a.clubActuel        ?? '',
+        valeur:       a.valeur       ?? a.valeurMarchande   ?? 0,
+        commissionPct: a.commissionPct ?? a.commission       ?? 0,
+        transferts:   a.transferts   ? (typeof a.transferts === 'string' ? JSON.parse(a.transferts) : a.transferts) : [],
+        commissions:  a.commissions  ? (typeof a.commissions === 'string' ? JSON.parse(a.commissions) : a.commissions) : [],
+      }));
+    default:
+      return items;
+  }
+}
+
 const initialState = {
   clients: CLIENTS,
   devis: DEVIS,
@@ -169,7 +207,7 @@ export function CRMProvider({ children }) {
       ['vipMembers', '/vip'],
       ['activites', '/activites'],
     ];
-    Promise.all(ENDPOINTS.map(([key, path]) => api.get(path).then(data => [key, data])))
+    Promise.all(ENDPOINTS.map(([key, path]) => api.get(path).then(data => [key, mapApiEntities(key, data)])))
       .then(results => {
         const payload = Object.fromEntries(results);
         dispatch({ type: 'HYDRATE_FROM_API', payload });
@@ -197,35 +235,62 @@ export function CRMProvider({ children }) {
 
 async function syncToApi(action) {
   switch (action.type) {
+    // ── Clients (id entier, compatible) ────────────────────────────────────
     case 'ADD_CLIENT':    return api.post('/clients', action.payload);
     case 'UPDATE_CLIENT': return api.put(`/clients/${action.payload.id}`, action.payload);
     case 'DELETE_CLIENT': return api.delete(`/clients/${action.payload}`);
-    case 'ADD_ATHLETE':    return api.post('/athletes', action.payload);
+
+    // ── Athletes (id entier) ────────────────────────────────────────────────
+    case 'ADD_ATHLETE': {
+      const created = await api.post('/athletes', action.payload);
+      // Stocker le dbId retourné dans l'entité locale (action déjà dispatchée,
+      // on ne peut pas la modifier — le dbId sera capturé au prochain HYDRATE)
+      return created;
+    }
     case 'UPDATE_ATHLETE': return api.put(`/athletes/${action.payload.id}`, action.payload);
     case 'DELETE_ATHLETE': return api.delete(`/athletes/${action.payload}`);
+
+    // ── Devis (clé = ref string → route by-ref) ─────────────────────────────
     case 'ADD_DEVIS':    return api.post('/devis', action.payload);
-    case 'UPDATE_DEVIS': return api.put(`/devis/${action.payload.ref}`, action.payload);
-    case 'DELETE_DEVIS': return api.delete(`/devis/${action.payload}`);
+    case 'UPDATE_DEVIS': return api.put(`/devis/by-ref/${action.payload.ref}`, action.payload);
+    case 'UPDATE_DEVIS_STATUT': return api.patch(`/devis/by-ref/${action.payload.ref}/statut`, { statut: action.payload.statut });
+    case 'DELETE_DEVIS': return api.delete(`/devis/by-ref/${action.payload}`);
+
+    // ── Factures (clé = ref string) ─────────────────────────────────────────
     case 'ADD_FACTURE':    return api.post('/factures', action.payload);
-    case 'UPDATE_FACTURE': return api.put(`/factures/${action.payload.ref}`, action.payload);
-    case 'DELETE_FACTURE': return api.delete(`/factures/${action.payload}`);
+    case 'UPDATE_FACTURE': return api.put(`/factures/by-ref/${action.payload.ref}`, action.payload);
+    case 'UPDATE_FACTURE_STATUT': return api.patch(`/factures/by-ref/${action.payload.ref}/statut`, { statut: action.payload.statut });
+    case 'DELETE_FACTURE': return api.delete(`/factures/by-ref/${action.payload}`);
+
+    // ── Contrats (clé = ref string) ─────────────────────────────────────────
     case 'ADD_CONTRAT':    return api.post('/contrats', action.payload);
-    case 'UPDATE_CONTRAT': return api.put(`/contrats/${action.payload.ref}`, action.payload);
-    case 'DELETE_CONTRAT': return api.delete(`/contrats/${action.payload}`);
+    case 'UPDATE_CONTRAT': return api.put(`/contrats/by-ref/${action.payload.ref}`, action.payload);
+    case 'DELETE_CONTRAT': return api.delete(`/contrats/by-ref/${action.payload}`);
+
+    // ── Projets (clé = ref string) ──────────────────────────────────────────
     case 'ADD_PROJET':    return api.post('/projets', action.payload);
-    case 'UPDATE_PROJET': return api.put(`/projets/${action.payload.ref}`, action.payload);
-    case 'DELETE_PROJET': return api.delete(`/projets/${action.payload}`);
+    case 'UPDATE_PROJET': return api.put(`/projets/by-ref/${action.payload.ref}`, action.payload);
+    case 'DELETE_PROJET': return api.delete(`/projets/by-ref/${action.payload}`);
+
+    // ── Evenements (clé = ref après Bloc A, sinon id string EVT-xx) ─────────
     case 'ADD_EVENEMENT':    return api.post('/evenements', action.payload);
-    case 'UPDATE_EVENEMENT': return api.put(`/evenements/${action.payload.id}`, action.payload);
-    case 'DELETE_EVENEMENT': return api.delete(`/evenements/${action.payload}`);
+    case 'UPDATE_EVENEMENT': return api.put(`/evenements/by-ref/${action.payload.id}`, action.payload);
+    case 'DELETE_EVENEMENT': return api.delete(`/evenements/by-ref/${action.payload}`);
+
+    // ── Camps (même pattern que Evenements) ─────────────────────────────────
     case 'ADD_CAMP':    return api.post('/camps', action.payload);
-    case 'UPDATE_CAMP': return api.put(`/camps/${action.payload.id}`, action.payload);
-    case 'DELETE_CAMP': return api.delete(`/camps/${action.payload}`);
+    case 'UPDATE_CAMP': return api.put(`/camps/by-ref/${action.payload.id}`, action.payload);
+    case 'DELETE_CAMP': return api.delete(`/camps/by-ref/${action.payload}`);
+
+    // ── VIP (clé = clientId) ────────────────────────────────────────────────
     case 'ADD_VIP':    return api.post('/vip', action.payload);
-    case 'UPDATE_VIP': return api.put(`/vip/${action.payload.id}`, action.payload);
-    case 'DELETE_VIP': return api.delete(`/vip/${action.payload}`);
+    case 'UPDATE_VIP': return api.put(`/vip/by-client/${action.payload.clientId}`, action.payload);
+    case 'DELETE_VIP': return api.delete(`/vip/by-client/${action.payload}`);
+
+    // ── Activités ───────────────────────────────────────────────────────────
     case 'ADD_ACTIVITE':    return api.post('/activites', action.payload);
     case 'DELETE_ACTIVITE': return api.delete(`/activites/${action.payload}`);
+
     default: return Promise.resolve();
   }
 }

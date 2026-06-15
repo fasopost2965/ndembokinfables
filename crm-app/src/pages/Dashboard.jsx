@@ -24,8 +24,8 @@ function RevenueChart({ factures }) {
   const cur = MONTHS[MONTHS.length - 1];
 
   const totals = MONTHS.map(m => {
-    const paid = factures.filter(f => f.statut === 'Payée' && (f.date||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0);
-    const pend = m === cur ? factures.filter(f => ['En attente','En retard'].includes(f.statut) && (f.date||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0) : 0;
+    const paid = factures.filter(f => f.statut === 'Payée' && (f.date||f.echeance||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0);
+    const pend = m === cur ? factures.filter(f => ['En attente','En retard'].includes(f.statut) && (f.date||f.echeance||'').slice(0,7) === m).reduce((s,f) => s+f.montant, 0) : 0;
     return { val: paid + pend, isCurrent: m === cur };
   });
 
@@ -119,7 +119,7 @@ function AlertsBanner({ factures, contrats, devis, clientNom, navigate }) {
   const ago15 = shiftDays(-15);
 
   const facturesLate = factures.filter(f =>
-    f.statut === 'En retard' || (f.statut === 'En attente' && f.date && f.date < today)
+    f.statut === 'En retard' || (f.statut === 'En attente' && (f.echeance || f.date) && (f.echeance || f.date) < today)
   );
   const contratsExpiring = contrats.filter(c =>
     c.expire && !['Résilié','Expiré'].includes(c.statut) && c.expire > today && c.expire <= in30
@@ -187,7 +187,7 @@ function HealthScore({ factures, devis, contrats, projets }) {
   const today = todayStr();
   const in30 = shiftDays(30);
 
-  const lateCount = factures.filter(f => f.statut === 'En retard' || (f.statut === 'En attente' && f.date && f.date < today)).length;
+  const lateCount = factures.filter(f => f.statut === 'En retard' || (f.statut === 'En attente' && (f.echeance || f.date) && (f.echeance || f.date) < today)).length;
   const expiringCount = contrats.filter(c => c.expire && c.expire > today && c.expire <= in30).length;
   const convRate = devis.length ? devis.filter(d => ['Accepté','Converti'].includes(d.statut)).length / devis.length : 0;
   const payRate = factures.length ? factures.filter(f => f.statut === 'Payée').length / factures.length : 1;
@@ -260,22 +260,22 @@ export default function Dashboard() {
 
   const allDocs = [
     ...devis.map(d => ({ ref: d.ref, client: clientNom(d.clientId), objet: d.objet || d.ref, montant: fmtUsd(d.montant), statut: d.statut, href: '/devis', date: d.date })),
-    ...factures.map(f => ({ ref: f.ref, client: clientNom(f.clientId), objet: f.ref, montant: fmtUsd(f.montant), statut: f.statut, href: '/factures', date: f.date })),
+    ...factures.map(f => ({ ref: f.ref, client: clientNom(f.clientId), objet: f.objet || f.ref, montant: fmtUsd(f.montant), statut: f.statut, href: '/factures', date: f.echeance || f.date })),
   ].sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,5);
 
   const deadlines = [
     ...factures.filter(f => ['En retard','En attente'].includes(f.statut)).map(f => ({
       titre: f.ref + (f.statut === 'En retard' ? ' — en retard' : ' — échéance'),
       detail: clientNom(f.clientId) + ' · ' + fmtUsd(f.montant),
-      date: dateFr(f.date).toUpperCase(), dot: f.statut === 'En retard' ? '#BC000D' : '#F4A800', dateColor: f.statut === 'En retard' ? '#BC000D' : '#9A6B00',
+      date: dateFr(f.echeance || f.date).toUpperCase(), dot: f.statut === 'En retard' ? '#BC000D' : '#F4A800', dateColor: f.statut === 'En retard' ? '#BC000D' : '#9A6B00',
     })),
     ...contrats.filter(c => c.statut === 'Expire bientôt' && c.expire).map(c => ({
       titre: c.ref + ' — expiration', detail: clientNom(c.clientId) + ' · ' + c.type,
       date: dateFr(c.expire).toUpperCase(), dot: '#F4A800', dateColor: '#9A6B00',
     })),
     ...evenements.slice(0,2).map(e => ({
-      titre: (e.titre||e.ref||'').length > 42 ? (e.titre||e.ref||'').slice(0,39) + '…' : (e.titre||e.ref||''),
-      detail: (e.lieu || '—') + ' · ' + (e.type || ''), date: dateFr(e.date).toUpperCase(), dot: '#1E9FD8', dateColor: '#1E78A8',
+      titre: ((e.nom||e.titre||e.ref||'').length > 42 ? (e.nom||e.titre||e.ref||'').slice(0,39) + '…' : (e.nom||e.titre||e.ref||'')),
+      detail: (e.lieu || '—') + ' · ' + (e.type || ''), date: dateFr(e.dateDebut||e.date).toUpperCase(), dot: '#1E9FD8', dateColor: '#1E78A8',
     })),
   ].slice(0,5);
 

@@ -28,10 +28,12 @@ function buildNotifications(state) {
   });
 
   state.contrats.forEach(c => {
-    if (c.statut === 'Actif' && c.dateFin) {
-      const diff = daysDiff(c.dateFin, TODAY);
+    const dateExpiry = c.expire || c.dateFin;
+    const isActif = ['Signé', 'Actif', 'Expire bientôt'].includes(c.statut);
+    if (isActif && dateExpiry) {
+      const diff = daysDiff(dateExpiry, TODAY);
       if (diff !== null && diff >= 0 && diff <= 30) {
-        notes.push({ id: `ctr-expire-${c.ref}`, type: 'warning', icon: '📄', title: `Contrat ${c.ref} expire dans ${diff} j`, body: `${c.type || '—'} — fin le ${dateFr(c.dateFin)}`, to: '/contrats' });
+        notes.push({ id: `ctr-expire-${c.ref}`, type: 'warning', icon: '📄', title: `Contrat ${c.ref} expire dans ${diff} j`, body: `${c.type || '—'} — fin le ${dateFr(dateExpiry)}`, to: '/contrats' });
       }
     }
   });
