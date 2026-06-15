@@ -16,9 +16,23 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons';
+          }
+        },
+      },
+    },
   },
   test: {
-    environment: 'node',
-    include: ['src/**/*.test.js'],
+    environment: 'jsdom',
+    include: ['src/**/*.test.{js,jsx}', 'src/**/__tests__/**/*.test.{js,jsx}'],
+    globals: true,
+    setupFiles: ['./src/__tests__/vitest.setup.js'],
   },
 })
