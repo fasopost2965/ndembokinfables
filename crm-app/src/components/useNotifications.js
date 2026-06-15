@@ -2,26 +2,25 @@ import { useMemo } from 'react';
 import { useCRM } from '../contexts/CRMContext';
 import { dateFr } from '../crm-data';
 
-const TODAY = new Date();
-
-function daysDiff(isoDate) {
+function daysDiff(isoDate, today) {
   if (!isoDate) return null;
   const d = new Date(isoDate);
   if (isNaN(d)) return null;
-  return Math.round((d - TODAY) / 86400000);
+  return Math.round((d - today) / 86400000);
 }
 
 function buildNotifications(state) {
+  const TODAY = new Date();
   const notes = [];
 
   state.factures.forEach(f => {
     if (f.statut === 'En retard') {
-      const diff = daysDiff(f.echeance);
+      const diff = daysDiff(f.echeance, TODAY);
       const label = diff !== null && diff < 0 ? `${Math.abs(diff)} j de retard` : 'En retard';
       notes.push({ id: `fac-retard-${f.ref}`, type: 'danger', icon: '⚠️', title: `Facture ${f.ref} en retard`, body: `${f.objet || '—'} — ${label}`, to: '/factures' });
     }
     if (f.statut === 'En attente' && f.echeance) {
-      const diff = daysDiff(f.echeance);
+      const diff = daysDiff(f.echeance, TODAY);
       if (diff !== null && diff >= 0 && diff <= 7) {
         notes.push({ id: `fac-echeance-${f.ref}`, type: 'warning', icon: '🕐', title: `Facture ${f.ref} — échéance dans ${diff} j`, body: f.objet || '—', to: '/factures' });
       }
@@ -30,7 +29,7 @@ function buildNotifications(state) {
 
   state.contrats.forEach(c => {
     if (c.statut === 'Actif' && c.dateFin) {
-      const diff = daysDiff(c.dateFin);
+      const diff = daysDiff(c.dateFin, TODAY);
       if (diff !== null && diff >= 0 && diff <= 30) {
         notes.push({ id: `ctr-expire-${c.ref}`, type: 'warning', icon: '📄', title: `Contrat ${c.ref} expire dans ${diff} j`, body: `${c.type || '—'} — fin le ${dateFr(c.dateFin)}`, to: '/contrats' });
       }
@@ -39,7 +38,7 @@ function buildNotifications(state) {
 
   state.devis.forEach(d => {
     if (['En attente', 'Envoyé'].includes(d.statut) && d.date) {
-      const age = -daysDiff(d.date);
+      const age = -daysDiff(d.date, TODAY);
       if (age !== null && age > 14) {
         notes.push({ id: `dev-attente-${d.ref}`, type: 'info', icon: '📋', title: `Devis ${d.ref} sans réponse (${age} j)`, body: d.objet || '—', to: '/devis' });
       }

@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCRM } from '../contexts/CRMContext';
 import { dateFr, fmtUsd } from '../crm-data';
@@ -65,7 +65,6 @@ const MAX_PER_SECTION = 4;
 export default function GlobalSearch({ query, onClose }) {
   const { state } = useCRM();
   const navigate = useNavigate();
-  const panelRef = useRef(null);
   const q = query.toLowerCase().trim();
 
   const results = useMemo(() => {
@@ -85,7 +84,7 @@ export default function GlobalSearch({ query, onClose }) {
   if (!q || results.length === 0) {
     if (!q) return null;
     return (
-      <div ref={panelRef} style={panelStyle}>
+      <div style={panelStyle}>
         <div style={{ padding: '20px 16px', textAlign: 'center', color: 'var(--text-3)', fontSize: '13px' }}>
           Aucun résultat pour <strong style={{ color: 'var(--text-1)' }}>« {query} »</strong>
         </div>
@@ -96,7 +95,7 @@ export default function GlobalSearch({ query, onClose }) {
   const totalHits = results.reduce((s, r) => s + r.hits.length, 0);
 
   return (
-    <div ref={panelRef} style={panelStyle}>
+    <div style={panelStyle}>
       <div style={{ padding: '8px 12px 6px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '11px', color: 'var(--text-3)', fontWeight: 600 }}>{totalHits} résultat{totalHits > 1 ? 's' : ''} pour « {query} »</span>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: '16px', lineHeight: 1, padding: '0 4px' }}>×</button>

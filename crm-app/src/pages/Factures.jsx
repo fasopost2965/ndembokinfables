@@ -42,7 +42,7 @@ export default function Factures() {
     setFDateEmission(today()); setFEcheance(addDays(30)); setFStatut('En attente'); setErrors({}); setIsDrawerOpen(true);
   };
   const openEdit = (f) => {
-    setEditTarget(f); setFClient(String(f.clientId)); setFObjet(f.objet); setFNotes(f.notes || '');
+    setEditTarget(f); setFClient(f.clientId != null ? String(f.clientId) : ''); setFObjet(f.objet); setFNotes(f.notes || '');
     setFMontant(String(f.montant)); setFDateEmission(f.date || today()); setFEcheance(f.echeance || addDays(30));
     setFStatut(f.statut); setErrors({}); setIsDrawerOpen(true);
   };

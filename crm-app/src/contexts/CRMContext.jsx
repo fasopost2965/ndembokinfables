@@ -131,6 +131,8 @@ export function CRMProvider({ children }) {
         const parsed = JSON.parse(stored);
         // Reset confirm modal state on load
         parsed.confirmModal = { isOpen: false, title: '', message: '', onConfirm: null };
+        // Backfill field absent from pre-Phase-8 localStorage snapshots
+        parsed.notificationsLues = parsed.notificationsLues ?? [];
         return parsed;
       }
     } catch (e) {

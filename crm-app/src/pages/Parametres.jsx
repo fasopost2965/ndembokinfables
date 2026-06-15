@@ -62,20 +62,21 @@ export default function Parametres() {
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({ ...company });
+  // When not dirty, read company from context directly so RESTORE_STATE is reflected immediately.
+  const activeForm = dirty ? form : company;
 
   const set = (key) => (val) => {
-    setForm(f => ({ ...f, [key]: val }));
+    setForm(f => ({ ...(dirty ? f : company), [key]: val }));
     setDirty(true);
   };
 
   const handleSave = () => {
-    dispatch({ type: 'UPDATE_COMPANY', payload: form });
+    dispatch({ type: 'UPDATE_COMPANY', payload: activeForm });
     setDirty(false);
     addToast('Paramètres enregistrés avec succès !', 'success');
   };
 
   const handleCancel = () => {
-    setForm({ ...company });
     setDirty(false);
     addToast('Modifications annulées.');
   };
@@ -148,14 +149,14 @@ export default function Parametres() {
                 {/* Logo upload */}
                 <div>
                   <div style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '8px' }}>Logo officiel</div>
-                  {form.logoUrl ? (
+                  {activeForm.logoUrl ? (
                     <div style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', background: 'var(--bg-page)', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                      <img src={form.logoUrl} alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '6px', border: '1px solid var(--border)' }} onError={e => e.target.style.display = 'none'} />
-                      <div style={{ flex: 1, fontSize: '12px', color: 'var(--text-3)', wordBreak: 'break-all' }}>{form.logoUrl.slice(0, 60)}{form.logoUrl.length > 60 ? '…' : ''}</div>
+                      <img src={activeForm.logoUrl} alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '6px', border: '1px solid var(--border)' }} onError={e => e.target.style.display = 'none'} />
+                      <div style={{ flex: 1, fontSize: '12px', color: 'var(--text-3)', wordBreak: 'break-all' }}>{activeForm.logoUrl.slice(0, 60)}{activeForm.logoUrl.length > 60 ? '…' : ''}</div>
                       <button onClick={() => { set('logoUrl')(''); setDirty(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--red)', fontWeight: 700, fontSize: '12px' }}>Supprimer</button>
                     </div>
                   ) : null}
-                  <InputField label="URL du logo (lien https:// ou base64)" value={form.logoUrl || ''} onChange={v => { set('logoUrl')(v); setDirty(true); }} placeholder="https://votre-domaine.com/logo.png" />
+                  <InputField label="URL du logo (lien https:// ou base64)" value={activeForm.logoUrl || ''} onChange={v => { set('logoUrl')(v); setDirty(true); }} placeholder="https://votre-domaine.com/logo.png" />
                   <p style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '8px', lineHeight: 1.5 }}>Coller l'URL externe ou une data URI base64. Apparaît dans l'en-tête des contrats générés.</p>
                 </div>
 
@@ -185,23 +186,23 @@ export default function Parametres() {
               <SectionTitle>Informations légales</SectionTitle>
               <p style={{ fontSize: '12.5px', color: 'var(--text-2)', marginBottom: '24px', marginTop: '-10px' }}>Identification officielle utilisée pour la génération des contrats et la conformité fiscale (RDC).</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <InputField label="Dénomination sociale" value={form.nom} onChange={set('nom')} placeholder="NDEMBO KIN CONNECT SARL" />
+                <InputField label="Dénomination sociale" value={activeForm.nom} onChange={set('nom')} placeholder="NDEMBO KIN CONNECT SARL" />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <InputField label="RCCM" value={form.rccm} onChange={set('rccm')} mono placeholder="CD/KIN/RCCM/23-B-0158" />
-                  <InputField label="ID National" value={form.idNat} onChange={set('idNat')} mono placeholder="01-83-N12345K" />
+                  <InputField label="RCCM" value={activeForm.rccm} onChange={set('rccm')} mono placeholder="CD/KIN/RCCM/23-B-0158" />
+                  <InputField label="ID National" value={activeForm.idNat} onChange={set('idNat')} mono placeholder="01-83-N12345K" />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <InputField label="NIF" value={form.nif} onChange={set('nif')} mono placeholder="A1234567B" />
-                  <InputField label="Téléphone & WhatsApp" value={form.tel} onChange={set('tel')} mono placeholder="+243 810 188 880" />
+                  <InputField label="NIF" value={activeForm.nif} onChange={set('nif')} mono placeholder="A1234567B" />
+                  <InputField label="Téléphone & WhatsApp" value={activeForm.tel} onChange={set('tel')} mono placeholder="+243 810 188 880" />
                 </div>
-                <InputField label="Adresse du siège" value={form.adresse} onChange={set('adresse')} placeholder="Av. Citroniers, Q/ Golf…" />
+                <InputField label="Adresse du siège" value={activeForm.adresse} onChange={set('adresse')} placeholder="Av. Citroniers, Q/ Golf…" />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <InputField label="Ville" value={form.ville || ''} onChange={set('ville')} placeholder="Kinshasa" />
-                  <InputField label="Pays" value={form.pays || ''} onChange={set('pays')} placeholder="RDC" />
+                  <InputField label="Ville" value={activeForm.ville || ''} onChange={set('ville')} placeholder="Kinshasa" />
+                  <InputField label="Pays" value={activeForm.pays || ''} onChange={set('pays')} placeholder="RDC" />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <InputField label="Email de facturation" value={form.email} onChange={set('email')} type="email" placeholder="contact@ndembokin.com" />
-                  <InputField label="Site web" value={form.siteWeb || ''} onChange={set('siteWeb')} placeholder="https://ndembokin.com" />
+                  <InputField label="Email de facturation" value={activeForm.email} onChange={set('email')} type="email" placeholder="contact@ndembokin.com" />
+                  <InputField label="Site web" value={activeForm.siteWeb || ''} onChange={set('siteWeb')} placeholder="https://ndembokin.com" />
                 </div>
               </div>
             </div>
@@ -233,11 +234,11 @@ export default function Parametres() {
                 <InputField label="Taux CDF/USD" value={String(form.tauxCDF)} onChange={v => set('tauxCDF')(Number(v))} mono type="number" placeholder="2850" />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-                <InputField label="TVA applicaple (%)" value={String(form.tva ?? 0)} onChange={v => set('tva')(Number(v))} mono type="number" placeholder="0" />
+                <InputField label="TVA applicable (%)" value={String(form.tva ?? 0)} onChange={v => set('tva')(Number(v))} mono type="number" placeholder="0" />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)' }}>Aperçu</span>
                   <div style={{ height: '38px', display: 'flex', alignItems: 'center', fontSize: '13px', color: 'var(--text-2)', paddingLeft: '4px' }}>
-                    {form.tva > 0 ? `TVA ${form.tva}% appliquée sur les documents` : 'Aucune TVA — montants HT uniquement'}
+                    {activeForm.tva > 0 ? `TVA ${activeForm.tva}% appliquée sur les documents` : 'Aucune TVA — montants HT uniquement'}
                   </div>
                 </div>
               </div>
@@ -259,15 +260,15 @@ export default function Parametres() {
               <p style={{ fontSize: '12.5px', color: 'var(--text-2)', marginBottom: '24px', marginTop: '-10px' }}>Numérotation automatique, conditions par défaut et modèles de contrat actifs.</p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-                <InputField label="Préfixe Devis" value={form.prefixeDevis} onChange={set('prefixeDevis')} mono placeholder="DEV-2026-" />
-                <InputField label="Préfixe Factures" value={form.prefixeFactures} onChange={set('prefixeFactures')} mono placeholder="FAC-2026-" />
-                <InputField label="Préfixe Contrats" value={form.prefixeContrats} onChange={set('prefixeContrats')} mono placeholder="CTR-2026-" />
+                <InputField label="Préfixe Devis" value={activeForm.prefixeDevis} onChange={set('prefixeDevis')} mono placeholder="DEV-2026-" />
+                <InputField label="Préfixe Factures" value={activeForm.prefixeFactures} onChange={set('prefixeFactures')} mono placeholder="FAC-2026-" />
+                <InputField label="Préfixe Contrats" value={activeForm.prefixeContrats} onChange={set('prefixeContrats')} mono placeholder="CTR-2026-" />
               </div>
 
               <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '24px' }}>
                 <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)' }}>Conditions par défaut (Devis & Factures)</span>
                 <textarea
-                  value={form.conditionsDefaut}
+                  value={activeForm.conditionsDefaut}
                   onChange={e => set('conditionsDefaut')(e.target.value)}
                   rows={3}
                   style={{ border: '1px solid var(--border-input)', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', resize: 'vertical', outline: 'none', fontFamily: 'var(--font-open-sans)', lineHeight: 1.5 }}
@@ -301,17 +302,17 @@ export default function Parametres() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <InputField label="Nom d'expéditeur" value={form.nomExpediteur} onChange={set('nomExpediteur')} placeholder="Ndembo Kin Connect SARL" />
-                  <InputField label="Email d'expéditeur" value={form.emailExpediteur} onChange={set('emailExpediteur')} type="email" placeholder="contact@ndembokin.com" />
+                  <InputField label="Nom d'expéditeur" value={activeForm.nomExpediteur} onChange={set('nomExpediteur')} placeholder="Ndembo Kin Connect SARL" />
+                  <InputField label="Email d'expéditeur" value={activeForm.emailExpediteur} onChange={set('emailExpediteur')} type="email" placeholder="contact@ndembokin.com" />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <InputField label="Copie (CC) automatique" value={form.emailCC} onChange={set('emailCC')} type="email" placeholder="direction@ndembokin.com" />
-                  <InputField label="Objet par défaut" value={form.objetDefaut} onChange={set('objetDefaut')} placeholder="Votre document [REF] — Ndembo Kin Connect" />
+                  <InputField label="Copie (CC) automatique" value={activeForm.emailCC} onChange={set('emailCC')} type="email" placeholder="direction@ndembokin.com" />
+                  <InputField label="Objet par défaut" value={activeForm.objetDefaut} onChange={set('objetDefaut')} placeholder="Votre document [REF] — Ndembo Kin Connect" />
                 </div>
                 <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)' }}>Signature d'email</span>
                   <textarea
-                    value={form.signatureEmail}
+                    value={activeForm.signatureEmail}
                     onChange={e => set('signatureEmail')(e.target.value)}
                     rows={4}
                     style={{ border: '1px solid var(--border-input)', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', resize: 'vertical', outline: 'none', fontFamily: 'var(--font-open-sans)', lineHeight: 1.5 }}
@@ -322,7 +323,7 @@ export default function Parametres() {
                     <div style={{ fontWeight: 600, fontSize: '13px' }}>Joindre le PDF imprimable</div>
                     <div style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '2px' }}>Le document est joint automatiquement à chaque envoi.</div>
                   </div>
-                  <Toggle checked={form.joindrePDF} onChange={v => { set('joindrePDF')(v); setDirty(true); }} />
+                  <Toggle checked={activeForm.joindrePDF} onChange={v => { set('joindrePDF')(v); setDirty(true); }} />
                 </div>
               </div>
             </div>
