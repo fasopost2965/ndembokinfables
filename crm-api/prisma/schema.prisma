@@ -39,23 +39,28 @@ model Client {
 }
 
 model Athlete {
-  id              Int      @id @default(autoincrement())
-  ref             String   @unique
-  nom             String
-  prenom          String?
-  poste           String?
-  clubActuel      String?
-  nationalite     String?
-  age             Int?
-  valeurMarchande Float?
-  commission      Float?
-  bio             String?
-  notes           String?
-  contractRef     String?
-  email           String?
-  tel             String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  ref           String   @unique
+  nom           String
+  prenom        String?
+  poste         String?
+  club          String?
+  nationalite   String?
+  age           Int?
+  valeur        Float?
+  commissionPct Float?
+  photo         String?
+  pied          String?
+  adresse       String?
+  transferts    String?
+  commissions   String?
+  bio           String?
+  notes         String?
+  contractRef   String?
+  email         String?
+  tel           String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Devis {
@@ -141,9 +146,14 @@ model Tache {
 model Evenement {
   id           Int      @id @default(autoincrement())
   ref          String   @unique
-  titre        String
+  nom          String
   type         String
-  date         String
+  dateDebut    String
+  dateFin      String?
+  statut       String?
+  inscrits     Int?
+  capacite     Int?
+  clientId     Int?
   lieu         String?
   budget       Float?
   notes        String?
@@ -155,9 +165,15 @@ model Evenement {
 model Camp {
   id           Int      @id @default(autoincrement())
   ref          String   @unique
-  titre        String
+  nom          String
   type         String
-  date         String
+  dateDebut    String
+  dateFin      String?
+  statut       String?
+  categorie    String?
+  places       Int?
+  inscrits     Int?
+  clientId     Int?
   lieu         String?
   budget       Float?
   notes        String?
@@ -167,18 +183,20 @@ model Camp {
 }
 
 model VipMember {
-  id           Int      @id @default(autoincrement())
-  ref          String   @unique
-  clientId     Int?
-  nom          String
-  tier         String   @default("Argent")
-  email        String?
-  tel          String?
-  carteNFC     String?
-  dateAdhesion String?
-  avantages    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  ref       String   @unique
+  clientId  Int?
+  nom       String?
+  tier      String   @default("Argent")
+  statut    String?
+  email     String?
+  tel       String?
+  carte     String?
+  depuis    String?
+  expire    String?
+  avantages String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Activite {

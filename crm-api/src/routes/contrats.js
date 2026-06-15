@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 
 import { requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
@@ -40,5 +40,18 @@ router.delete('/:id', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-export default router;
+// Ref-based routes for frontend sync
+router.put('/by-ref/:ref', validate(contratSchema), async (req, res, next) => {
+  try {
+    res.json(await prisma.contrat.update({ where: { ref: req.params.ref }, data: req.body }));
+  } catch (e) { next(e); }
+});
 
+router.delete('/by-ref/:ref', async (req, res, next) => {
+  try {
+    await prisma.contrat.delete({ where: { ref: req.params.ref } });
+    res.status(204).end();
+  } catch (e) { next(e); }
+});
+
+export default router;
