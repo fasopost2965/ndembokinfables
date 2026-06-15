@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  nom       String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id        Int       @id @default(autoincrement())
+  ref       String    @unique
+  nom       String
+  type      String    @default("Club")
+  email     String?
+  tel       String?
+  ville     String?
+  pays      String?
+  contact   String?
+  siteWeb   String?
+  notes     String?
+  avatar    String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  devis     Devis[]
+  factures  Facture[]
+  contrats  Contrat[]
+  projets   Projet[]
+}
+
+model Athlete {
+  id              Int      @id @default(autoincrement())
+  ref             String   @unique
+  nom             String
+  prenom          String?
+  poste           String?
+  clubActuel      String?
+  nationalite     String?
+  age             Int?
+  valeurMarchande Float?
+  commission      Float?
+  bio             String?
+  notes           String?
+  contractRef     String?
+  email           String?
+  tel             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Devis {
+  id         Int          @id @default(autoincrement())
+  ref        String       @unique
+  clientId   Int?
+  client     Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  statut     String       @default("Brouillon")
+  date       String
+  expiration String?
+  objet      String?
+  montant    Float        @default(0)
+  notes      String?
+  lignes     LigneDevis[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model LigneDevis {
+  id          Int    @id @default(autoincrement())
+  devisId     Int
+  devis       Devis  @relation(fields: [devisId], references: [id], onDelete: Cascade)
+  description String
+  qte         Float  @default(1)
+  prix        Float  @default(0)
+}
+
+model Facture {
+  id          Int      @id @default(autoincrement())
+  ref         String   @unique
+  clientId    Int?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  statut      String   @default("En attente")
+  date        String
+  echeance    String?
+  dateRelance String?
+  objet       String?
+  notes       String?
+  montant     Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Contrat {
+  id        Int      @id @default(autoincrement())
+  ref       String   @unique
+  clientId  Int?
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  type      String
+  valeur    Float    @default(0)
+  statut    String   @default("Brouillon")
+  dateDebut String?
+  expire    String?
+  clauses   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Projet {
+  id          Int      @id @default(autoincrement())
+  ref         String   @unique
+  clientId    Int?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  nom         String
+  description String?
+  statut      String   @default("Planifié")
+  avancement  Int      @default(0)
+  dateDebut   String?
+  dateFin     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  taches      Tache[]
+}
+
+model Tache {
+  id       Int     @id @default(autoincrement())
+  projetId Int
+  projet   Projet  @relation(fields: [projetId], references: [id], onDelete: Cascade)
+  texte    String
+  fait     Boolean @default(false)
+}
+
+model Evenement {
+  id           Int      @id @default(autoincrement())
+  ref          String   @unique
+  titre        String
+  type         String
+  date         String
+  lieu         String?
+  budget       Float?
+  notes        String?
+  participants String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Camp {
+  id           Int      @id @default(autoincrement())
+  ref          String   @unique
+  titre        String
+  type         String
+  date         String
+  lieu         String?
+  budget       Float?
+  notes        String?
+  participants String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VipMember {
+  id           Int      @id @default(autoincrement())
+  ref          String   @unique
+  clientId     Int?
+  nom          String
+  tier         String   @default("Argent")
+  email        String?
+  tel          String?
+  carteNFC     String?
+  dateAdhesion String?
+  avantages    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Activite {
+  id          Int      @id @default(autoincrement())
+  entityType  String
+  entityId    String
+  type        String
+  description String
+  date        String
+  auteur      String   @default("Système")
+  createdAt   DateTime @default(now())
+}
