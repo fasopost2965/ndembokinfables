@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TYPE_QUALITE, fmtUsd } from '../crm-data';
 import { useCRM } from '../contexts/CRMContext';
@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   nom: '', type: 'Club', email: '', tel: '',
   ville: '', pays: 'RDC', adresse: '',
   siteWeb: '', contactPrincipal: '', notes: '',
+  avatar: '',
 };
 
 const DETAIL_TABS = ['Aperçu', 'Devis', 'Factures', 'Contrats', 'Activités'];
@@ -60,6 +61,15 @@ export default function Clients() {
   const [editTarget, setEditTarget] = useState(null);
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState(EMPTY_FORM);
+  const logoInputRef = useRef(null);
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setForm(f => ({ ...f, avatar: ev.target.result }));
+    reader.readAsDataURL(file);
+  };
 
   const clientCA = (clientId) =>
     factures.filter(f => f.clientId === clientId && f.statut === 'Payée').reduce((s, f) => s + f.montant, 0);
@@ -84,6 +94,7 @@ export default function Clients() {
       siteWeb:         client.siteWeb || '',
       contactPrincipal: client.contactPrincipal || '',
       notes:           client.notes || '',
+      avatar:          client.avatar || '',
     });
     setErrors({});
     setIsDrawerOpen(true);
@@ -141,6 +152,35 @@ export default function Clients() {
     return (
       <>
         <ValidationSummary errors={errors} />
+        {/* Logo upload */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 0 4px' }}>
+          <div
+            onClick={() => logoInputRef.current?.click()}
+            style={{ width: '64px', height: '64px', borderRadius: '10px', background: form.avatar ? 'transparent' : 'rgba(37,67,84,0.08)', border: '2px dashed var(--border-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, transition: 'border-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--cyan)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-input)'}
+          >
+            {form.avatar
+              ? <img src={form.avatar} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="1.6" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            }
+          </div>
+          <div>
+            <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '4px' }}>Logo du client</div>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginBottom: '8px' }}>PNG, JPG, SVG — max 2 Mo</div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button type="button" onClick={() => logoInputRef.current?.click()} style={{ height: '28px', padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border-input)', borderRadius: '5px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', color: 'var(--text-2)' }}>
+                {form.avatar ? 'Changer' : 'Choisir un fichier'}
+              </button>
+              {form.avatar && (
+                <button type="button" onClick={() => setForm(f => ({ ...f, avatar: '' }))} style={{ height: '28px', padding: '0 12px', background: 'none', border: '1px solid rgba(188,0,13,0.3)', borderRadius: '5px', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', color: 'var(--red)' }}>
+                  Supprimer
+                </button>
+              )}
+            </div>
+          </div>
+          <input ref={logoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoUpload} />
+        </div>
         <FormSection title="Identification" subtitle="Raison sociale, type et localisation">
           <TextField label="Nom du client / entité" value={form.nom} onChange={v => setForm(f => ({ ...f, nom: v }))} required placeholder="Ex. Mazembe Corp" maxLength={80} error={errors.nom} />
           <FormRow>
@@ -208,8 +248,11 @@ export default function Clients() {
             {client.nom.charAt(0)}
           </div>
           <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div style={{ width: '68px', height: '68px', borderRadius: '12px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
-              <span style={{ fontFamily: 'var(--font-oswald)', fontSize: '28px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>{client.nom.substring(0, 2)}</span>
+            <div style={{ width: '68px', height: '68px', borderRadius: '12px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 14px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
+              {client.avatar
+                ? <img src={client.avatar} alt={client.nom} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                : <span style={{ fontFamily: 'var(--font-oswald)', fontSize: '28px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>{client.nom.substring(0, 2)}</span>
+              }
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.14em', marginBottom: '4px' }}>{client.type} · {client.ville || client.pays}</div>
