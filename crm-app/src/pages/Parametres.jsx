@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useCRM } from '../contexts/CRMContext';
 import { useToast } from '../contexts/ToastContext';
 
 const NAV = [
-  { id: 'identite',  label: 'Logo & Identité' },
-  { id: 'legal',     label: 'Informations légales' },
-  { id: 'devises',   label: 'Devises & Taxes' },
-  { id: 'documents', label: 'Modèles de documents' },
-  { id: 'email',     label: 'E-mail & Envois' },
+  { id: 'identite',   label: 'Logo & Identité' },
+  { id: 'legal',      label: 'Informations légales' },
+  { id: 'devises',    label: 'Devises & Taxes' },
+  { id: 'documents',  label: 'Modèles de documents' },
+  { id: 'email',      label: 'E-mail & Envois' },
+  { id: 'sauvegarde', label: 'Sauvegarde & Restauration' },
 ];
 
 const BRAND_COLORS = [
@@ -52,10 +53,13 @@ function SectionTitle({ children }) {
 }
 
 export default function Parametres() {
-  const { state: { company }, dispatch } = useCRM();
+  const { state, dispatch } = useCRM();
+  const { company } = state;
   const addToast = useToast();
   const [activeSection, setActiveSection] = useState('identite');
   const [dirty, setDirty] = useState(false);
+  const [restoreError, setRestoreError] = useState('');
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({ ...company });
 
@@ -74,6 +78,44 @@ export default function Parametres() {
     setForm({ ...company });
     setDirty(false);
     addToast('Modifications annulées.');
+  };
+
+  const handleExport = () => {
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ndembo-crm-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast('Sauvegarde téléchargée avec succès !', 'success');
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const parsed = JSON.parse(evt.target.result);
+        const required = ['clients', 'devis', 'factures', 'contrats'];
+        const missing = required.filter(k => !Array.isArray(parsed[k]));
+        if (missing.length > 0) {
+          setRestoreError(`Fichier invalide — champs manquants : ${missing.join(', ')}`);
+          addToast('Fichier de sauvegarde invalide.', 'error');
+          return;
+        }
+        dispatch({ type: 'RESTORE_STATE', payload: parsed });
+        setRestoreError('');
+        addToast('Données restaurées avec succès !', 'success');
+      } catch {
+        setRestoreError('Impossible de lire le fichier JSON.');
+        addToast('Erreur de lecture du fichier.', 'error');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   return (
@@ -153,7 +195,14 @@ export default function Parametres() {
                   <InputField label="Téléphone & WhatsApp" value={form.tel} onChange={set('tel')} mono placeholder="+243 810 188 880" />
                 </div>
                 <InputField label="Adresse du siège" value={form.adresse} onChange={set('adresse')} placeholder="Av. Citroniers, Q/ Golf…" />
-                <InputField label="Email de facturation" value={form.email} onChange={set('email')} type="email" placeholder="contact@ndembokin.com" />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <InputField label="Ville" value={form.ville || ''} onChange={set('ville')} placeholder="Kinshasa" />
+                  <InputField label="Pays" value={form.pays || ''} onChange={set('pays')} placeholder="RDC" />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <InputField label="Email de facturation" value={form.email} onChange={set('email')} type="email" placeholder="contact@ndembokin.com" />
+                  <InputField label="Site web" value={form.siteWeb || ''} onChange={set('siteWeb')} placeholder="https://ndembokin.com" />
+                </div>
               </div>
             </div>
           )}
@@ -181,7 +230,16 @@ export default function Parametres() {
               {/* Taux */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
                 <InputField label="1 USD = ? CDF" value={String(form.tauxUSD)} onChange={v => set('tauxUSD')(Number(v))} mono type="number" placeholder="2850" />
-                <InputField label="TVA (%)" value={String(form.tauxCDF)} onChange={v => set('tauxCDF')(Number(v))} mono type="number" placeholder="16" />
+                <InputField label="Taux CDF/USD" value={String(form.tauxCDF)} onChange={v => set('tauxCDF')(Number(v))} mono type="number" placeholder="2850" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <InputField label="TVA applicaple (%)" value={String(form.tva ?? 0)} onChange={v => set('tva')(Number(v))} mono type="number" placeholder="0" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <span style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)' }}>Aperçu</span>
+                  <div style={{ height: '38px', display: 'flex', alignItems: 'center', fontSize: '13px', color: 'var(--text-2)', paddingLeft: '4px' }}>
+                    {form.tva > 0 ? `TVA ${form.tva}% appliquée sur les documents` : 'Aucune TVA — montants HT uniquement'}
+                  </div>
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--text-3)' }}>
@@ -265,6 +323,49 @@ export default function Parametres() {
                     <div style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '2px' }}>Le document est joint automatiquement à chaque envoi.</div>
                   </div>
                   <Toggle checked={form.joindrePDF} onChange={v => { set('joindrePDF')(v); setDirty(true); }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── SAUVEGARDE & RESTAURATION ── */}
+          {activeSection === 'sauvegarde' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', padding: '28px' }}>
+                <SectionTitle>Exporter les données</SectionTitle>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-2)', marginBottom: '20px', marginTop: '-10px', lineHeight: 1.6 }}>
+                  Télécharge l'intégralité des données CRM au format JSON. Conservez ce fichier comme sauvegarde ou pour migrer vers un autre environnement.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '16px', background: 'var(--bg-page)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(30,159,216,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="2" strokeLinecap="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: '13.5px' }}>Sauvegarde complète JSON</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '2px' }}>
+                      {Object.keys(state).filter(k => Array.isArray(state[k])).map(k => `${k} (${state[k].length})`).join(' · ')}
+                    </div>
+                  </div>
+                  <button onClick={handleExport} style={{ padding: '9px 18px', background: 'var(--cyan)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px', flexShrink: 0 }}>
+                    ↓ Télécharger
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: '8px', padding: '28px' }}>
+                <SectionTitle>Restaurer une sauvegarde</SectionTitle>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-2)', marginBottom: '20px', marginTop: '-10px', lineHeight: 1.6 }}>
+                  Sélectionnez un fichier JSON exporté depuis ce CRM. <strong style={{ color: 'var(--red)' }}>Attention :</strong> cette opération remplace toutes les données actuelles de manière irréversible.
+                </p>
+                <div style={{ padding: '20px', background: 'rgba(188,0,13,0.04)', border: '1px dashed var(--red)', borderRadius: '8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '28px', marginBottom: '8px' }}>📂</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Sélectionner un fichier .json</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '16px' }}>Le fichier doit contenir les clés : clients, devis, factures, contrats</div>
+                  <input ref={fileInputRef} type="file" accept=".json,application/json" onChange={handleImport} style={{ display: 'none' }} id="restore-file-input" />
+                  <label htmlFor="restore-file-input" style={{ display: 'inline-block', padding: '9px 20px', background: 'var(--red)', color: 'var(--white)', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}>
+                    Choisir un fichier
+                  </label>
+                  {restoreError && <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--red)', fontWeight: 600 }}>{restoreError}</div>}
                 </div>
               </div>
             </div>

@@ -6,6 +6,7 @@ import { useToast } from '../contexts/ToastContext';
 import EmptyState from '../components/ui/EmptyState';
 import StatusBadge from '../components/ui/StatusBadge';
 import { FormSection, FormRow, TextField, TextareaField, AmountField, TypeCards, ValidationSummary } from '../components/ui/FormControls';
+import ActivityTimeline from '../components/activities/ActivityTimeline';
 
 const POSTES = ['Attaquant', 'Milieu offensif', 'Milieu défensif', 'Ailier', 'Défenseur central', 'Latéral', 'Gardien'];
 const EMPTY_FORM = { nom: '', age: '', poste: 'Attaquant', club: '', nationalite: 'RDC', valeur: '', email: '', tel: '', adresse: '', pied: 'Droit', commissionPct: '', photo: '', bio: '', videos: '' };
@@ -103,7 +104,7 @@ function KpiStrip({ athletes }) {
   );
 }
 
-const DETAIL_TABS = ['Profil', 'Contrats & Transferts', 'Commissions', 'Performances', 'Vidéos'];
+const DETAIL_TABS = ['Profil', 'Contrats & Transferts', 'Commissions', 'Performances', 'Vidéos', 'Activités'];
 
 export default function Athletes() {
   const { state: { athletes, contrats, camps }, dispatch, confirmAction } = useCRM();
@@ -493,6 +494,13 @@ export default function Athletes() {
                 <button onClick={() => openEdit(athlete)} style={{ marginTop: '14px', padding: '8px 16px', background: 'var(--navy-deep)', color: 'var(--white)', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>Ajouter des liens vidéo</button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Activités */}
+        {detailTab === 'Activités' && (
+          <div style={{ background: 'var(--white)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            <ActivityTimeline entityType="athlete" entityId={athlete.id} />
           </div>
         )}
 

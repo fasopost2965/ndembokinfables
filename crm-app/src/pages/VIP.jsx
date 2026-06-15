@@ -250,7 +250,7 @@ export default function VIP() {
               color: info.chip, bg: info.bg,
             }))}
           />
-          <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '-8px', paddingLeft: '2px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '6px', paddingLeft: '2px' }}>
             {VIP_TIERS[form.tier]?.remise} · {VIP_TIERS[form.tier]?.prix} USD/an
           </div>
         </div>
