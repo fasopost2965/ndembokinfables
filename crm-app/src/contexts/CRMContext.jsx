@@ -1,5 +1,7 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { CLIENTS, DEVIS, FACTURES, CONTRATS, PROJETS, EVENEMENTS, CAMPS, VIP_MEMBERS, ATHLETES, COMPANY } from '../crm-data';
+import { api } from '../lib/api';
+import { getToken } from '../hooks/useAuth';
 
 const initialState = {
   clients: CLIENTS,
@@ -113,6 +115,14 @@ function crmReducer(state, action) {
       return { ...state, notificationsLues: action.payload };
     case 'RESTORE_STATE':
       return { ...action.payload, confirmModal: { isOpen: false, title: '', message: '', onConfirm: null } };
+    case 'HYDRATE_FROM_API':
+      return {
+        ...state,
+        ...action.payload,
+        company: state.company,
+        confirmModal: state.confirmModal,
+        notificationsLues: state.notificationsLues,
+      };
     case 'OPEN_CONFIRM':
       return { ...state, confirmModal: { isOpen: true, ...action.payload } };
     case 'CLOSE_CONFIRM':
@@ -129,9 +139,7 @@ export function CRMProvider({ children }) {
       const stored = localStorage.getItem('ndemboCrmState');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Reset confirm modal state on load
         parsed.confirmModal = { isOpen: false, title: '', message: '', onConfirm: null };
-        // Backfill field absent from pre-Phase-8 localStorage snapshots
         parsed.notificationsLues = parsed.notificationsLues ?? [];
         return parsed;
       }
@@ -141,15 +149,85 @@ export function CRMProvider({ children }) {
     return initial;
   });
 
+  // Persist to localStorage on every state change
   useEffect(() => {
     localStorage.setItem('ndemboCrmState', JSON.stringify(state));
   }, [state]);
 
+  // Hydrate from API on mount when authenticated
+  useEffect(() => {
+    if (!getToken()) return;
+    const ENDPOINTS = [
+      ['clients', '/clients'],
+      ['athletes', '/athletes'],
+      ['devis', '/devis'],
+      ['factures', '/factures'],
+      ['contrats', '/contrats'],
+      ['projets', '/projets'],
+      ['evenements', '/evenements'],
+      ['camps', '/camps'],
+      ['vipMembers', '/vip'],
+      ['activites', '/activites'],
+    ];
+    Promise.all(ENDPOINTS.map(([key, path]) => api.get(path).then(data => [key, data])))
+      .then(results => {
+        const payload = Object.fromEntries(results);
+        dispatch({ type: 'HYDRATE_FROM_API', payload });
+      })
+      .catch(() => {
+        // API unavailable — keep localStorage data silently
+      });
+  }, []);
+
+  // apiDispatch: optimistic local update + background API sync
+  const apiDispatch = useCallback((action) => {
+    dispatch(action);
+    if (!getToken()) return;
+    syncToApi(action).catch(err =>
+      console.warn('[apiDispatch] sync failed:', action.type, err.message)
+    );
+  }, []);
+
   return (
-    <CRMContext.Provider value={{ state, dispatch }}>
+    <CRMContext.Provider value={{ state, dispatch: apiDispatch }}>
       {children}
     </CRMContext.Provider>
   );
+}
+
+async function syncToApi(action) {
+  switch (action.type) {
+    case 'ADD_CLIENT':    return api.post('/clients', action.payload);
+    case 'UPDATE_CLIENT': return api.put(`/clients/${action.payload.id}`, action.payload);
+    case 'DELETE_CLIENT': return api.delete(`/clients/${action.payload}`);
+    case 'ADD_ATHLETE':    return api.post('/athletes', action.payload);
+    case 'UPDATE_ATHLETE': return api.put(`/athletes/${action.payload.id}`, action.payload);
+    case 'DELETE_ATHLETE': return api.delete(`/athletes/${action.payload}`);
+    case 'ADD_DEVIS':    return api.post('/devis', action.payload);
+    case 'UPDATE_DEVIS': return api.put(`/devis/${action.payload.ref}`, action.payload);
+    case 'DELETE_DEVIS': return api.delete(`/devis/${action.payload}`);
+    case 'ADD_FACTURE':    return api.post('/factures', action.payload);
+    case 'UPDATE_FACTURE': return api.put(`/factures/${action.payload.ref}`, action.payload);
+    case 'DELETE_FACTURE': return api.delete(`/factures/${action.payload}`);
+    case 'ADD_CONTRAT':    return api.post('/contrats', action.payload);
+    case 'UPDATE_CONTRAT': return api.put(`/contrats/${action.payload.ref}`, action.payload);
+    case 'DELETE_CONTRAT': return api.delete(`/contrats/${action.payload}`);
+    case 'ADD_PROJET':    return api.post('/projets', action.payload);
+    case 'UPDATE_PROJET': return api.put(`/projets/${action.payload.ref}`, action.payload);
+    case 'DELETE_PROJET': return api.delete(`/projets/${action.payload}`);
+    case 'ADD_EVENEMENT':    return api.post('/evenements', action.payload);
+    case 'UPDATE_EVENEMENT': return api.put(`/evenements/${action.payload.id}`, action.payload);
+    case 'DELETE_EVENEMENT': return api.delete(`/evenements/${action.payload}`);
+    case 'ADD_CAMP':    return api.post('/camps', action.payload);
+    case 'UPDATE_CAMP': return api.put(`/camps/${action.payload.id}`, action.payload);
+    case 'DELETE_CAMP': return api.delete(`/camps/${action.payload}`);
+    case 'ADD_VIP':    return api.post('/vip', action.payload);
+    case 'UPDATE_VIP': return api.put(`/vip/${action.payload.id}`, action.payload);
+    case 'DELETE_VIP': return api.delete(`/vip/${action.payload}`);
+    case 'ADD_ACTIVITE':    return api.post('/activites', action.payload);
+    case 'DELETE_ACTIVITE': return api.delete(`/activites/${action.payload}`);
+    default: return Promise.resolve();
+  }
 }
 
 export function useCRM() {
@@ -168,5 +246,10 @@ export function useCRM() {
     context.dispatch({ type: 'OPEN_CONFIRM', payload: { title, message, onConfirm } });
   };
 
-  return { ...context, getNom, confirmAction };
+  const clientCA = (clientId) =>
+    context.state.factures
+      .filter(f => f.clientId === clientId && f.statut === 'Payée')
+      .reduce((sum, f) => sum + (f.montant || 0), 0);
+
+  return { ...context, getNom, confirmAction, clientCA };
 }
