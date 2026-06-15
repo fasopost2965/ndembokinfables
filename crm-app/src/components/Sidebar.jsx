@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCRM } from '../contexts/CRMContext';
+import { useAuth } from '../hooks/useAuth.js';
 
 const ICONS = {
   dashboard: 'M3.5 3.5h7v7h-7zM13.5 3.5h7v7h-7zM13.5 13.5h7v7h-7zM3.5 13.5h7v7h-7z',
@@ -16,7 +17,9 @@ const ICONS = {
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state: { devis, factures, contrats, projets, clients, athletes } } = useCRM();
+  const { logout, user } = useAuth();
 
   const sections = [
     { title: 'Pilotage', items: [
@@ -111,12 +114,25 @@ export default function Sidebar({ isOpen, onClose }) {
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17h.01M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"></path></svg>
           <span>Aide &amp; support</span>
         </Link>
+        {/* User row + logout */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px 0 12px' }}>
-          <span style={{ fontFamily: 'var(--font-open-sans)', fontSize: '10.5px', color: '#5F7A8C' }}>CRM v1.0</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-open-sans)', fontSize: '10.5px', color: '#5F7A8C' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '99px', background: 'var(--cyan)' }}></span>
-            Kinshasa, RDC
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <span style={{ fontFamily: 'var(--font-open-sans)', fontSize: '11.5px', fontWeight: 600, color: '#B9CBD8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.nom || user?.email || 'Administrateur'}
+            </span>
+            <span style={{ fontFamily: 'var(--font-open-sans)', fontSize: '10px', color: '#5F7A8C' }}>CRM v1.0 · Kinshasa</span>
+          </div>
+          <button
+            onClick={() => { logout(); navigate('/login'); }}
+            title="Se déconnecter"
+            style={{ background: 'none', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', color: '#8FA6B5', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--red)'; e.currentTarget.style.borderColor = 'var(--red)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#8FA6B5'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
         </div>
       </div>
     </aside>
